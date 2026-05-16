@@ -1,0 +1,46 @@
+/* Layout Structure */
+
+/* Layout Container */
+.layout-container {
+    display: flex;
+    height: 100%; /* Fill #mainContent */
+    transition: padding-left 0.3s ease; /* Transition for sidebar collapse */
+}
+
+/* Main Content Area */
+.main-content-area {
+    flex-grow: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two equal columns */
+    grid-template-rows: auto 1fr; /* Row for filter, row for panels */
+    gap: 1rem;
+    padding: 1rem;
+    overflow-y: auto; /* Allow scrolling if content overflows */
+    background-color: var(--bg-primary);
+}
+
+.main-content-area > #globalUserFilterContainer {
+    grid-column: 1 / -1; /* Span all columns */
+    grid-row: 1;         /* Place in the first row */
+}
+
+.main-content-area > #configPanel {
+    grid-column: 1;      /* First column */
+    grid-row: 2;         /* Second row */
+}
+
+.main-content-area > #copilotPanel {
+    grid-column: 2;      /* Second column */
+    grid-row: 2;         /* Second row */
+}
+
+/* Grid and Panel display adjustments for collapse */
+.main-content-area.config-panel-collapsed #configPanel,
+.main-content-area.copilot-panel-collapsed #copilotPanel {
+    display: none;
+}
+
+.main-content-area.config-panel-collapsed #copilotPanel,
+.main-content-area.copilot-panel-collapsed #configPanel {
+    grid-column: 1 / -1; /* Span the full width */
+} 

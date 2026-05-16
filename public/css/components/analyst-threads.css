@@ -1,0 +1,393 @@
+/* Analyst Thread Styles */
+
+/* Thread dropdown container */
+.analyst-thread-container {
+    flex-shrink: 0;
+    position: relative;
+}
+
+.analyst-thread-dropdown-container {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.thread-dropdown-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex-shrink: 0;
+}
+
+.thread-dropdown-select {
+    flex: 1;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    background: var(--bg-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 0.5rem;
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.5;
+    outline: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    min-width: 0;
+    max-width: 100%;
+    font-family: inherit;
+    height: 42px;
+    
+    /* Custom arrow with better color */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3e%3cpath stroke='%23E0E0E0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1.25rem;
+}
+
+.thread-dropdown-select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    color: var(--text-tertiary);
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.thread-dropdown-select:hover:not(:disabled) {
+    border-color: rgba(255, 255, 255, 0.2);
+    background-color: var(--bg-tertiary);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.thread-dropdown-select:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px rgba(38, 166, 154, 0.2);
+    background-color: var(--bg-tertiary);
+}
+
+/* Style dropdown options for better visibility */
+.thread-dropdown-select option {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+}
+
+.thread-dropdown-select option:hover,
+.thread-dropdown-select option:focus,
+.thread-dropdown-select option:checked {
+    background-color: var(--accent-primary) !important;
+    box-shadow: 0 0 10px var(--accent-primary);
+}
+
+.thread-dropdown-select option:disabled {
+    color: var(--text-tertiary);
+    font-size: 0.75rem;
+    opacity: 0.6;
+    font-style: italic;
+}
+
+/* Special styling for "New Conversation" option */
+.thread-dropdown-select option[value="__new__"] {
+    font-weight: 700;
+    color: var(--accent-secondary);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 0.25rem;
+}
+
+/* Light theme specific adjustments */
+:root[data-theme="light"] .thread-dropdown-select {
+    background: #ffffff;
+    border: 1px solid #dfe1e6;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3e%3cpath stroke='%235e6c84' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+}
+
+:root[data-theme="light"] .thread-dropdown-select:hover:not(:disabled) {
+    background: #f3f4f6;
+    border-color: #10a37f;
+}
+
+:root[data-theme="light"] .thread-dropdown-select option {
+    background: #ffffff;
+    color: #1f2937;
+}
+
+:root[data-theme="light"] .analyst-thread-container {
+    background: rgba(250, 251, 252, 0.8);
+    border-bottom: 1px solid #dfe1e6;
+    backdrop-filter: blur(10px);
+}
+
+:root[data-theme="light"] .thread-dropdown-label {
+    color: #5e6c84;
+}
+
+/* Inbox styles for expanded panel - Email-like design */
+.analyst-thread-inbox {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 320px;
+    height: 400px;
+    background: var(--bg-primary);
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.thread-inbox-header {
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    flex-shrink: 0;
+}
+
+.thread-inbox-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.025em;
+}
+
+.new-thread-btn {
+    padding: 0.375rem;
+    background: var(--accent-primary);
+    border: none;
+    border-radius: 0.375rem;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+}
+
+.new-thread-btn:hover {
+    background: var(--accent-secondary);
+    transform: scale(1.05);
+}
+
+.new-thread-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Small + button next to dropdown */
+.new-thread-btn-small {
+    padding: 0.5rem;
+    background: var(--accent-primary);
+    border: none;
+    border-radius: 0.375rem;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+}
+
+.new-thread-btn-small:hover {
+    background: var(--accent-secondary);
+    transform: scale(1.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.new-thread-btn-small svg {
+    width: 18px;
+    height: 18px;
+}
+
+.thread-list {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--bg-primary);
+}
+
+.thread-item {
+    display: flex;
+    align-items: center;
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    gap: 0.75rem;
+}
+
+.thread-item:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.thread-item.active {
+    background: rgba(38, 166, 154, 0.1);
+    border-left: 3px solid var(--accent-primary);
+    padding-left: calc(1rem - 3px);
+}
+
+.thread-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.thread-title {
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.thread-meta {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+}
+
+.message-count {
+    color: var(--text-secondary);
+}
+
+.thread-time {
+    color: var(--text-tertiary);
+}
+
+.delete-thread-btn {
+    padding: 0.25rem;
+    background: transparent;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 0.25rem;
+    opacity: 0;
+}
+
+.thread-item:hover .delete-thread-btn {
+    opacity: 1;
+}
+
+.delete-thread-btn:hover {
+    background: rgba(255, 59, 48, 0.1);
+    color: #ff3b30;
+}
+
+.delete-thread-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.thread-empty-state {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--text-tertiary);
+}
+
+.thread-empty-state p {
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Show/hide based on panel state and mode */
+/* Default: show dropdown, hide inbox */
+.analyst-thread-dropdown-container {
+    display: flex;
+}
+
+.analyst-thread-inbox {
+    display: none;
+}
+
+/* When copilot panel is expanded (spans full width), show inbox and hide dropdown */
+.main-content-area.config-panel-collapsed #copilotPanel .analyst-thread-dropdown-container {
+    display: none;
+}
+
+.main-content-area.config-panel-collapsed #copilotPanel .analyst-thread-inbox {
+    display: flex;
+}
+
+/* On smaller screens, always use dropdown */
+@media (max-width: 768px) {
+    .analyst-thread-inbox {
+        display: none !important;
+    }
+    
+    .analyst-thread-dropdown-container {
+        display: flex !important;
+    }
+}
+
+/* Hide entire analyst thread container when not in analyst mode */
+#copilotPanel:not([data-mode="analyst"]) .analyst-thread-container {
+    display: none !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .analyst-thread-container {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .thread-dropdown-label {
+        font-size: 0.8rem;
+    }
+    
+    .thread-dropdown-select {
+        font-size: 0.8rem;
+        padding: 0.375rem 0.625rem;
+        padding-right: 2rem;
+    }
+    
+    .analyst-thread-inbox {
+        max-height: 150px;
+    }
+}
+
+/* Ensure messages area maintains proper layout */
+#copilotPanel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#copilotPanel .analyst-thread-container ~ #copilotMessages,
+#copilotPanel:has(.analyst-thread-container) #copilotMessages {
+    flex-grow: 1;
+    min-height: 0; /* Allow proper scrolling */
+    overflow-y: auto;
+}
+
+/* Ensure proper spacing */
+#copilotPanel .copilot-header {
+    flex-shrink: 0;
+}
+
+#copilotPanel .analyst-thread-container {
+    flex-shrink: 0;
+}
+
+#copilotPanel .copilot-input-container {
+    flex-shrink: 0;
+}

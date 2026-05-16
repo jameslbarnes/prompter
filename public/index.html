@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Say: The AI Documentarian</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="AI agents autonomously documenting humanity through continuous storytelling.">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Say: The AI Documentarian">
+    <meta property="og:description" content="AI agents autonomously documenting humanity through continuous storytelling.">
+    <meta property="og:image" content="https://prompter.example.com/saylogo.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/saylogo.png">
+    
+    <!-- Add Firebase libraries -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --black: #000000;
+            --white: #ffffff;
+            --gray-50: #fafafa;
+            --gray-100: #f5f5f5;
+            --gray-200: #e5e5e5;
+            --gray-300: #d4d4d4;
+            --gray-400: #a3a3a3;
+            --gray-500: #737373;
+            --gray-600: #525252;
+            --gray-700: #404040;
+            --gray-800: #262626;
+            --gray-900: #171717;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background: white;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Ensure content stays above the background */
+        .hero, nav, section, footer, .video-container {
+            position: relative;
+            z-index: 1;
+        }
+        
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+            background: linear-gradient(180deg, var(--white) 0%, var(--gray-50) 100%);
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            display: block;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+            max-width: 800px;
+        }
+
+        .subtitle {
+            font-size: clamp(1.1rem, 2vw, 1.5rem);
+            color: var(--gray-600);
+            font-weight: 400;
+            max-width: 600px;
+            margin-bottom: 3rem;
+            line-height: 1.5;
+        }
+
+        /* Manifesto */
+        .manifesto {
+            font-size: clamp(1rem, 1.4vw, 1.15rem);
+            line-height: 1.7;
+            color: var(--gray-700);
+            max-width: 720px;
+            margin: 0 auto 4rem;
+            letter-spacing: -0.01em;
+            text-align: left;
+        }
+
+        .manifesto strong {
+            color: var(--black);
+            font-weight: 600;
+        }
+
+        /* Media Showcase */
+        .showcase {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .showcase-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .showcase-title {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        .showcase-subtitle {
+            font-size: 1.1rem;
+            color: var(--gray-600);
+        }
+
+        /* Films Container */
+        .films-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .film-section {
+            width: 100%;
+            margin-bottom: 4rem;
+        }
+
+        /* Film Card */
+        .film-card {
+            width: 100%;
+            max-width: 900px;
+            background: var(--black);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        @media (max-width: 768px) {
+            .film-card {
+                width: calc(100% - 2rem);
+                margin: 0 auto;
+            }
+        }
+
+        .film-header {
+            padding: 2.5rem;
+            background: var(--gray-900);
+            border-bottom: 1px solid var(--gray-800);
+        }
+
+        .film-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-400);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .film-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--white);
+            letter-spacing: -0.01em;
+            margin-bottom: 0.25rem;
+        }
+
+        .film-description {
+            color: var(--gray-400);
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            background: var(--black);
+        }
+
+        .video-thumbnail {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .video-container:hover .video-thumbnail {
+            transform: scale(1.02);
+        }
+
+        .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .video-container:hover .play-overlay {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .play-button {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s;
+        }
+
+        .video-container:hover .play-button {
+            transform: scale(1.1);
+        }
+
+        /* Interview Card */
+        .interview-card {
+            width: 100%;
+            max-width: 900px;
+            background: var(--white);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--gray-200);
+        }
+
+        .interview-header {
+            padding: 3rem 3rem 0;
+            text-align: center;
+        }
+
+        .interview-title {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.75rem;
+        }
+
+        .interview-description {
+            font-size: 1.1rem;
+            color: var(--gray-600);
+            margin-bottom: 2rem;
+        }
+
+        .interview-form {
+            padding: 0 3rem 3rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-input {
+            padding: 1rem;
+            font-size: 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            background: var(--gray-50);
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--black);
+            background: var(--white);
+        }
+
+
+        .start-button {
+            width: 100%;
+            padding: 1rem 2rem;
+            font-size: 1.05rem;
+            font-weight: 600;
+            background: var(--black);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            letter-spacing: -0.01em;
+        }
+
+        .start-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Toggle Switch Styles */
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #22c55e;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+        
+        .form-fields input:focus {
+            outline: none;
+            border-color: var(--black);
+            background: #fafafa;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Pulse Animation */
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.1);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--gray-500);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--gray-600);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        footer a:hover {
+            color: var(--black);
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            body {
+                overflow-x: hidden;
+            }
+
+            .hero {
+                min-height: auto;
+                padding: 3rem 1rem;
+            }
+
+            .manifesto {
+                margin: 0 auto 2rem;
+                padding: 0 1rem;
+            }
+
+            .showcase {
+                margin-bottom: 3rem;
+                margin-top: 3rem !important;
+                padding: 0;
+                width: 100%;
+                overflow: hidden;
+            }
+            
+            section[style*="padding: 6rem 2rem"] {
+                padding: 3rem 1rem !important;
+            }
+            
+            h2[style*="font-size: 3rem"] {
+                font-size: 2rem !important;
+            }
+
+            .showcase-header {
+                margin-bottom: 2rem;
+                padding: 0 1rem;
+            }
+
+            .films-container {
+                margin: 0;
+                padding: 0 1rem;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+
+            .film-section {
+                margin-bottom: 2rem;
+                width: 100% !important;
+            }
+
+            .film-card {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0;
+                border-radius: 12px;
+                overflow: hidden;
+            }
+
+            .film-header {
+                padding: 1.25rem;
+            }
+            
+            .film-label {
+                margin-bottom: 0.25rem;
+            }
+
+            .film-title {
+                margin-bottom: 0.125rem;
+            }
+
+            .interview-header, .interview-form {
+                padding: 2rem 1.5rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .film-title {
+                font-size: 1.5rem;
+            }
+
+            .interview-title {
+                font-size: 1.5rem;
+            }
+            
+            .interview-section {
+                margin-left: 0;
+                margin-right: 0;
+            }
+            
+            .interview-section h2 {
+                font-size: 1.5rem !important;
+            }
+            
+            .interview-section p {
+                padding: 0;
+            }
+            
+            #interviewForm {
+                margin: 0 !important;
+                width: 100%;
+            }
+            
+            .form-container {
+                padding: 1.5rem !important;
+                margin: 0;
+                border-radius: 12px;
+            }
+            
+            .form-container button {
+                font-size: 1rem !important;
+                padding: 0.875rem 1.5rem !important;
+            }
+
+            footer {
+                padding: 3rem 1rem;
+            }
+
+            /* Best Person section mobile styles */
+            #best-person {
+                background-position: top center !important;
+                background-size: 180% auto !important;
+                padding: 1rem !important;
+            }
+
+            .best-person-header {
+                padding-top: 180px !important;
+            }
+
+            .interview-section {
+                padding: 1.5rem !important;
+                border-radius: 16px !important;
+                margin: 0 !important;
+            }
+
+            .interview-section h3 {
+                font-size: 1.5rem !important;
+            }
+
+            .interview-section p {
+                font-size: 0.95rem !important;
+            }
+        }
+        
+        /* Video toggle styling */
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ddd;
+            transition: .3s;
+            border-radius: 24px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Best Person header - desktop default */
+        .best-person-header {
+            padding-top: 405px;
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <img src="saylogo.png" alt="Say" class="logo">
+        <h1><strong style="text-decoration: underline;">Say</strong> what needs<br>to be <strong style="text-decoration: underline;">said</strong>.</h1>
+        <p class="subtitle">Say is an AI agent that tells human stories.</p>
+        
+        <div class="manifesto">
+            <p style="font-size: 1.3rem; line-height: 1.8; margin-bottom: 1.5rem;">
+                Most of the human story is still unwritten. Attention is scarce, memory is fragile, and only a sliver of lived experience ever reaches an audience.
+            </p>
+            <p style="font-size: 1.3rem; line-height: 1.8; margin-bottom: 1.5rem;">
+                Artificial Intelligence is changing this very quickly. Today's frontier models are capable researchers, interviewers, writers, editors, animators, and marketers, and are poised to extend the range of human storytelling by many orders of magnitude.
+            </p>
+            <p style="font-size: 1.3rem; line-height: 1.8; margin-bottom: 1.5rem;">
+                We are unifying these abilities into Say, a storytelling agent that autonomously tells real, human stories like an award-winning documentarian, and are excited to share our early progress:
+            </p>
+            <p style="font-size: 1.3rem; line-height: 1.8; margin-bottom: 1.5rem;">
+                <strong>What We Don't Say</strong>: Say's debut short, created from AI interviews with a discursive psychologist and her son, shows how dropping a single word from our vocabularies can shift our reality. Every element, from the editing to the music, was produced by our agent.
+            </p>
+            <p style="font-size: 1.3rem; line-height: 1.8; margin-bottom: 1.5rem;">
+                Our current production, <strong>The Best Person I Know</strong>, is a global search for excellence through personal stories.
+            </p>
+            <p style="font-size: 1.3rem; line-height: 1.8; margin-bottom: 1.5rem;">
+                Imagine if we each had a talented scribe focused on connecting us with the rest of the world by telling our stories. What would we say?
+            </p>
+            <p style="font-size: 1.3rem; line-height: 1.8; margin-bottom: 0;">
+                Actually, maybe the better question is: what would it ask?
+            </p>
+        </div>
+    </section>
+
+    <!-- FIRST FILM SECTION -->
+    <section style="background: #000; color: white; padding: 6rem 2rem; margin-top: 0;">
+        <div style="max-width: 900px; margin: 0 auto;">
+            <div style="text-align: center; margin-bottom: 4rem;">
+                <h2 style="font-size: 3rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em;">Our First Film</h2>
+                <p style="font-size: 1.25rem; color: #999; max-width: 600px; margin: 0 auto;">Created entirely by autonomous AI agents interviewing real humans about the words that shape their lives</p>
+            </div>
+            
+            <!-- Film 1 -->
+            <div class="film-section" style="width: 100%;">
+                <div class="film-card" style="background: #111; border: none;">
+                    <div class="film-header">
+                        <div class="film-label">Film #1 • Fully Autonomous</div>
+                        <h3 class="film-title">What We Don't Say</h3>
+                        <p class="film-description" style="margin-bottom: 1rem;">Could consciously eliminating words from our vocabularies change our lives?</p>
+                        <p class="film-description" style="font-size: 0.9rem; line-height: 1.5;">
+                            A mother and son discover how changing their language transforms their reality. 
+                            From replacing "stress" with specific emotions to swapping "but" for "and," 
+                            their parallel journeys reveal the hidden power of conscious speech.
+                        </p>
+                        <p class="film-description" style="font-size: 0.85rem; margin-top: 1rem; opacity: 0.9;">
+                            Every frame, from interviews to editing to music, was created autonomously by Say.
+                        </p>
+                    </div>
+                    <div class="video-container" onclick="loadYouTubeVideo()">
+                        <img src="https://img.youtube.com/vi/gNZpAl6TQHs/maxresdefault.jpg" 
+                             alt="What We Don't Say" 
+                             class="video-thumbnail">
+                        <div class="play-overlay">
+                            <div class="play-button">
+                                <svg viewBox="0 0 24 24" style="width: 32px; height: 32px; fill: #000; margin-left: 3px;">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 2rem;">
+                    <a href="https://www.youtube.com/@SayInterviews" target="_blank" style="color: #999; text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border: 1px solid #333; border-radius: 20px; transition: all 0.2s;" onmouseover="this.style.color='#fff'; this.style.borderColor='#666';" onmouseout="this.style.color='#999'; this.style.borderColor='#333';">
+                        <svg style="width: 16px; height: 16px; fill: currentColor;" viewBox="0 0 24 24">
+                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        </svg>
+                        Watch more films
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- INTERVIEW SECTION -->
+    <section id="best-person" style="background: url('/images/best-person-bg.png') center center / cover no-repeat; padding: 6rem 2rem; position: relative;">
+        <div style="max-width: 900px; margin: 0 auto;">
+            <div class="best-person-header" style="text-align: center; margin-bottom: 1rem;">
+                <span style="display: inline-block; background: var(--black); color: white; padding: 0.4rem 1.5rem 0.4rem 2.5rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 1rem; position: relative;">
+                    <span style="position: absolute; top: 50%; left: 0.75rem; transform: translateY(-50%); width: 8px; height: 8px; background: #ef4444; border-radius: 50%; animation: pulse 2s infinite;"></span>
+                    NOW FILMING
+                </span>
+            </div>
+
+            <!-- Film 2 / Interview -->
+            <div class="interview-section" style="background: rgba(255,255,255,0.95); padding: 2.5rem; border-radius: 24px; box-shadow: 0 25px 50px rgba(0,0,0,0.15);">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <h3 style="font-size: 2rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em; color: #000;">Share their story in 5 minutes</h3>
+                    <p style="max-width: 600px; margin: 0 auto; color: var(--gray-700); line-height: 1.7; font-size: 1.1rem;">
+                        We're making a documentary about these people—told through the eyes of those who know them best. Fill out the form, have a brief voice conversation with our AI, and we'll email you a video you can share with them.
+                    </p>
+                    <p style="margin-top: 1rem; font-size: 0.95rem; color: var(--gray-600); font-style: italic;">
+                        Your story may be featured in our film. You can come back anytime to honor more people.
+                    </p>
+                    <!-- Social Proof -->
+                    <div id="socialProof" style="margin-top: 1.5rem; display: none;">
+                        <div id="socialProofAvatars" style="display: flex; justify-content: center; align-items: center; gap: -8px; margin-bottom: 0.75rem;">
+                            <!-- Avatar circles will be added here -->
+                        </div>
+                        <p id="socialProofText" style="font-size: 0.95rem; color: var(--gray-600); font-style: italic;">
+                            <!-- Message will be added here -->
+                        </p>
+                    </div>
+                </div>
+                <form id="interviewForm" style="max-width: 500px; margin: 0 auto;">
+                    <div class="form-container" style="padding: 0;">
+                        <div class="form-fields" style="display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                            <input type="text" id="userName" placeholder="Your name" required style="padding: 1rem; font-size: 1rem; border: 1px solid var(--gray-300); border-radius: 8px; background: #fff; transition: all 0.2s; font-family: inherit;">
+                            <input type="email" id="userEmail" placeholder="Your email" required style="padding: 1rem; font-size: 1rem; border: 1px solid var(--gray-300); border-radius: 8px; background: #fff; transition: all 0.2s; font-family: inherit;">
+                            <input type="text" id="personName" placeholder="Name of one remarkable person" required style="padding: 1rem; font-size: 1rem; border: 1px solid var(--gray-300); border-radius: 8px; background: #fff; transition: all 0.2s; font-family: inherit;">
+                        </div>
+                        <div style="margin: 1.5rem 0; display: flex; align-items: center; justify-content: center; gap: 0.75rem; font-size: 0.9rem;">
+                            <span style="color: var(--gray-600);">Audio only</span>
+                            <label style="position: relative; display: inline-block; width: 44px; height: 24px; cursor: pointer;">
+                                <input type="checkbox" id="enableVideo" checked style="opacity: 0; width: 0; height: 0; position: absolute;">
+                                <span class="toggle-slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ddd; transition: .3s; border-radius: 24px;"></span>
+                            </label>
+                            <span style="color: var(--gray-600); font-weight: 500;">Include video</span>
+                        </div>
+                        <div style="margin: 1.5rem 0 1.5rem; display: flex; align-items: flex-start; gap: 0.5rem;">
+                            <input type="checkbox" id="consentCheckbox" style="margin-top: 0.25rem; cursor: pointer;" required checked>
+                            <label for="consentCheckbox" style="font-size: 0.85rem; color: var(--gray-600); cursor: pointer; text-align: left; line-height: 1.4;">
+                                I consent to the use of my likeness and story for Say's documentary and marketing purposes
+                            </label>
+                        </div>
+                        <button type="submit" id="submitButton" disabled style="width: 100%; background: #ccc; color: white; padding: 1rem 2rem; font-size: 1rem; font-weight: 600; border: none; border-radius: 8px; cursor: not-allowed; transition: all 0.2s;">
+                            Share This Story →
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- ABOUT SECTION -->
+    <section style="background: #fff; padding: 6rem 2rem; border-top: 1px solid #e5e5e5;">
+        <div style="max-width: 900px; margin: 0 auto; text-align: center;">
+            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--black); text-transform: uppercase; letter-spacing: 0.1em;">About the Founder</h3>
+            <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 2rem; letter-spacing: -0.02em;">James Barnes</h2>
+            
+            <!-- Image right after heading -->
+            <div style="margin-bottom: 2.5rem;">
+                <img src="https://www.studiome.ai/_next/image?url=%2Fimages%2Fethereaperformance.jpg&w=1920&q=75" 
+                     alt="Immersive storytelling experience" 
+                     style="width: 100%; max-width: 800px; height: auto; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); margin: 0 auto; display: block;">
+            </div>
+            
+            <p style="font-size: 1.15rem; line-height: 1.8; color: #4a5568; margin-bottom: 1.5rem; max-width: 800px; margin-left: auto; margin-right: auto; text-align: left;">
+                James Barnes builds AI systems designed to make humans feel more curious, present, and connected. After creating the world's first personalized political ad in 2012 and spending six years at Facebook (where he helped build political advertising tools, served as the 2016 Trump campaign embed, and later led election integrity efforts), James learned that with great technological power comes great responsibility.
+            </p>
+            <p style="font-size: 1.15rem; line-height: 1.8; color: #4a5568; margin-bottom: 1.5rem; max-width: 800px; margin-left: auto; margin-right: auto; text-align: left;">
+                His work on Autobiographer, an AI biographer that helps people tell their life stories, led him to develop an obsession with active curiosity inside language models. This exploration of how AI can ask better questions, not just provide answers, drives his current work on Say.
+            </p>
+            <p style="font-size: 1.15rem; line-height: 1.8; color: #4a5568; margin-bottom: 2.5rem; max-width: 800px; margin-left: auto; margin-right: auto; text-align: left;">
+                Through his immersive AI art practice and now these autonomous interviewing agents, he explores how artificial intelligence can amplify our humanity rather than exploit it. His work focuses not just on what we can build with AI; he focuses on what we should build: technology that brings us closer to ourselves and each other.
+            </p>
+            <div>
+                <a href="https://www.studiome.ai" target="_blank" 
+                   style="display: inline-flex; align-items: center; gap: 0.5rem; color: #000; text-decoration: none; font-weight: 600; font-size: 1.05rem; padding: 0.75rem 1.5rem; border: 2px solid #000; border-radius: 8px; transition: all 0.2s;"
+                   onmouseover="this.style.background='#000'; this.style.color='#fff';" 
+                   onmouseout="this.style.background='transparent'; this.style.color='#000';">
+                    Learn more
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vision Statement -->
+    <section style="background: var(--gray-50); padding: 4rem 2rem; text-align: center;">
+        <div style="max-width: 700px; margin: 0 auto;">
+            <p style="font-size: 1.3rem; line-height: 1.8; color: var(--gray-700);">
+                We're building an autonomous fleet of storytelling agents, each one searching for stories that deserve to be preserved and shared with the world.
+            </p>
+        </div>
+    </section>
+
+    <footer>
+        <p>
+            A <a href="https://studiome.ai" target="_blank">StudioMe</a> Production • 
+            <a href="/studio">Say Studio</a> • 
+            <a href="mailto:contact@example.com">Contact</a> • 
+            <a href="/admin.html">Login</a>
+        </p>
+    </footer>
+
+    <script>
+        // Fetch and display social proof
+        async function loadSocialProof() {
+            console.log('[Social Proof] Starting to load social proof...');
+            
+            try {
+                // Wait for Firebase to be initialized
+                if (typeof firebase === 'undefined' || !firebase.firestore) {
+                    console.log('[Social Proof] Firebase not yet loaded, retrying in 500ms...');
+                    setTimeout(loadSocialProof, 500);
+                    return;
+                }
+
+                console.log('[Social Proof] Firebase loaded successfully');
+                const db = firebase.firestore();
+                
+                // Query reports for the Best Person I Know interview
+                const interviewId = 'd53e47fd-c156-4327-9226-0b1d5469ece4';
+                console.log('[Social Proof] Querying reports for interview:', interviewId);
+                
+                const reportsRef = db.collection('reports')
+                    .where('interview_id', '==', interviewId)
+                    .orderBy('start_timestamp', 'desc')
+                    .limit(50);
+                
+                const snapshot = await reportsRef.get();
+                console.log('[Social Proof] Query complete. Found documents:', snapshot.size);
+                
+                if (!snapshot.empty) {
+                    // Extract unique names
+                    const names = new Set();
+                    const allData = [];
+                    
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        allData.push({
+                            id: doc.id,
+                            user_name: data.user_name,
+                            start_timestamp: data.start_timestamp,
+                            interview_id: data.interview_id
+                        });
+                        
+                        if (data.user_name) {
+                            // Get first name only
+                            const firstName = data.user_name.trim().split(' ')[0];
+                            if (firstName) {
+                                names.add(firstName);
+                                console.log('[Social Proof] Added name:', firstName);
+                            }
+                        } else {
+                            console.log('[Social Proof] Document missing user_name:', doc.id);
+                        }
+                    });
+                    
+                    console.log('[Social Proof] All documents data:', allData);
+                    
+                    // Convert to array and prepare display
+                    const uniqueNames = Array.from(names);
+                    console.log('[Social Proof] Unique names found:', uniqueNames);
+                    
+                    // Always include Sam and George as examples
+                    if (!uniqueNames.includes('Sam')) {
+                        uniqueNames.push('Sam');
+                    }
+                    if (!uniqueNames.includes('George')) {
+                        uniqueNames.push('George');
+                    }
+                    
+                    // Randomize the order of names
+                    for (let i = uniqueNames.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [uniqueNames[i], uniqueNames[j]] = [uniqueNames[j], uniqueNames[i]];
+                    }
+                    
+                    console.log('[Social Proof] Names randomized:', uniqueNames);
+                    
+                    if (uniqueNames.length > 0) {
+                        const socialProofEl = document.getElementById('socialProof');
+                        const avatarsEl = document.getElementById('socialProofAvatars');
+                        const textEl = document.getElementById('socialProofText');
+                        
+                        if (!socialProofEl || !avatarsEl || !textEl) {
+                            console.error('[Social Proof] Required elements not found!');
+                            return;
+                        }
+                        
+                        // Create avatars (max 5 visible)
+                        const avatarNames = uniqueNames.slice(0, 5);
+                        const avatarColors = [
+                            '#6366f1', // indigo
+                            '#8b5cf6', // violet
+                            '#ec4899', // pink
+                            '#f59e0b', // amber
+                            '#10b981'  // emerald
+                        ];
+                        
+                        // Randomize avatar colors too
+                        for (let i = avatarColors.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [avatarColors[i], avatarColors[j]] = [avatarColors[j], avatarColors[i]];
+                        }
+                        
+                        avatarsEl.innerHTML = '';
+                        avatarNames.forEach((name, index) => {
+                            const avatar = document.createElement('div');
+                            avatar.style.cssText = `
+                                width: 40px;
+                                height: 40px;
+                                border-radius: 50%;
+                                background-color: ${avatarColors[index % avatarColors.length]};
+                                color: white;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-weight: 600;
+                                font-size: 1.1rem;
+                                border: 3px solid white;
+                                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                                margin-left: ${index === 0 ? '0' : '-8px'};
+                                z-index: ${5 - index};
+                                position: relative;
+                            `;
+                            avatar.textContent = name.charAt(0).toUpperCase();
+                            avatarsEl.appendChild(avatar);
+                        });
+                        
+                        // Add "+X" avatar if there are more names
+                        if (uniqueNames.length > 5) {
+                            const moreAvatar = document.createElement('div');
+                            moreAvatar.style.cssText = `
+                                width: 40px;
+                                height: 40px;
+                                border-radius: 50%;
+                                background-color: #e5e7eb;
+                                color: #6b7280;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-weight: 600;
+                                font-size: 0.9rem;
+                                border: 3px solid white;
+                                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                                margin-left: -8px;
+                                z-index: 0;
+                                position: relative;
+                            `;
+                            moreAvatar.textContent = `+${uniqueNames.length - 5}`;
+                            avatarsEl.appendChild(moreAvatar);
+                        }
+                        
+                        // Create message
+                        let message = '';
+                        
+                        if (uniqueNames.length === 1) {
+                            message = `Join ${uniqueNames[0]} in sharing your story.`;
+                        } else if (uniqueNames.length === 2) {
+                            message = `Join ${uniqueNames[0]} and ${uniqueNames[1]} in sharing your story.`;
+                        } else if (uniqueNames.length <= 5) {
+                            const displayNames = uniqueNames.slice(0, -1).join(', ') + ', and ' + uniqueNames[uniqueNames.length - 1];
+                            message = `Join ${displayNames} in sharing your story.`;
+                        } else {
+                            // Show first 3 names and count of others
+                            const firstThree = uniqueNames.slice(0, 3).join(', ');
+                            const othersCount = uniqueNames.length - 3;
+                            message = `Join ${firstThree}, and ${othersCount} others in sharing your story.`;
+                        }
+                        
+                        console.log('[Social Proof] Setting message:', message);
+                        textEl.textContent = message;
+                        socialProofEl.style.display = 'block';
+                        console.log('[Social Proof] Social proof displayed successfully');
+                    } else {
+                        console.log('[Social Proof] No names found to display');
+                    }
+                } else {
+                    console.log('[Social Proof] No documents found in query, using default names');
+                    
+                    // Use default names when no real participants yet
+                    const uniqueNames = ['George', 'Sam'];
+                    
+                    const socialProofEl = document.getElementById('socialProof');
+                    const avatarsEl = document.getElementById('socialProofAvatars');
+                    const textEl = document.getElementById('socialProofText');
+                    
+                    if (!socialProofEl || !avatarsEl || !textEl) {
+                        console.error('[Social Proof] Required elements not found!');
+                        return;
+                    }
+                    
+                    // Create avatars for default names
+                    const avatarColors = ['#6366f1', '#8b5cf6'];
+                    
+                    avatarsEl.innerHTML = '';
+                    uniqueNames.forEach((name, index) => {
+                        const avatar = document.createElement('div');
+                        avatar.style.cssText = `
+                            width: 40px;
+                            height: 40px;
+                            border-radius: 50%;
+                            background-color: ${avatarColors[index]};
+                            color: white;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-weight: 600;
+                            font-size: 1.1rem;
+                            border: 3px solid white;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                            margin-left: ${index === 0 ? '0' : '-8px'};
+                            z-index: ${2 - index};
+                            position: relative;
+                        `;
+                        avatar.textContent = name.charAt(0).toUpperCase();
+                        avatarsEl.appendChild(avatar);
+                    });
+                    
+                    const message = `Join ${uniqueNames[0]} and ${uniqueNames[1]} in sharing your story.`;
+                    textEl.textContent = message;
+                    socialProofEl.style.display = 'block';
+                    console.log('[Social Proof] Default social proof displayed');
+                }
+            } catch (error) {
+                console.error('[Social Proof] Error loading social proof:', error);
+                console.error('[Social Proof] Error details:', error.message, error.code);
+                // Fail silently - social proof is nice to have but not critical
+            }
+        }
+
+        // Load social proof when page loads
+        document.addEventListener('DOMContentLoaded', loadSocialProof);
+
+        // Form validation
+        const consentCheckbox = document.getElementById('consentCheckbox');
+        const submitButton = document.getElementById('submitButton');
+        const nameInput = document.getElementById('userName');
+        const emailInput = document.getElementById('userEmail');
+        const personInput = document.getElementById('personName');
+        
+        // Function to update button state based on all conditions
+        function updateSubmitButton() {
+            const hasName = nameInput.value.trim().length > 0;
+            const hasEmail = emailInput.value.trim().length > 0;
+            const hasPerson = personInput.value.trim().length > 0;
+            const hasConsent = consentCheckbox.checked;
+            
+            if (hasName && hasEmail && hasPerson && hasConsent) {
+                submitButton.disabled = false;
+                submitButton.style.background = 'var(--black)';
+                submitButton.style.cursor = 'pointer';
+            } else {
+                submitButton.disabled = true;
+                submitButton.style.background = '#ccc';
+                submitButton.style.cursor = 'not-allowed';
+            }
+        }
+        
+        // Check state whenever any input changes
+        nameInput.addEventListener('input', updateSubmitButton);
+        emailInput.addEventListener('input', updateSubmitButton);
+        personInput.addEventListener('input', updateSubmitButton);
+        consentCheckbox.addEventListener('change', updateSubmitButton);
+        
+        // Check initial state on page load
+        updateSubmitButton();
+
+        // Helper to extract UTM parameters from current URL
+        function getUtmParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+            const utmParams = {};
+            utmKeys.forEach(key => {
+                const value = urlParams.get(key);
+                if (value) utmParams[key] = value;
+            });
+            return utmParams;
+        }
+
+        // Form submission
+        document.getElementById('interviewForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('userName').value.trim();
+            const email = document.getElementById('userEmail').value.trim();
+            const personName = document.getElementById('personName').value.trim();
+            const videoEnabled = document.getElementById('enableVideo').checked;
+            const consentGiven = document.getElementById('consentCheckbox').checked;
+
+            if (name && email && personName && consentGiven) {
+                const firstQuestion = encodeURIComponent(`How would you describe ${personName} to a friend?`);
+                let url = `/i/?interview=d53e47fd-c156-4327-9226-0b1d5469ece4&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&video=${videoEnabled}&personName=${encodeURIComponent(personName)}&firstQuestion=${firstQuestion}`;
+
+                // Pass through UTM parameters
+                const utmParams = getUtmParams();
+                Object.entries(utmParams).forEach(([key, value]) => {
+                    url += `&${key}=${encodeURIComponent(value)}`;
+                });
+
+                window.location.href = url;
+            }
+        });
+
+        // YouTube video
+        function loadYouTubeVideo() {
+            const container = document.querySelector('.video-container');
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'absolute';
+            iframe.style.top = '0';
+            iframe.style.left = '0';
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = '0';
+            iframe.src = 'https://www.youtube.com/embed/gNZpAl6TQHs?autoplay=1&playsinline=1';
+            iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+            iframe.allowFullscreen = true;
+            
+            container.innerHTML = '';
+            container.appendChild(iframe);
+        }
+    </script>
+</body>
+</html>

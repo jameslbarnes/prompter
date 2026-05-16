@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Shapes Playground</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script>
+        // Create global references after firebase-config.js loads
+        setTimeout(() => {
+            if (typeof auth === 'undefined' && firebase && firebase.auth) {
+                window.auth = firebase.auth();
+                window.db = firebase.firestore();
+                console.log('Created global auth and db references');
+            }
+        }, 100);
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #visualization {
+            width: 100%;
+            height: 100%;
+        }
+
+        #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 320px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .live-indicator {
+            display: inline-block;
+            background: #4a9eff;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-left: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        h3 {
+            margin: 20px 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #4a9eff;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #bbb;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            background: #1a1a1a;
+            color: #fff;
+            border: 1px solid #333;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        select:hover {
+            border-color: #4a9eff;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #4a9eff;
+            box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #4a9eff;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #6ab3ff;
+            transform: scale(1.2);
+        }
+
+        .value-display {
+            display: inline-block;
+            background: #1a1a1a;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #4a9eff;
+            font-weight: 600;
+            margin-left: 8px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .shape-params {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            border: 1px solid #333;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            background: #4a9eff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover {
+            background: #6ab3ff;
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: #333;
+        }
+
+        button.secondary:hover {
+            background: #444;
+        }
+
+        #status {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(20, 20, 20, 0.9);
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #4a9eff;
+            display: none;
+        }
+
+        #saved-configs {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 280px;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .config-item {
+            background: #1a1a1a;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .config-item.active {
+            background: #252525;
+            border: 1px solid #4a9eff;
+        }
+
+        .config-item.active::after {
+            content: 'ACTIVE';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #4a9eff;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .config-item:hover {
+            background: #252525;
+            transform: translateX(-2px);
+        }
+
+        .config-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .config-params {
+            font-size: 11px;
+            color: #888;
+        }
+
+        #toggle-saved {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 16px;
+            background: #333;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        #toggle-saved:hover {
+            background: #444;
+        }
+
+        .color-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="color"] {
+            width: 50px;
+            height: 32px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .info-text {
+            font-size: 11px;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        /* Scrollbar styling */
+        #controls::-webkit-scrollbar,
+        #saved-configs::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #controls::-webkit-scrollbar-track,
+        #saved-configs::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        #controls::-webkit-scrollbar-thumb,
+        #saved-configs::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        #controls::-webkit-scrollbar-thumb:hover,
+        #saved-configs::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="visualization"></div>
+        
+        <div id="controls">
+            <h2>Shape Configuration Manager <span class="live-indicator">LIVE CONFIG</span></h2>
+            
+            <!-- Mode Selection -->
+            <div class="control-group">
+                <label>Configuration Mode</label>
+                <select id="config-mode" onchange="switchConfigMode()">
+                    <option value="interview">Interview Shape</option>
+                    <option value="report">Report Generation Shape</option>
+                    <option value="preview">Preview Mode</option>
+                </select>
+                <div class="info-text">Configure shapes for different app states</div>
+            </div>
+            
+            <div class="control-group">
+                <label>Shape Type</label>
+                <select id="shape-type" onchange="changeShape()">
+                    <option value="torusKnot">Torus Knot</option>
+                    <option value="mobiusStrip">Möbius Strip</option>
+                    <option value="kleinBottle">Klein Bottle</option>
+                    <option value="lorenzAttractor">Lorenz Attractor</option>
+                    <option value="sphericalSpiral">Spherical Spiral</option>
+                    <option value="dnaHelix">DNA Double Helix</option>
+                    <option value="trefoilKnot">Trefoil Knot</option>
+                    <option value="lissajous">Lissajous Curve</option>
+                    <option value="hilbertCurve3D">3D Hilbert Curve</option>
+                    <option value="fermatSpiral">Fermat Spiral</option>
+                    <option value="seashell">Seashell</option>
+                    <option value="epicycloid">Epicycloid</option>
+                </select>
+            </div>
+
+            <h3>Shape Parameters</h3>
+            <div id="shape-params-container" class="shape-params">
+                <!-- Shape-specific parameters will be inserted here -->
+            </div>
+
+            <h3>Visualization Settings</h3>
+            <div class="control-group">
+                <label>Text Speed <span class="value-display" id="speed-value">50</span></label>
+                <input type="range" id="speed" min="10" max="200" value="50" step="10">
+            </div>
+            
+            <div class="control-group">
+                <label>Text Size <span class="value-display" id="text-size-value">0.5</span></label>
+                <input type="range" id="text-size" min="0.1" max="2" value="0.5" step="0.1">
+            </div>
+            
+            <div class="control-group">
+                <label>Text Orientation</label>
+                <select id="text-orientation" onchange="updateTextOrientation()">
+                    <option value="vertical">Vertical (Stacked)</option>
+                    <option value="horizontal">Horizontal (Ribbon)</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label>Background Color</label>
+                <div class="color-controls">
+                    <input type="color" id="bg-color" value="#000000">
+                    <button onclick="setBackgroundPreset('dark')">Dark</button>
+                    <button onclick="setBackgroundPreset('light')">Light</button>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button onclick="saveConfigurationForMode()">Save Config</button>
+                <button onclick="previewMode('interview')" style="background: #28a745;">Preview Interview</button>
+                <button onclick="previewMode('report')" style="background: #6f42c1;">Preview Report Gen</button>
+            </div>
+            
+            <div class="button-group">
+                <button class="secondary" onclick="toggleLoremIpsum()">Toggle Text</button>
+                <button class="secondary" onclick="clearVisualization()">Clear</button>
+                <button class="secondary" onclick="exportShapeConfig()">Export Config</button>
+            </div>
+        </div>
+        
+        <button id="toggle-saved" onclick="toggleSavedConfigs()">Saved Configs</button>
+        
+        <div id="saved-configs">
+            <h2>Saved Configurations</h2>
+            <div id="auth-status" style="margin-bottom: 15px; display: none;">
+                <button id="sign-in-btn" onclick="signIn()" style="width: 100%;">Sign In to Save Configs</button>
+                <div id="user-info" style="display: none; color: #4a9eff; font-size: 13px; text-align: center;"></div>
+            </div>
+            <div id="configs-list"></div>
+        </div>
+        
+        <div id="status"></div>
+    </div>
+
+    <script src="js/shapes-viz.js"></script>
+    <script>
+        // Initialize visualization
+        const container = document.getElementById('visualization');
+        let viz = new ShapesViz(container);
+        
+        // Track the currently loaded config and mode
+        let activeConfigId = null;
+        let currentConfigMode = 'interview'; // 'interview', 'report', or 'preview'
+        
+        // Store configurations for each mode
+        let shapeConfigurations = {
+            interview: {
+                shapeType: 'torusKnot',
+                shapeParams: { radius: 4, tubeRadius: 1.2, p: 3, q: 5 },
+                speed: 50,
+                textSize: 0.5,
+                textOrientation: 'vertical',
+                bgColor: '#000000'
+            },
+            report: {
+                shapeType: 'lissajous',
+                shapeParams: { a: 4, b: 5, c: 6, scale: 3 },
+                speed: 75,
+                textSize: 0.7,
+                textOrientation: 'vertical',
+                bgColor: '#000000'
+            }
+        };
+        
+        // Lorem ipsum generator
+        const loremWords = [
+            'lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit',
+            'sed', 'do', 'eiusmod', 'tempor', 'incididunt', 'ut', 'labore', 'et', 'dolore',
+            'magna', 'aliqua', 'enim', 'ad', 'minim', 'veniam', 'quis', 'nostrud',
+            'exercitation', 'ullamco', 'laboris', 'nisi', 'aliquip', 'ex', 'ea', 'commodo',
+            'consequat', 'duis', 'aute', 'irure', 'in', 'reprehenderit', 'voluptate',
+            'velit', 'esse', 'cillum', 'fugiat', 'nulla', 'pariatur', 'excepteur', 'sint',
+            'occaecat', 'cupidatat', 'non', 'proident', 'sunt', 'culpa', 'qui', 'officia',
+            'deserunt', 'mollit', 'anim', 'id', 'est', 'laborum'
+        ];
+        
+        let loremInterval = null;
+        let isStreaming = false;
+        
+        // Shape parameter definitions
+        const shapeParamDefinitions = {
+            torusKnot: [
+                { id: 'radius', label: 'Radius', min: 1, max: 10, step: 0.1, default: 4 },
+                { id: 'tubeRadius', label: 'Tube Radius', min: 0.1, max: 3, step: 0.1, default: 1.2 },
+                { id: 'p', label: 'P Value', min: 1, max: 10, step: 1, default: 3 },
+                { id: 'q', label: 'Q Value', min: 1, max: 10, step: 1, default: 5 }
+            ],
+            mobiusStrip: [
+                { id: 'radius', label: 'Radius', min: 1, max: 10, step: 0.1, default: 4 },
+                { id: 'width', label: 'Width', min: 0.5, max: 5, step: 0.1, default: 2 },
+                { id: 'twists', label: 'Twists', min: 0.5, max: 3, step: 0.5, default: 1 }
+            ],
+            kleinBottle: [
+                { id: 'scale', label: 'Scale', min: 1, max: 10, step: 0.1, default: 3 },
+                { id: 'detail', label: 'Detail', min: 50, max: 200, step: 10, default: 100 }
+            ],
+            lorenzAttractor: [
+                { id: 'sigma', label: 'Sigma (σ)', min: 5, max: 20, step: 0.5, default: 10 },
+                { id: 'rho', label: 'Rho (ρ)', min: 20, max: 40, step: 1, default: 28 },
+                { id: 'beta', label: 'Beta (β)', min: 1, max: 5, step: 0.1, default: 8/3 },
+                { id: 'scale', label: 'Scale', min: 0.05, max: 0.3, step: 0.01, default: 0.15 }
+            ],
+            sphericalSpiral: [
+                { id: 'radius', label: 'Radius', min: 1, max: 10, step: 0.1, default: 4 },
+                { id: 'turns', label: 'Turns', min: 5, max: 20, step: 1, default: 10 },
+                { id: 'height', label: 'Height', min: 4, max: 16, step: 0.5, default: 8 }
+            ],
+            dnaHelix: [
+                { id: 'radius', label: 'Radius', min: 1, max: 5, step: 0.1, default: 2 },
+                { id: 'height', label: 'Height', min: 5, max: 20, step: 0.5, default: 10 },
+                { id: 'turns', label: 'Turns', min: 2, max: 10, step: 0.5, default: 5 }
+            ],
+            trefoilKnot: [
+                { id: 'radius', label: 'Radius', min: 1, max: 10, step: 0.1, default: 4 },
+                { id: 'tubeRadius', label: 'Tube Radius', min: 0.1, max: 2, step: 0.1, default: 1 }
+            ],
+            lissajous: [
+                { id: 'a', label: 'Frequency A', min: 1, max: 10, step: 1, default: 4 },
+                { id: 'b', label: 'Frequency B', min: 1, max: 10, step: 1, default: 5 },
+                { id: 'c', label: 'Frequency C', min: 1, max: 10, step: 1, default: 6 },
+                { id: 'scale', label: 'Scale', min: 1, max: 10, step: 0.1, default: 3 }
+            ],
+            hilbertCurve3D: [
+                { id: 'order', label: 'Order', min: 1, max: 4, step: 1, default: 3 },
+                { id: 'scale', label: 'Scale', min: 3, max: 10, step: 0.5, default: 5 }
+            ],
+            fermatSpiral: [
+                { id: 'scale', label: 'Scale', min: 0.1, max: 2, step: 0.1, default: 0.5 },
+                { id: 'height', label: 'Height', min: 4, max: 16, step: 0.5, default: 8 },
+                { id: 'turns', label: 'Turns', min: 10, max: 40, step: 2, default: 20 }
+            ],
+            seashell: [
+                { id: 'a', label: 'Initial Radius', min: 0.5, max: 5, step: 0.1, default: 2 },
+                { id: 'b', label: 'Growth Rate', min: 5, max: 20, step: 0.5, default: 10 },
+                { id: 'c', label: 'Vertical Scale', min: 2, max: 10, step: 0.5, default: 5 },
+                { id: 'n', label: 'Spirals', min: 3, max: 10, step: 0.5, default: 5 }
+            ],
+            epicycloid: [
+                { id: 'R', label: 'Major Radius', min: 2, max: 8, step: 0.1, default: 3 },
+                { id: 'r', label: 'Minor Radius', min: 0.5, max: 3, step: 0.1, default: 1 },
+                { id: 'height', label: 'Height', min: 2, max: 8, step: 0.5, default: 4 },
+                { id: 'k', label: 'Cusps', min: 3, max: 10, step: 1, default: 5 }
+            ]
+        };
+        
+        function getRandomWords(count) {
+            const words = [];
+            for (let i = 0; i < count; i++) {
+                words.push(loremWords[Math.floor(Math.random() * loremWords.length)]);
+            }
+            return words.join(' ');
+        }
+        
+        function toggleLoremIpsum() {
+            if (isStreaming) {
+                stopLoremIpsum();
+            } else {
+                startLoremIpsum();
+            }
+        }
+        
+        function startLoremIpsum() {
+            isStreaming = true;
+            const speed = parseInt(document.getElementById('speed').value);
+            
+            loremInterval = setInterval(() => {
+                const text = getRandomWords(Math.floor(Math.random() * 3) + 1);
+                viz.streamText(text);
+            }, speed);
+            
+            document.querySelector('button[onclick="toggleLoremIpsum()"]').textContent = 'Stop Text';
+        }
+        
+        function stopLoremIpsum() {
+            isStreaming = false;
+            if (loremInterval) {
+                clearInterval(loremInterval);
+                loremInterval = null;
+            }
+            document.querySelector('button[onclick="toggleLoremIpsum()"]').textContent = 'Start Text';
+        }
+        
+        function clearVisualization() {
+            viz.clear();
+        }
+        
+        // Update shape parameters UI
+        function updateShapeParamsUI(shapeType) {
+            const container = document.getElementById('shape-params-container');
+            const params = shapeParamDefinitions[shapeType] || [];
+            
+            container.innerHTML = '';
+            
+            if (params.length === 0) {
+                container.innerHTML = '<p class="info-text">No adjustable parameters for this shape</p>';
+                return;
+            }
+            
+            params.forEach(param => {
+                const controlGroup = document.createElement('div');
+                controlGroup.className = 'control-group';
+                
+                const currentValue = viz.shapeParams[shapeType][param.id] || param.default;
+                
+                controlGroup.innerHTML = `
+                    <label>${param.label} <span class="value-display" id="${param.id}-value">${currentValue.toFixed(param.step < 1 ? 1 : 0)}</span></label>
+                    <input type="range" 
+                           id="${param.id}" 
+                           min="${param.min}" 
+                           max="${param.max}" 
+                           value="${currentValue}" 
+                           step="${param.step}"
+                           oninput="updateShapeParam('${shapeType}', '${param.id}', this.value)">
+                `;
+                
+                container.appendChild(controlGroup);
+            });
+        }
+        
+        // Update shape parameter
+        function updateShapeParam(shapeType, paramId, value) {
+            const param = shapeParamDefinitions[shapeType].find(p => p.id === paramId);
+            const numValue = parseFloat(value);
+            
+            // Update display
+            const displayElement = document.getElementById(`${paramId}-value`);
+            if (displayElement) {
+                displayElement.textContent = numValue.toFixed(param.step < 1 ? 1 : 0);
+            }
+            
+            // Update visualization
+            const newParams = { ...viz.shapeParams[shapeType], [paramId]: numValue };
+            viz.setShape(shapeType, newParams);
+            
+            // Clear active config when manually changing values
+            activeConfigId = null;
+            updateConfigDisplay();
+        }
+        
+        // Change shape
+        function changeShape() {
+            const shapeType = document.getElementById('shape-type').value;
+            viz.setShape(shapeType);
+            updateShapeParamsUI(shapeType);
+            
+            // Clear text when changing shapes
+            viz.clear();
+            
+            // Clear active config
+            activeConfigId = null;
+            updateConfigDisplay();
+        }
+        
+        // Background color
+        function setBackgroundPreset(preset) {
+            const color = preset === 'dark' ? '#000000' : '#ffffff';
+            document.getElementById('bg-color').value = color;
+            updateBackgroundColor();
+        }
+        
+        function updateBackgroundColor() {
+            const color = document.getElementById('bg-color').value;
+            viz.scene.background = new THREE.Color(color);
+            document.body.style.background = color;
+            
+            const isLight = parseInt(color.substring(1), 16) > 0x808080;
+            document.body.style.color = isLight ? '#000' : '#fff';
+        }
+        
+        // Update displays
+        document.getElementById('speed').addEventListener('input', (e) => {
+            document.getElementById('speed-value').textContent = e.target.value;
+            if (isStreaming) {
+                stopLoremIpsum();
+                startLoremIpsum();
+            }
+        });
+        
+        document.getElementById('text-size').addEventListener('input', (e) => {
+            document.getElementById('text-size-value').textContent = e.target.value;
+            viz.config.textSize = parseFloat(e.target.value);
+        });
+        
+        document.getElementById('bg-color').addEventListener('input', updateBackgroundColor);
+        
+        // Configuration mode management
+        function switchConfigMode() {
+            const mode = document.getElementById('config-mode').value;
+            currentConfigMode = mode;
+            
+            if (mode === 'preview') {
+                // In preview mode, just update the indicator
+                updateConfigDisplay();
+                showStatus('Preview mode - use preview buttons to test configurations');
+                return;
+            }
+            
+            // Load the configuration for the selected mode
+            const config = shapeConfigurations[mode];
+            if (config) {
+                loadConfigurationData(config);
+                showStatus(`Loaded ${mode} configuration`);
+            }
+            
+            updateConfigDisplay();
+        }
+        
+        function previewMode(mode) {
+            const config = shapeConfigurations[mode];
+            if (!config) {
+                showStatus(`No ${mode} configuration saved`, 'error');
+                return;
+            }
+            
+            loadConfigurationData(config);
+            
+            // Start lorem ipsum if not already running
+            if (!isStreaming) {
+                startLoremIpsum();
+            }
+            
+            if (mode === 'interview') {
+                showStatus('Previewing interview experience - this shows during Q&A');
+            } else {
+                showStatus('Previewing report generation - this shows while waiting for report');
+            }
+        }
+        
+        function loadConfigurationData(config) {
+            // Set shape type
+            document.getElementById('shape-type').value = config.shapeType;
+            changeShape();
+            
+            // Set shape parameters
+            viz.setShape(config.shapeType, config.shapeParams);
+            updateShapeParamsUI(config.shapeType);
+            
+            // Set other parameters
+            document.getElementById('speed').value = config.speed;
+            document.getElementById('text-size').value = config.textSize;
+            document.getElementById('text-orientation').value = config.textOrientation || 'vertical';
+            document.getElementById('bg-color').value = config.bgColor;
+            
+            // Update displays
+            document.getElementById('speed-value').textContent = config.speed;
+            document.getElementById('text-size-value').textContent = config.textSize;
+            viz.config.textSize = config.textSize;
+            viz.config.textOrientation = config.textOrientation || 'vertical';
+            
+            updateBackgroundColor();
+        }
+        
+        // Save configuration for current mode
+        async function saveConfigurationForMode() {
+            if (currentConfigMode === 'preview') {
+                showStatus('Switch to Interview or Report mode to save configurations', 'error');
+                return;
+            }
+            
+            // Update current configuration with UI values
+            const shapeType = document.getElementById('shape-type').value;
+            
+            // Get current shape parameters from the sliders
+            const currentShapeParams = {};
+            const paramDefs = shapeParamDefinitions[shapeType];
+            if (paramDefs) {
+                paramDefs.forEach(param => {
+                    const slider = document.getElementById(param.id);
+                    if (slider) {
+                        currentShapeParams[param.id] = parseFloat(slider.value);
+                    }
+                });
+            }
+            
+            const config = {
+                shapeType,
+                shapeParams: currentShapeParams,
+                speed: parseInt(document.getElementById('speed').value),
+                textSize: parseFloat(document.getElementById('text-size').value),
+                textOrientation: document.getElementById('text-orientation').value,
+                bgColor: document.getElementById('bg-color').value
+            };
+            
+            // Save to local configurations
+            shapeConfigurations[currentConfigMode] = config;
+            
+            console.log(`Saving ${currentConfigMode} configuration:`, config);
+            
+            // Also save to user's profile if authenticated
+            if (window.auth && auth.currentUser) {
+                try {
+                    const userDocRef = db.collection('users').doc(auth.currentUser.uid);
+                    
+                    // Get current user data
+                    const userDoc = await userDocRef.get();
+                    const userData = userDoc.exists ? userDoc.data() : {};
+                    
+                    // Update shape configurations
+                    const shapeConfigs = userData.shapeConfigurations || {};
+                    shapeConfigs[currentConfigMode] = {
+                        ...config,
+                        name: `${currentConfigMode}_shape`,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    // Set the appropriate active config based on mode
+                    const updateData = {
+                        shapeConfigurations: shapeConfigs,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+                    
+                    if (currentConfigMode === 'interview') {
+                        updateData.activeInterviewShapeConfig = shapeConfigs[currentConfigMode];
+                    } else if (currentConfigMode === 'report') {
+                        updateData.activeReportShapeConfig = shapeConfigs[currentConfigMode];
+                    }
+                    
+                    await userDocRef.set(updateData, { merge: true });
+                    
+                    console.log(`Saved ${currentConfigMode} configuration:`, updateData);
+                    showStatus(`${currentConfigMode} configuration saved successfully!`);
+                } catch (error) {
+                    console.error('Error saving configuration:', error);
+                    showStatus('Error saving to cloud, but saved locally', 'warning');
+                }
+            } else {
+                showStatus(`${currentConfigMode} configuration saved locally`);
+            }
+            
+            updateConfigDisplay();
+        }
+        
+        // Export configuration for use in production
+        function exportShapeConfig() {
+            const exportData = {
+                interview: shapeConfigurations.interview,
+                report: shapeConfigurations.report,
+                timestamp: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'shape-configurations.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showStatus('Configuration exported successfully!');
+        }
+        
+        // Save/Load configurations (legacy function updated)
+        async function saveConfiguration() {
+            return saveConfigurationForMode();
+        }
+        
+        // Original save function preserved for backward compatibility
+        async function saveConfigurationLegacy() {
+            const name = prompt('Enter a name for this configuration:');
+            if (!name) return;
+            
+            const shapeType = document.getElementById('shape-type').value;
+            const config = {
+                name,
+                shapeType,
+                shapeParams: viz.shapeParams[shapeType],
+                speed: parseInt(document.getElementById('speed').value),
+                textSize: parseFloat(document.getElementById('text-size').value),
+                textOrientation: document.getElementById('text-orientation').value,
+                bgColor: document.getElementById('bg-color').value,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Check if user is authenticated
+            if (!window.auth || !auth.currentUser) {
+                showStatus('Please sign in to save configurations', 'error');
+                return;
+            }
+            
+            try {
+                // Save to user's profile in Firestore
+                const userDocRef = db.collection('users').doc(auth.currentUser.uid);
+                
+                // Get current saved configs
+                const userDoc = await userDocRef.get();
+                const userData = userDoc.exists ? userDoc.data() : {};
+                const savedConfigs = userData.shapesConfigs || [];
+                
+                // Add new config with unique ID
+                config.id = `config_${Date.now()}`;
+                savedConfigs.push(config);
+                
+                // Also set as the active shape config
+                await userDocRef.set({
+                    shapesConfigs: savedConfigs,
+                    activeShapeConfig: config, // This is the active config for production
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                
+                showStatus('Configuration saved and set as active!');
+                activeConfigId = config.id;
+                updateConfigDisplay();
+                loadSavedConfigs();
+            } catch (error) {
+                console.error('Error saving configuration:', error);
+                showStatus('Error saving configuration', 'error');
+            }
+        }
+        
+        async function loadSavedConfigs() {
+            try {
+                // Check if user is authenticated
+                if (!window.auth || !auth.currentUser) {
+                    return;
+                }
+                
+                // Load from user's profile in Firestore
+                const userDocRef = db.collection('users').doc(auth.currentUser.uid);
+                const userDoc = await userDocRef.get();
+                
+                if (!userDoc.exists) {
+                    const list = document.getElementById('configs-list');
+                    list.innerHTML = '<div style="color: #888; padding: 10px;">No saved configurations</div>';
+                    return;
+                }
+                
+                const userData = userDoc.data();
+                const configs = userData.shapesConfigs || [];
+                const activeConfig = userData.activeShapeConfig;
+                
+                const list = document.getElementById('configs-list');
+                list.innerHTML = '';
+                
+                if (configs.length === 0) {
+                    list.innerHTML = '<div style="color: #888; padding: 10px;">No saved configurations</div>';
+                    return;
+                }
+                
+                configs.forEach(config => {
+                    const item = document.createElement('div');
+                    item.className = 'config-item';
+                    
+                    // Check if this is the currently loaded config
+                    if (activeConfigId && config.id === activeConfigId) {
+                        item.classList.add('active');
+                    }
+                    
+                    item.innerHTML = `
+                        <div class="config-name">${config.name}</div>
+                        <div class="config-params">
+                            Shape: ${config.shapeType}
+                        </div>
+                    `;
+                    
+                    item.onclick = () => loadConfiguration(config);
+                    list.appendChild(item);
+                });
+                
+                // If there's an active config but it's not loaded yet, load it
+                if (activeConfig && !activeConfigId) {
+                    loadConfiguration(activeConfig);
+                }
+            } catch (error) {
+                console.error('Error loading configurations:', error);
+                const list = document.getElementById('configs-list');
+                list.innerHTML = '<div style="color: #ff4444; padding: 10px;">Error loading configurations</div>';
+            }
+        }
+        
+        async function loadConfiguration(config) {
+            // Set shape type
+            document.getElementById('shape-type').value = config.shapeType;
+            changeShape();
+            
+            // Set shape parameters
+            viz.setShape(config.shapeType, config.shapeParams);
+            updateShapeParamsUI(config.shapeType);
+            
+            // Set other parameters
+            document.getElementById('speed').value = config.speed;
+            document.getElementById('text-size').value = config.textSize;
+            document.getElementById('text-orientation').value = config.textOrientation || 'vertical';
+            document.getElementById('bg-color').value = config.bgColor;
+            
+            // Update displays
+            document.getElementById('speed-value').textContent = config.speed;
+            document.getElementById('text-size-value').textContent = config.textSize;
+            viz.config.textSize = config.textSize;
+            viz.config.textOrientation = config.textOrientation || 'vertical';
+            
+            // Track this as the active config
+            activeConfigId = config.id || config.name;
+            
+            // Save as the active config for production
+            if (window.auth && auth.currentUser) {
+                try {
+                    const userDocRef = db.collection('users').doc(auth.currentUser.uid);
+                    await userDocRef.set({
+                        activeShapeConfig: config,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                    
+                    showStatus(`Loaded and activated: ${config.name}`);
+                } catch (error) {
+                    console.error('Error setting active config:', error);
+                    showStatus(`Loaded configuration: ${config.name}`, 'warning');
+                }
+            } else {
+                showStatus(`Loaded configuration: ${config.name}`);
+            }
+            
+            updateBackgroundColor();
+            updateConfigDisplay();
+            
+            // Update saved configs display to show new active config
+            if (document.getElementById('saved-configs').style.display === 'block') {
+                loadSavedConfigs();
+            }
+        }
+        
+        function toggleSavedConfigs() {
+            const panel = document.getElementById('saved-configs');
+            const button = document.getElementById('toggle-saved');
+            
+            if (panel.style.display === 'block') {
+                panel.style.display = 'none';
+                button.style.display = 'block';
+            } else {
+                panel.style.display = 'block';
+                button.style.display = 'none';
+                // Update auth UI when panel opens
+                if (window.auth && auth.currentUser) {
+                    updateAuthUI(auth.currentUser);
+                } else {
+                    updateAuthUI(null);
+                }
+            }
+        }
+        
+        function showStatus(message, type = 'success') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.style.display = 'block';
+            status.style.color = type === 'error' ? '#ff4444' : '#4a9eff';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Show current config info
+        function updateConfigDisplay() {
+            const indicator = document.querySelector('.live-indicator');
+            const modeText = currentConfigMode.charAt(0).toUpperCase() + currentConfigMode.slice(1);
+            
+            if (currentConfigMode === 'preview') {
+                indicator.textContent = 'PREVIEW MODE';
+                indicator.style.background = '#ff9800';
+            } else if (currentConfigMode === 'interview') {
+                indicator.textContent = 'INTERVIEW CONFIG';
+                indicator.style.background = '#28a745';
+            } else if (currentConfigMode === 'report') {
+                indicator.textContent = 'REPORT CONFIG';
+                indicator.style.background = '#6f42c1';
+            } else if (activeConfigId) {
+                indicator.textContent = 'SAVED CONFIG';
+                indicator.style.background = '#9c27b0';
+            } else {
+                indicator.textContent = 'CUSTOM CONFIG';
+                indicator.style.background = '#4a9eff';
+            }
+        }
+        
+        // Sign in function
+        async function signIn() {
+            try {
+                showStatus('Signing in...', 'info');
+                const provider = new firebase.auth.GoogleAuthProvider();
+                const result = await auth.signInWithPopup(provider);
+                console.log('Sign in successful:', result.user.email);
+                showStatus('Sign in successful!', 'success');
+                updateAuthUI(result.user);
+            } catch (error) {
+                console.error('Sign in error:', error);
+                showStatus(`Sign in failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // Sign out function  
+        async function signOut() {
+            try {
+                await auth.signOut();
+            } catch (error) {
+                console.error('Sign out error:', error);
+            }
+        }
+        
+        // Update auth UI
+        function updateAuthUI(user) {
+            const authStatus = document.getElementById('auth-status');
+            const signInBtn = document.getElementById('sign-in-btn');
+            const userInfo = document.getElementById('user-info');
+            const configsList = document.getElementById('configs-list');
+            
+            if (authStatus && document.getElementById('saved-configs').style.display === 'block') {
+                authStatus.style.display = 'block';
+            }
+            
+            if (user) {
+                if (signInBtn) signInBtn.style.display = 'none';
+                if (userInfo) {
+                    userInfo.style.display = 'block';
+                    userInfo.innerHTML = `
+                        <div>Signed in as ${user.email}</div>
+                        <button onclick="signOut()" style="margin-top: 5px; padding: 4px 12px; background: #333; border-radius: 4px; font-size: 12px;">Sign Out</button>
+                    `;
+                }
+                loadSavedConfigs();
+                loadUserShapeConfigurations(); // Load mode-based configs
+            } else {
+                if (signInBtn) signInBtn.style.display = 'block';
+                if (userInfo) userInfo.style.display = 'none';
+                if (configsList) configsList.innerHTML = '<div style="color: #888; padding: 10px;">Sign in to save configurations</div>';
+            }
+        }
+        
+        // Update text orientation function
+        function updateTextOrientation() {
+            const orientation = document.getElementById('text-orientation').value;
+            const currentShapeType = document.getElementById('shape-type').value;
+            
+            // Stop any ongoing text streaming
+            stopLoremIpsum();
+            
+            // Clear and destroy current viz
+            viz.clear();
+            viz.destroy();
+            
+            // Get current config
+            const currentConfig = {
+                shapeType: currentShapeType,
+                textSize: parseFloat(document.getElementById('text-size').value),
+                bgColor: document.getElementById('bg-color').value,
+                textOrientation: orientation
+            };
+            
+            // Recreate viz with new orientation
+            viz = new ShapesViz(container, currentConfig);
+            
+            // Wait a moment for initialization to complete
+            setTimeout(() => {
+                // Restore shape parameters from UI
+                const params = {};
+                const paramDefs = shapeParamDefinitions[currentShapeType] || [];
+                paramDefs.forEach(param => {
+                    const element = document.getElementById(param.id);
+                    if (element) {
+                        params[param.id] = parseFloat(element.value);
+                    }
+                });
+                
+                // Set shape with current parameters
+                viz.setShape(currentShapeType, params);
+            }, 100);
+            
+            // Clear active config when manually changing values
+            activeConfigId = null;
+            updateConfigDisplay();
+        }
+        
+        // Make functions global
+        window.signIn = signIn;
+        window.signOut = signOut;
+        window.changeShape = changeShape;
+        window.updateShapeParam = updateShapeParam;
+        window.updateTextOrientation = updateTextOrientation;
+        window.toggleLoremIpsum = toggleLoremIpsum;
+        window.clearVisualization = clearVisualization;
+        window.setBackgroundPreset = setBackgroundPreset;
+        window.saveConfiguration = saveConfiguration;
+        window.saveConfigurationForMode = saveConfigurationForMode;
+        window.toggleSavedConfigs = toggleSavedConfigs;
+        window.switchConfigMode = switchConfigMode;
+        window.previewMode = previewMode;
+        window.exportShapeConfig = exportShapeConfig;
+        
+        // Export configuration access for production use
+        window.getShapeConfigurations = function() {
+            return shapeConfigurations;
+        };
+        
+        window.getShapeConfig = function(mode) {
+            return shapeConfigurations[mode];
+        };
+        
+        // Load user shape configurations from Firebase
+        async function loadUserShapeConfigurations() {
+            if (!window.auth || !auth.currentUser) return;
+            
+            try {
+                const userDocRef = db.collection('users').doc(auth.currentUser.uid);
+                const userDoc = await userDocRef.get();
+                
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    
+                    // Load saved configurations for each mode
+                    if (userData.shapeConfigurations) {
+                        if (userData.shapeConfigurations.interview) {
+                            shapeConfigurations.interview = userData.shapeConfigurations.interview;
+                            console.log('Loaded interview config from Firebase:', userData.shapeConfigurations.interview);
+                        }
+                        if (userData.shapeConfigurations.report) {
+                            shapeConfigurations.report = userData.shapeConfigurations.report;
+                            console.log('Loaded report config from Firebase:', userData.shapeConfigurations.report);
+                        }
+                    }
+                    
+                    // If currently in a mode, load that config
+                    if (currentConfigMode !== 'preview' && shapeConfigurations[currentConfigMode]) {
+                        loadConfigurationData(shapeConfigurations[currentConfigMode]);
+                        showStatus(`Loaded saved ${currentConfigMode} configuration`);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading user shape configurations:', error);
+            }
+        }
+        
+        // Initialize
+        updateShapeParamsUI('torusKnot');
+        updateConfigDisplay();
+        
+        // Load saved configs on page load
+        window.addEventListener('load', () => {
+            // Check if running from file:// protocol
+            if (window.location.protocol === 'file:') {
+                showStatus('Please access this page from a web server for authentication to work', 'error');
+                const authStatus = document.getElementById('auth-status');
+                if (authStatus) {
+                    authStatus.style.display = 'block';
+                    authStatus.innerHTML = '<div style="color: #ff4444; padding: 10px;">Authentication requires HTTPS. Please access from a web server.</div>';
+                }
+                return;
+            }
+            
+            // Function to initialize auth when Firebase is ready
+            function initializeAuth() {
+                if (typeof window.auth !== 'undefined' && typeof window.db !== 'undefined') {
+                    console.log('Firebase auth initialized, checking auth state...');
+                    try {
+                        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+                            .then(() => {
+                                const currentUser = auth.currentUser;
+                                if (currentUser) {
+                                    updateAuthUI(currentUser);
+                                }
+                                
+                                auth.onAuthStateChanged((user) => {
+                                    updateAuthUI(user);
+                                });
+                            })
+                            .catch((error) => {
+                                console.error('Error setting persistence:', error);
+                            });
+                    } catch (error) {
+                        console.error('Error setting up auth listener:', error);
+                    }
+                } else {
+                    setTimeout(initializeAuth, 500);
+                }
+            }
+            
+            initializeAuth();
+        });
+    </script>
+</body>
+</html>

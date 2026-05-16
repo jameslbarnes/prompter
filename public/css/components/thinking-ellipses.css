@@ -1,0 +1,156 @@
+/* Thinking Ellipses Component Styles */
+
+/* Thinking State Ellipses */
+.thinking-ellipses-container {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 2rem;
+    animation: fadeIn 0.5s ease;
+    position: relative;
+    z-index: 50;
+}
+
+.thinking-active .thinking-ellipses-container {
+    display: flex !important;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 50;
+    width: auto;
+    height: auto;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.thinking-ellipses-large {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.thinking-active .thinking-ellipses-large {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.thinking-ellipses-large .ellipse-dot {
+    width: 12px;
+    height: 12px;
+    background-color: #10a37f !important;
+    border-radius: 50%;
+    animation: ellipsePulseLarge 1.4s infinite ease-in-out;
+    display: block !important;
+    opacity: 1 !important;
+    border: 2px solid #ffffff !important;
+}
+
+.thinking-active .thinking-ellipses-large .ellipse-dot {
+    background-color: #ffffff !important;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.thinking-ellipses-large .ellipse-dot:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.thinking-ellipses-large .ellipse-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.thinking-ellipses-large .ellipse-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes ellipsePulseLarge {
+    0%, 80%, 100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+    40% {
+        opacity: 1;
+        transform: scale(1.3);
+    }
+}
+
+.thinking-status-text {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    text-align: center;
+    font-weight: 500;
+}
+
+.thinking-active .thinking-status-text {
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Small Thinking Ellipses */
+.thinking-ellipses {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.ellipse-dot {
+    width: 6px;
+    height: 6px;
+    background-color: white;
+    border-radius: 50%;
+    animation: ellipsePulse 1.4s infinite ease-in-out;
+}
+
+.ellipse-dot:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.ellipse-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.ellipse-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes ellipsePulse {
+    0%, 80%, 100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+    40% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .thinking-ellipses-container {
+        padding: 1rem;
+    }
+    
+    .thinking-active .thinking-ellipses-container {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 1rem;
+    }
+    
+    .thinking-ellipses-large .ellipse-dot {
+        width: 10px;
+        height: 10px;
+    }
+    
+    .thinking-status-text {
+        font-size: 0.875rem;
+    }
+}

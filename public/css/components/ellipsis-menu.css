@@ -1,0 +1,101 @@
+/* Ellipsis Menu Component */
+
+.ellipsis-menu {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+#interviewsList .interview-card:hover .ellipsis-menu {
+    opacity: 1;
+}
+
+.ellipsis-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    padding: 0.25rem;
+    cursor: pointer;
+    border-radius: 4px;
+    line-height: 1;
+}
+
+.ellipsis-btn:hover {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.ellipsis-dropdown {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    min-width: 140px;
+}
+
+.ellipsis-dropdown button {
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+.ellipsis-dropdown button:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.ellipsis-dropdown .delete-btn {
+    color: #f87171;
+}
+
+.ellipsis-dropdown .delete-btn:hover {
+    color: #ef4444;
+    background-color: var(--bg-tertiary);
+}
+
+/* Response Ellipsis Menu */
+.response-ellipsis-menu {
+    position: relative;
+}
+
+.response-ellipsis-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    line-height: 1;
+}
+
+.response-ellipsis-btn:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.response-ellipsis-dropdown {
+    position: absolute;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    min-width: 200px;
+    border-radius: 0.375rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.response-ellipsis-dropdown button {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.response-ellipsis-dropdown button:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.create-from-response-btn {
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+} 

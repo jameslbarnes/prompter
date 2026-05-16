@@ -1,0 +1,26 @@
+/* Textarea Fixes and Styles */
+
+/* Ensure textarea text is visible in both themes */
+#pastedResumeText {
+    color: var(--text-primary);
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+}
+
+/* Adjust textarea placeholder color for better visibility */
+#pastedResumeText::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+/* Mobile-specific textarea fixes */
+@media (max-width: 768px) {
+    /* Fix textarea on mobile */
+    textarea {
+        font-size: 16px !important; /* Prevent zoom on iOS */
+    }
+    
+    #pastedResumeText {
+        min-height: 120px;
+    }
+}

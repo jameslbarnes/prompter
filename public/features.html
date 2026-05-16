@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Say - Features</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #3a3f4b;
+            font-family: Georgia, serif;
+            color: white;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+        /* Header */
+        .header {
+            position: fixed;
+            top: 40px;
+            left: 60px;
+            right: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 100;
+        }
+        .logo {
+            font-size: 32px;
+            font-weight: normal;
+            letter-spacing: 2px;
+            text-decoration: none;
+            color: white;
+        }
+        .nav {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+        .nav a:hover,
+        .nav a.active {
+            opacity: 1;
+        }
+        /* Main content */
+        .main {
+            padding-top: 120px;
+            padding-bottom: 80px;
+        }
+        .hero {
+            text-align: center;
+            margin-bottom: 100px;
+        }
+        .hero h1 {
+            font-size: 48px;
+            font-weight: normal;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+        .hero p {
+            font-size: 20px;
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 60px;
+            margin-bottom: 100px;
+        }
+        .feature {
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        .feature:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+        .feature h3 {
+            font-size: 24px;
+            font-weight: normal;
+            margin-bottom: 16px;
+            letter-spacing: 0.5px;
+        }
+        .feature p {
+            font-size: 16px;
+            opacity: 0.8;
+            line-height: 1.7;
+        }
+        /* Use Cases */
+        .use-cases {
+            margin-bottom: 100px;
+        }
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .section-header h2 {
+            font-size: 36px;
+            font-weight: normal;
+            margin-bottom: 16px;
+        }
+        .section-header p {
+            font-size: 18px;
+            opacity: 0.8;
+        }
+        .use-case-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        .use-case {
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+        }
+        .use-case h4 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: white;
+            opacity: 0.95;
+        }
+        .use-case p {
+            font-size: 15px;
+            opacity: 0.8;
+        }
+        /* How It Works */
+        .how-it-works {
+            margin-bottom: 100px;
+        }
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+        .step {
+            text-align: center;
+        }
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .step h4 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+        .step p {
+            font-size: 15px;
+            opacity: 0.8;
+        }
+        /* CTA Section */
+        .cta-section {
+            text-align: center;
+            padding: 80px 0;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 4px;
+            margin-bottom: 60px;
+        }
+        .cta-section h2 {
+            font-size: 36px;
+            font-weight: normal;
+            margin-bottom: 20px;
+        }
+        .cta-section p {
+            font-size: 18px;
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: transparent;
+            border: 1px solid white;
+            color: white;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-family: Georgia, serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            text-decoration: none;
+        }
+        .cta-button img {
+            height: 20px;
+            width: auto;
+            filter: brightness(0) invert(1);
+        }
+        .cta-button:hover {
+            background: white;
+            color: black;
+        }
+        .cta-button:hover img {
+            filter: brightness(0) invert(0);
+        }
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            width: 45px;
+            height: 45px;
+        }
+        .mobile-menu-toggle span {
+            display: block;
+            width: 25px;
+            height: 2px;
+            background: white;
+            margin-bottom: 5px;
+            transition: all 0.3s ease;
+        }
+        .mobile-menu-toggle span:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Mobile overlay menu */
+        .nav.mobile-open {
+            display: flex !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(58, 63, 75, 0.98);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            z-index: 90;
+        }
+        .nav.mobile-open a {
+            font-size: 24px;
+            opacity: 1;
+        }
+        
+        /* Mobile */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 20px;
+            }
+            .header {
+                top: 20px;
+                left: 20px;
+                right: 60px;
+            }
+            .logo {
+                font-size: 28px;
+            }
+            .nav {
+                display: none;
+            }
+            .mobile-menu-toggle {
+                display: block;
+            }
+            .hero h1 {
+                font-size: 32px;
+            }
+            .hero p {
+                font-size: 18px;
+            }
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            .feature {
+                padding: 30px 20px;
+            }
+            .cta-section {
+                padding: 60px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="/" class="logo">Say</a>
+        <nav class="nav" id="mainNav">
+            <a href="/">Home</a>
+            <a href="/features.html" class="active">Features</a>
+            <a href="/pricing.html">Pricing</a>
+            <a href="/gallery.html">Templates</a>
+            <a href="/admin.html">Sign In</a>
+        </nav>
+    </header>
+    
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <main class="main">
+        <div class="container">
+            <!-- Hero Section -->
+            <section class="hero">
+                <h1>Powerful Features for Deep Audience Understanding</h1>
+                <p>Say combines AI-powered conversations with intelligent memory to help you connect with your audience like never before.</p>
+            </section>
+
+            <!-- Core Features -->
+            <section class="features-grid">
+                <div class="feature">
+                    <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 18.75a6.75 6.75 0 110-13.5 6.75 6.75 0 010 13.5zM12 18.75v6M8.25 18.75l-1.5 6M15.75 18.75l1.5 6"/>
+                    </svg>
+                    <h3>Voice-First Conversations</h3>
+                    <p>Natural dialogue that puts participants at ease. Speak or type - whatever feels most comfortable. Our AI understands context, emotion, and nuance to create genuine connections.</p>
+                </div>
+                
+                <div class="feature">
+                    <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <h3>Intelligent Follow-ups</h3>
+                    <p>Our AI asks the right questions at the right time. It listens for opportunities to go deeper, uncovering insights that scripted interviews miss.</p>
+                </div>
+                
+                <div class="feature">
+                    <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    <h3>Cross-Session Memory</h3>
+                    <p>Build deeper insights with each conversation. Say remembers past interactions, creating a rich understanding of your audience over time.</p>
+                </div>
+                
+                <div class="feature">
+                    <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M9 17V7m0 10l3-3m-3 3l-3-3m13 3V7m0 10l3-3m-3 3l-3-3M12 3v4"/>
+                    </svg>
+                    <h3>Automated Synthesis</h3>
+                    <p>Transform hours of conversations into actionable intelligence in minutes. Get key themes, quotes, and insights formatted for immediate use.</p>
+                </div>
+                
+                <div class="feature">
+                    <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                    <h3>Privacy & Security</h3>
+                    <p>Your conversations are encrypted and private. Control who has access, anonymize responses, and ensure participant confidentiality.</p>
+                </div>
+                
+                <div class="feature">
+                    <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+                    </svg>
+                    <h3>Customizable Templates</h3>
+                    <p>Start with proven interview frameworks or create your own. Tailor questions, prompts, and flow to match your specific needs.</p>
+                </div>
+            </section>
+
+            <!-- Use Cases -->
+            <section class="use-cases">
+                <div class="section-header">
+                    <h2>Perfect For Every Speaking Engagement</h2>
+                    <p>See how professionals use Say to transform their presentations</p>
+                </div>
+                <div class="use-case-cards">
+                    <div class="use-case">
+                        <h4>Keynote Speakers</h4>
+                        <p>Interview 100+ conference attendees before your talk. Reference their actual challenges and aspirations to create unforgettable presentations.</p>
+                    </div>
+                    <div class="use-case">
+                        <h4>Workshop Facilitators</h4>
+                        <p>Understand participant needs before day one. Design exercises that address their specific situations and maximize workshop impact.</p>
+                    </div>
+                    <div class="use-case">
+                        <h4>Corporate Trainers</h4>
+                        <p>Assess team dynamics and skill gaps in advance. Deliver training that feels custom-built for each organization.</p>
+                    </div>
+                    <div class="use-case">
+                        <h4>Consultants</h4>
+                        <p>Deep dive into client challenges before engagements. Walk into meetings with insights that typically take weeks to uncover.</p>
+                    </div>
+                    <div class="use-case">
+                        <h4>Thought Leaders</h4>
+                        <p>Gather real stories and perspectives from your community. Create content that resonates because it's grounded in actual experiences.</p>
+                    </div>
+                    <div class="use-case">
+                        <h4>Event Organizers</h4>
+                        <p>Pre-interview attendees to shape programming. Create events that deliver exactly what your audience wants and needs.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- How It Works -->
+            <section class="how-it-works">
+                <div class="section-header">
+                    <h2>Simple Yet Powerful</h2>
+                    <p>From setup to insights in minutes</p>
+                </div>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h4>Share Your Link</h4>
+                        <p>Send your custom interview link to participants. Works on any device, no downloads required.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h4>Natural Conversations</h4>
+                        <p>Participants speak or type their responses. AI asks follow-up questions to go deeper.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h4>Instant Analysis</h4>
+                        <p>Say synthesizes all conversations, surfacing key themes, quotes, and insights.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <h4>Transform Your Talk</h4>
+                        <p>Use real stories and insights to create presentations that truly connect.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CTA -->
+            <section class="cta-section">
+                <h2>Ready to Transform Your Next Presentation?</h2>
+                <p>Start with 5 free interviews. No credit card required.</p>
+                <a href="/i/" class="cta-button">
+                    <img src="saylogo.png" alt="Say">
+                    <span>Begin Your First Interview</span>
+                </a>
+            </section>
+        </div>
+    </main>
+    <script>
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const nav = document.getElementById('mainNav');
+            nav.classList.toggle('mobile-open');
+        }
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const nav = document.getElementById('mainNav');
+            const toggle = document.querySelector('.mobile-menu-toggle');
+            
+            if (!nav.contains(event.target) && !toggle.contains(event.target) && nav.classList.contains('mobile-open')) {
+                nav.classList.remove('mobile-open');
+            }
+        });
+    </script>
+</body>
+</html>

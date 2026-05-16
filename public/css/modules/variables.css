@@ -1,0 +1,42 @@
+/* CSS Variables and Theme Configuration */
+
+:root {
+    /* Updated Softer Dark Theme */
+    --bg-primary: #26282B;   /* Slightly lighter, less stark black */
+    --bg-secondary: #3C3F44; /* Softer grey for sidebars/inputs */
+    --bg-tertiary: #4A4D53;  /* Softer hover state */
+    --bg-hover: #5A5D63;     /* Lighter hover state */
+    --text-primary: #E0E0E0;   /* Slightly softer white */
+    --text-secondary: #B0B0B8; /* Softer grey for secondary text */
+    --text-tertiary: #787A80;  /* Muted grey */
+    --accent-primary: #26A69A; /* Softer Teal (Material Teal 400) */
+    --accent-secondary: #4DB6AC;/* Lighter Teal (Material Teal 300) */
+    --border-color: rgba(255, 255, 255, 0.08); /* Even more subtle borders */
+    --input-bg: var(--bg-secondary); /* Use secondary background */
+    --input-border: var(--border-color); /* Use subtle border */
+    --input-focus-border: var(--accent-primary); /* Use primary accent for focus */
+    --sidebar-width: 260px;
+    --sidebar-collapsed-width: 0px; /* Collapse fully */
+    --header-height: 60px;
+    --panel-collapsed-width: 40px; /* Width for collapsed panels */
+}
+
+:root[data-theme="light"] {
+    /* Updated Light Theme (v2) */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f4f5f7; /* Slightly more distinct off-white (like Atlassian/modern UI) */
+    --bg-tertiary: #f3f4f6;  /* Keeping this one light for hover */
+    --text-primary: #1f2937; /* Keeping dark grey */
+    --text-secondary: #5e6c84; /* Darker, slightly blue-ish grey (Atlassian N600) */
+    --text-tertiary: #8993a4; /* Lighter, slightly blue-ish grey (Atlassian N400) */
+    --accent-primary: #10a37f; /* Reverting to original slightly stronger green */
+    --accent-secondary: #10b981;
+    --border-color: #dfe1e6;   /* More defined grey border (Atlassian N40) */
+    --input-bg: #ffffff;
+    --input-border: #d1d5db;
+    --input-focus-border: var(--accent-primary);
+    --sidebar-width: 260px;
+    --sidebar-collapsed-width: 0px; /* Collapse fully */
+    --header-height: 60px;
+    --panel-collapsed-width: 40px; /* Width for collapsed panels */
+} 

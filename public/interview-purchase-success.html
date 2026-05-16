@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Successful - AI Interview Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full mx-4">
+        <div class="bg-white rounded-lg shadow-sm border p-8 text-center">
+            <!-- Success Icon -->
+            <div class="mb-6">
+                <svg class="w-16 h-16 text-green-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">Purchase Successful!</h1>
+            <p class="text-gray-600 mb-6">Your interview credits have been added to your account.</p>
+            
+            <div id="purchaseDetails" class="bg-gray-50 rounded-lg p-4 mb-6">
+                <p class="text-sm text-gray-600">Loading purchase details...</p>
+            </div>
+            
+            <div class="space-y-3">
+                <a href="/admin.html" class="block w-full bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors">
+                    Go to Dashboard
+                </a>
+                <a href="/i/" class="block w-full bg-gray-200 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors">
+                    Start New Interview
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication
+        firebase.auth().onAuthStateChanged(async (user) => {
+            if (user) {
+                // Get session ID from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const sessionId = urlParams.get('session_id');
+                
+                if (sessionId) {
+                    // In a real implementation, you would fetch the session details
+                    // For now, just show a success message
+                    document.getElementById('purchaseDetails').innerHTML = `
+                        <p class="text-gray-700 font-medium">Your interviews are ready to use!</p>
+                        <p class="text-sm text-gray-600 mt-2">Check your dashboard for your updated balance.</p>
+                    `;
+                }
+            } else {
+                window.location.href = '/auth.html';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,376 @@
+/* Message Components */
+
+/* Base Message Styles */
+.message {
+    display: flex;
+    margin-bottom: 1.5rem;
+    max-width: 90%;
+}
+
+.user-message {
+    justify-content: flex-end;
+    margin-left: auto;
+}
+
+.ai-message {
+    margin-right: auto;
+}
+
+.message-content {
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    overflow-wrap: break-word;
+}
+
+.user-message .message-content {
+    background-color: var(--accent-primary);
+    color: white;
+    border-bottom-right-radius: 0.25rem;
+}
+
+.ai-message .message-content {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border-bottom-left-radius: 0.25rem;
+}
+
+/* Thinking Indicator */
+#thinkingIndicator {
+    padding: 0.5rem 1rem;
+    background-color: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+}
+
+#thinkingIndicator .flex {
+    align-items: center;
+}
+
+#thinkingIndicator span {
+    color: var(--text-secondary);
+}
+
+/* Message wrapper for better layout */
+.message-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+/* Message Actions */
+.message-actions {
+    display: flex;
+    gap: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    padding-top: 0.5rem;
+    margin-top: 0.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.message:hover .message-actions {
+    opacity: 1;
+}
+
+.message-actions .action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.message-actions .action-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    border-color: var(--text-secondary);
+}
+
+.message-actions .action-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Blockquote styling for analyst quotes */
+.ai-message blockquote {
+    margin: 1rem 0;
+    padding: 0.75rem 1rem;
+    border-left: 4px solid var(--accent-primary);
+    background-color: var(--bg-primary);
+    border-radius: 0 0.5rem 0.5rem 0;
+    font-style: italic;
+    position: relative;
+}
+
+/* Audio quote styling */
+.ai-message blockquote.audio-quote {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-right: 3.5rem;
+    cursor: default;
+}
+
+.audio-quote-content {
+    flex: 1;
+}
+
+.audio-quote-play-btn {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-primary);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.audio-quote-play-btn:hover {
+    background: var(--accent-primary-dark, #2563eb);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.audio-quote-play-btn:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.audio-quote-play-btn svg {
+    width: 16px;
+    height: 16px;
+    margin-left: 1px; /* Visual centering adjustment */
+}
+
+/* Playing state for audio clips */
+.ai-message blockquote.playing {
+    background-color: var(--accent-primary-light, rgba(59, 130, 246, 0.1));
+    border-left-color: var(--accent-primary);
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-message blockquote.playing::before {
+    content: '🔊';
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 1.2rem;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
+    100% { opacity: 0.6; transform: scale(1); }
+}
+
+/* Loading spinner for buttons */
+.loading-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Success message */
+.success-message {
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: var(--success-bg, #10b981);
+    color: white;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Audio summary link */
+.audio-summary-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 0.5rem;
+    color: var(--accent-primary);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: opacity 0.2s ease;
+}
+
+.audio-summary-link:hover {
+    opacity: 0.8;
+}
+
+/* Browser-specific recording warnings */
+.ios-recording-warning,
+.safari-recording-warning {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    color: #856404;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    animation: fadeIn 0.3s ease;
+}
+
+.ios-recording-warning .warning-content,
+.safari-recording-warning .warning-content {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.ios-recording-warning strong,
+.safari-recording-warning strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: #664d03;
+}
+
+.ios-recording-warning ul,
+.safari-recording-warning ul {
+    margin: 0.5rem 0 0 1.5rem;
+    padding: 0;
+    list-style: disc;
+}
+
+.ios-recording-warning li,
+.safari-recording-warning li {
+    margin-bottom: 0.25rem;
+}
+
+/* Citation styling */
+.audio-citation {
+    display: inline-block;
+    padding: 0 0.25rem;
+    color: var(--accent-primary);
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    border-radius: 3px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.audio-citation:hover {
+    background-color: var(--accent-primary-light, rgba(59, 130, 246, 0.1));
+    text-decoration: underline;
+}
+
+/* Citation hovercard */
+.citation-hovercard {
+    position: fixed;
+    padding: 0.75rem 1rem;
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: normal;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    min-width: 400px;
+    max-width: 600px;
+    width: max-content;
+    white-space: normal;
+    z-index: 10000;
+    border: 1px solid var(--border-color);
+}
+
+.citation-hovercard::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid var(--bg-tertiary);
+}
+
+.audio-citation:hover .citation-hovercard {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.citation-hovercard-content {
+    font-style: italic;
+    line-height: 1.4;
+}
+
+.citation-hovercard-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Playing state for citations */
+.audio-citation.playing {
+    background-color: var(--accent-primary);
+    color: white;
+    animation: citationPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes citationPulse {
+    0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+    50% { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); }
+    100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+}
+
+/* Citations header styling */
+.citations-header {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .ios-recording-warning,
+    .safari-recording-warning {
+        background-color: #44361d;
+        border-color: #5a4829;
+        color: #f8e6c8;
+    }
+    
+    .ios-recording-warning strong,
+    .safari-recording-warning strong {
+        color: #ffd93d;
+    }
+} 

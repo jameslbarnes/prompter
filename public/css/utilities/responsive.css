@@ -1,0 +1,25 @@
+/* Responsive Styles */
+
+@media (max-width: 1200px) {
+    /* Sidebar adjustments for smaller screens */
+    .sidebar {
+        position: absolute;
+        z-index: 60;
+        height: calc(100vh - var(--header-height));
+        transform: translateX(0);
+    }
+    
+    .sidebar.collapsed {
+        transform: translateX(-100%);
+    }
+    
+    /* Stack panels on smaller screens */
+    .main-content-area {
+        grid-template-columns: 1fr;
+        padding-left: 0;
+    }
+    
+    .sidebar.collapsed + .main-content-area .sidebar-toggle {
+        left: 10px;
+    }
+} 

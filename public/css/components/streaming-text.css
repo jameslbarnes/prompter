@@ -1,0 +1,36 @@
+/* Streaming Text Component Styles */
+
+.streaming-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.2em;
+    background-color: var(--accent-primary);
+    animation: blink 1s infinite;
+    vertical-align: text-bottom;
+    margin-left: 2px;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+.streaming-text {
+    display: inline;
+    animation: fadeInText 0.3s ease-out;
+}
+
+@keyframes fadeInText {
+    from {
+        opacity: 0.7;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Ensure cursor stays visible during thinking state */
+.thinking-active .streaming-cursor {
+    background-color: #ffffff;
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+}

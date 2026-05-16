@@ -1,0 +1,135 @@
+/* File Upload Component Styles */
+
+.file-upload-area {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.file-drop-area {
+    border: 2px dashed var(--border-color);
+    border-radius: 0.5rem;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-secondary);
+}
+
+.file-drop-area:hover {
+    border-color: var(--accent-primary);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.upload-status {
+    display: flex;
+    align-items: center;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background-color: var(--bg-tertiary);
+    transition: opacity 0.3s ease, height 0.3s ease, margin 0.3s ease, padding 0.3s ease;
+}
+
+.upload-status.hidden {
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    margin-top: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.upload-status-icon {
+    margin-right: 0.75rem;
+}
+
+.uploaded-file-card {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background-color: var(--bg-tertiary);
+    margin-top: 1rem;
+    transition: opacity 0.3s ease, height 0.3s ease, margin 0.3s ease, padding 0.3s ease;
+}
+
+.uploaded-file-card.hidden {
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    margin-top: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.file-icon {
+    margin-right: 0.75rem;
+}
+
+.file-info {
+    flex: 1;
+    overflow: hidden;
+}
+
+.file-name {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 400px;
+}
+
+.file-size {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .file-upload-area {
+        padding: 1rem;
+        padding-top: 0.75rem;
+    }
+    
+    .file-drop-area {
+        padding: 1.5rem 1rem;
+    }
+    
+    .uploaded-file-card {
+        padding: 0.5rem;
+    }
+    
+    .file-icon svg {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+    
+    .file-info {
+        max-width: 75%;
+    }
+    
+    .file-name {
+        max-width: 200px;
+    }
+    
+    .remove-file-btn {
+        padding: 0.5rem;
+        margin: -0.5rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .file-drop-area {
+        padding: 1rem 0.5rem;
+    }
+    
+    .file-name {
+        max-width: 150px;
+        font-size: 0.8rem;
+    }
+}

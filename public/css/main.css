@@ -1,0 +1,48 @@
+/* Main CSS File - Imports all modular components */
+
+/* Variables and Theme Configuration */
+@import url('./modules/variables.css');
+@import url('./utilities/variables-extended.css');
+
+/* Base Styles and Resets */
+@import url('./modules/base.css');
+
+/* Layout Styles */
+@import url('./modules/layout.css');
+@import url('./layouts/app-container.css');
+@import url('./layouts/modern-interview.css');
+
+/* Component Styles */
+@import url('./components/header.css');
+@import url('./components/buttons.css');
+@import url('./components/forms.css');
+@import url('./components/cards.css');
+@import url('./components/sidebar.css');
+@import url('./components/panels.css');
+@import url('./components/modals.css');
+@import url('./components/messages.css');
+@import url('./components/ellipsis-menu.css');
+@import url('./components/auth.css');
+@import url('./components/audio-player.css');
+@import url('./components/tabs.css');
+@import url('./components/file-upload.css');
+@import url('./components/progress.css');
+@import url('./components/generate-report.css');
+@import url('./components/interview.css');
+@import url('./components/recording.css');
+@import url('./components/thinking-trace.css');
+@import url('./components/thinking-ellipses.css');
+@import url('./components/streaming-text.css');
+@import url('./components/error-messages.css');
+@import url('./components/analyst-threads.css');
+@import url('./components/copilot-prompt-cards.css');
+/* @import url('./components/tts-toggle.css'); - TTS disabled */
+@import url('./components/landing-redesign.css');
+
+/* Utility Styles */
+@import url('./utilities/animations.css');
+@import url('./utilities/markdown.css');
+@import url('./utilities/scrollbar.css');
+@import url('./utilities/responsive.css');
+@import url('./utilities/helpers.css');
+@import url('./utilities/textarea-fixes.css');

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Cancelled - AI Interview Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="/" class="text-xl font-bold text-gray-900">AI Interview Platform</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/admin.html" class="text-gray-600 hover:text-gray-900">Dashboard</a>
+                    <button id="signOutBtn" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors">
+                        Sign Out
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="text-center">
+            <!-- Cancel Icon -->
+            <div class="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-yellow-100 mb-8">
+                <svg class="h-12 w-12 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+            </div>
+
+            <!-- Cancel Message -->
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Subscription Cancelled</h1>
+            <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+                No worries! Your subscription process was cancelled and no payment was charged.
+            </p>
+
+            <!-- Current Plan Info -->
+            <div class="bg-white rounded-lg shadow-sm border p-6 max-w-md mx-auto mb-8">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">You're still on your current plan</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Plan:</span>
+                        <span class="font-semibold" id="currentPlan">Free Trial</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Interviews Used:</span>
+                        <span class="font-semibold" id="usageInfo">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center mb-8">
+                <a href="/pricing.html" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                    View Pricing Again
+                </a>
+                <a href="/admin.html" class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                    Go to Dashboard
+                </a>
+            </div>
+
+            <!-- Why Upgrade Section -->
+            <div class="bg-blue-50 rounded-lg p-6 text-left">
+                <h3 class="text-lg font-semibold text-blue-900 mb-4 text-center">Why Upgrade?</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="flex items-start">
+                        <svg class="w-6 h-6 text-blue-600 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <div>
+                            <h4 class="font-semibold text-blue-900 mb-1">More Interviews</h4>
+                            <p class="text-blue-700 text-sm">Conduct hundreds or thousands of interviews per month instead of just 5.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <svg class="w-6 h-6 text-blue-600 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <div>
+                            <h4 class="font-semibold text-blue-900 mb-1">Advanced Analytics</h4>
+                            <p class="text-blue-700 text-sm">Get deeper insights with advanced reporting and analytics features.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <svg class="w-6 h-6 text-blue-600 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <div>
+                            <h4 class="font-semibold text-blue-900 mb-1">Priority Support</h4>
+                            <p class="text-blue-700 text-sm">Get faster response times and dedicated support for your questions.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <svg class="w-6 h-6 text-blue-600 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <div>
+                            <h4 class="font-semibold text-blue-900 mb-1">No Interruptions</h4>
+                            <p class="text-blue-700 text-sm">Never worry about hitting limits during important interview sessions.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Support -->
+            <div class="mt-8 text-center">
+                <p class="text-gray-600 mb-2">Have questions about our plans?</p>
+                <a href="mailto:support@example.com" class="text-blue-600 hover:text-blue-700 font-medium">
+                    Contact our support team
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize authentication
+        firebase.auth().onAuthStateChanged(async (user) => {
+            if (user) {
+                await loadCurrentPlanInfo();
+            } else {
+                window.location.href = '/auth.html';
+            }
+        });
+
+        // Sign out functionality
+        document.getElementById('signOutBtn').addEventListener('click', () => {
+            firebase.auth().signOut();
+        });
+
+        // Load current plan information
+        async function loadCurrentPlanInfo() {
+            try {
+                const user = firebase.auth().currentUser;
+                if (!user) return;
+
+                const idToken = await user.getIdToken();
+                const response = await fetch('/api/subscription', {
+                    headers: {
+                        'Authorization': `Bearer ${idToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    updatePlanInfo(data);
+                } else {
+                    console.error('Failed to load subscription data');
+                }
+            } catch (error) {
+                console.error('Error loading plan info:', error);
+            }
+        }
+
+        // Update plan information in UI
+        function updatePlanInfo(subscriptionData) {
+            const currentPlan = document.getElementById('currentPlan');
+            const usageInfo = document.getElementById('usageInfo');
+
+            const subscription = subscriptionData.subscription;
+            const usage = subscription.usage || {};
+            
+            // Determine current plan and usage
+            let planName = 'Free Trial';
+            let limit = subscriptionData.freeTrialLimit || 5;
+            let currentUsage = usage.interviewsCompleted || 0;
+
+            if (subscription.plan && subscription.plan !== 'free') {
+                const plan = subscriptionData.pricingPlans[subscription.plan];
+                if (plan) {
+                    planName = plan.name;
+                    limit = plan.includedInterviews;
+                    currentUsage = usage.currentPeriodUsage || 0;
+                }
+            }
+
+            currentPlan.textContent = planName;
+            usageInfo.textContent = `${currentUsage} / ${limit}`;
+        }
+
+        // Auto-redirect to pricing after 15 seconds
+        setTimeout(() => {
+            window.location.href = '/pricing.html';
+        }, 15000);
+    </script>
+</body>
+</html> 

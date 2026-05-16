@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting...</title>
+    <script>
+        // This page now redirects to report.html which handles all loading states
+        // through the DynamicShapeOverlay component
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const reportId = urlParams.get('reportId');
+            const sessionId = urlParams.get('sessionId');
+            const isRegeneration = urlParams.get('regenerate') === 'true';
+            const regenerationType = urlParams.get('type') || 'user';
+            
+            // Build redirect URL
+            let redirectUrl = '/report.html';
+            const redirectParams = new URLSearchParams();
+            
+            if (reportId) {
+                redirectParams.set('id', reportId);
+            }
+            if (sessionId) {
+                // Store session ID for socket connection
+                localStorage.setItem('archiveSessionId', sessionId);
+            }
+            if (isRegeneration) {
+                redirectParams.set('regenerate', 'true');
+                redirectParams.set('type', regenerationType);
+            }
+            
+            if (redirectParams.toString()) {
+                redirectUrl += '?' + redirectParams.toString();
+            }
+            
+            // Redirect to report.html
+            window.location.href = redirectUrl;
+        });
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg-primary, #111827);
+            color: var(--text-primary, #f3f4f6);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .redirect-message {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .redirect-message p {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .thinking-dots {
+            display: inline-flex;
+            gap: 4px;
+        }
+        
+        .thinking-dot {
+            width: 8px;
+            height: 8px;
+            background: #3b82f6;
+            border-radius: 50%;
+            animation: thinking 1.4s ease-in-out infinite;
+        }
+        
+        .thinking-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .thinking-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes thinking {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="redirect-message">
+        <p>Redirecting to report...</p>
+        <div class="thinking-dots">
+            <div class="thinking-dot"></div>
+            <div class="thinking-dot"></div>
+            <div class="thinking-dot"></div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,79 @@
+/* Global Audio Player Component */
+
+#globalAudioPlayerContainer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 80;
+    transform: translateY(100%);
+    opacity: 0;
+    transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
+    pointer-events: none;
+    display: none;
+}
+
+#globalAudioPlayerContainer.visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#globalAudioPlayer {
+    width: 100%;
+}
+
+.audio-controls {
+    display: flex;
+    align-items: center;
+    margin-left: 1rem;
+}
+
+.audio-controls button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    padding: 0.25rem;
+    cursor: pointer;
+    border-radius: 4px;
+    line-height: 1;
+}
+
+.audio-controls button:hover {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.audio-controls .play-pause-btn {
+    font-size: 1.2rem;
+}
+
+.audio-controls .volume-control {
+    display: flex;
+    align-items: center;
+    margin-left: 1rem;
+}
+
+.audio-controls .volume-control input[type="range"] {
+    width: 100px;
+    margin-left: 0.5rem;
+}
+
+.audio-controls .seek-slider {
+    width: 200px;
+    margin-left: 1rem;
+}
+
+.audio-controls .seek-slider input[type="range"] {
+    width: 100%;
+}
+
+.audio-controls .time-display {
+    margin-left: 1rem;
+    color: var(--text-secondary);
+}
+
+.audio-controls .track-info {
+    margin-left: auto;
+    color: var(--text-secondary);
+}

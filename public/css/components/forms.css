@@ -1,0 +1,176 @@
+/* Form Components */
+
+/* Checkbox Styling */
+input[type="checkbox"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid var(--border-color, #e5e7eb);
+    border-radius: 0.25rem;
+    background-color: var(--bg-primary, #ffffff);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s ease;
+}
+
+input[type="checkbox"]:checked {
+    background-color: var(--accent-primary, #3b82f6);
+    border-color: var(--accent-primary, #3b82f6);
+}
+
+input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 0.25rem;
+    top: 0.125rem;
+    width: 0.5rem;
+    height: 0.75rem;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+input[type="checkbox"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+input[type="checkbox"]:hover:not(:checked) {
+    border-color: var(--accent-primary, #3b82f6);
+}
+
+/* Config Panel Form Elements */
+#configPanel input[type="text"],
+#configPanel input[type="email"],
+#configPanel input[type="password"],
+#configPanel textarea,
+#configPanel select {
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-primary);
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+#configPanel input[type="text"]:focus,
+#configPanel input[type="email"]:focus,
+#configPanel input[type="password"]:focus,
+#configPanel textarea:focus,
+#configPanel select:focus {
+    outline: none;
+    border-color: var(--input-focus-border);
+    box-shadow: 0 0 0 1px var(--input-focus-border);
+}
+
+#configPanel label,
+#configPanel h3 {
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+#configPanel .form-group,
+#configPanel .mb-4 {
+    margin-bottom: 1rem;
+}
+
+/* Copilot Input Area */
+.copilot-input-area {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--bg-primary);
+    flex-shrink: 0;
+}
+
+.copilot-input-area .flex {
+    border: 1px solid var(--input-border);
+    border-radius: 0.5rem;
+    background-color: var(--input-bg);
+    position: relative;
+}
+
+#copilotInput {
+    background: none;
+    border: none;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    height: auto;
+    min-height: 40px;
+    resize: none;
+    color: var(--text-primary);
+    flex-grow: 1;
+}
+
+#copilotInput:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+#sendCopilotMessage {
+    position: absolute;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    background-color: var(--accent-primary);
+    color: white;
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+#sendCopilotMessage:hover {
+    background-color: var(--accent-secondary);
+    transform: none;
+}
+
+#sendCopilotMessage svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* URL Display Area */
+#interviewUrlDisplay {
+    background-color: var(--bg-secondary);
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#interviewUrlDisplay code {
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+    word-break: break-all;
+}
+
+#interviewUrlDisplay button {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    margin-left: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+#interviewUrlDisplay button:hover {
+    background-color: var(--bg-tertiary);
+    border-color: var(--accent-primary);
+    color: var(--text-primary);
+} 

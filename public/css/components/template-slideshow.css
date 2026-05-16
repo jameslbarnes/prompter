@@ -1,0 +1,869 @@
+/* Template Slideshow Component Styles */
+.template-slideshow {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.slideshow-container {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Loader */
+.slideshow-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    min-height: 400px;
+}
+
+.loader-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color, #e5e5e5);
+    border-top-color: var(--primary-color, #000);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Slideshow Content */
+.slideshow-content {
+    position: relative;
+    width: 100%;
+}
+
+.slideshow-track {
+    display: flex;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Add slide animation */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.slideshow-slide {
+    width: 100%;
+    flex-shrink: 0;
+    padding: 3rem 2rem;
+    position: relative;
+    animation: slideIn 0.6s ease-out;
+}
+
+.slideshow-slide::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 200px;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.03) 0%, transparent 100%);
+    pointer-events: none;
+}
+
+.slide-content {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    gap: 3rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Podcast Card Design */
+.podcast-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 20px 40px -8px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    max-width: 700px;
+    margin: 0 auto;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+}
+
+.podcast-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 6px 8px -2px rgba(0, 0, 0, 0.12),
+        0 12px 20px -4px rgba(0, 0, 0, 0.12),
+        0 24px 48px -10px rgba(0, 0, 0, 0.1);
+}
+
+/* Say Logo */
+.say-logo {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    padding: 0.375rem 0.75rem 0.375rem 0.5rem;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    z-index: 10;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.say-logo:hover {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+.say-logo img {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+}
+
+.say-logo span {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    letter-spacing: -0.02em;
+}
+
+/* Personalized Attribution */
+.personalized-attribution {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.person-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.person-avatar span {
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    text-transform: uppercase;
+}
+
+.attribution-text {
+    font-size: 0.8125rem;
+    color: var(--text-secondary, #666);
+    font-weight: 500;
+}
+
+/* Podcast Player Section */
+.podcast-player {
+    background: rgba(0, 0, 0, 0.02);
+    padding: 2rem 2rem 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.episode-info {
+    margin-bottom: 1rem;
+}
+
+.episode-title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary, #1a1a1a);
+    margin-top: 0.375rem;
+    font-style: italic;
+}
+
+.episode-description {
+    font-size: 0.875rem;
+    color: var(--text-secondary, #666);
+    line-height: 1.5;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+}
+
+/* Audio Controls */
+.audio-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.audio-controls .audio-play-button {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    position: relative;
+}
+
+.audio-controls .audio-play-button::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.audio-controls .audio-play-button:not(.playing)::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-ring {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.15);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1.15);
+        opacity: 0;
+    }
+}
+
+.audio-controls .audio-play-button:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.audio-controls .audio-play-button:hover::before {
+    opacity: 1;
+}
+
+.audio-controls .audio-play-button:active {
+    transform: scale(1.02);
+}
+
+.audio-controls .audio-play-button svg {
+    width: 20px;
+    height: 20px;
+    margin-left: 2px; /* Visual centering for play icon */
+}
+
+.audio-controls .audio-play-button .pause-icon {
+    margin-left: 0;
+}
+
+.audio-timeline {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.audio-controls .progress-bar {
+    height: 4px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.audio-controls .progress-fill {
+    height: 100%;
+    background: var(--primary-color, #000);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.1s;
+}
+
+.time-display {
+    display: flex;
+    justify-content: space-between;
+}
+
+.audio-controls .audio-time {
+    font-size: 0.75rem;
+    color: var(--text-secondary, #666);
+}
+
+.episode-stats {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.episode-stats .stat {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.8125rem;
+    color: var(--text-secondary, #666);
+}
+
+.episode-stats .stat svg {
+    width: 14px;
+    height: 14px;
+}
+
+.stat-separator {
+    color: var(--text-secondary, #666);
+    opacity: 0.5;
+    margin: 0 0.25rem;
+}
+
+/* Podcast CTA Section */
+.podcast-cta {
+    padding: 2rem;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(248, 249, 250, 0.8) 100%);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.podcast-cta::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 20%;
+    right: 20%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.3), transparent);
+    border-radius: 2px;
+}
+
+.cta-intro {
+    text-align: center;
+    margin-bottom: 1.25rem;
+}
+
+.cta-intro p {
+    font-size: 0.9375rem;
+    color: var(--text-secondary, #666);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+/* Inline Say Logo */
+.say-inline-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    background: rgba(0, 0, 0, 0.06);
+    padding: 0.25rem 0.625rem 0.25rem 0.375rem;
+    border-radius: 16px;
+    transition: all 0.2s ease;
+}
+
+.say-inline-logo:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.say-inline-logo img {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+}
+
+.say-inline-logo span {
+    font-weight: 600;
+    color: #1a1a1a;
+    font-size: 0.9375rem;
+}
+
+.podcast-form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-inline {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.podcast-form input {
+    flex: 1 1 150px;
+    min-width: 0;
+    padding: 0.875rem 1rem;
+    font-size: 0.875rem;
+    border: 2px solid var(--border-color, #e5e5e5);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 500;
+}
+
+.podcast-form input::placeholder {
+    color: #999;
+    font-weight: 400;
+}
+
+.podcast-form input:hover {
+    border-color: #d1d5db;
+    background: rgba(255, 255, 255, 1);
+}
+
+.podcast-form input:focus {
+    outline: none;
+    border-color: var(--primary-color, #000);
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08);
+    background: #fff;
+    transform: translateY(-1px);
+}
+
+.join-button {
+    padding: 0.875rem 1.5rem;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.join-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s ease;
+}
+
+.join-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.join-button:hover::before {
+    left: 100%;
+}
+
+.join-button:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.join-button svg {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.3s ease;
+}
+
+.join-button:hover svg {
+    transform: translateX(3px);
+}
+
+.form-note {
+    text-align: center;
+    font-size: 0.8125rem;
+    color: var(--text-light, #999);
+    margin: 0;
+}
+
+.join-button.loading {
+    position: relative;
+    color: transparent;
+    pointer-events: none;
+}
+
+.join-button.loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid white;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 0.8s linear infinite;
+}
+
+
+/* Navigation Buttons */
+.slideshow-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 2;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.slideshow-prev {
+    left: 2rem;
+}
+
+.slideshow-next {
+    right: 2rem;
+}
+
+.slideshow-nav:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.slideshow-nav:active:not(:disabled) {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.slideshow-nav:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.slideshow-nav svg {
+    width: 24px;
+    height: 24px;
+    color: var(--text-primary, #1a1a1a);
+    transition: transform 0.3s ease;
+}
+
+.slideshow-nav:hover:not(:disabled) svg {
+    transform: scale(1.2);
+}
+
+/* Indicators */
+.slideshow-indicators {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    padding: 1.5rem;
+    position: relative;
+}
+
+/* Optional: Add text indicator */
+.slideshow-indicators::before {
+    content: 'Browse essays';
+    position: absolute;
+    top: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: var(--text-light, #999);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.slideshow-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+    position: relative;
+}
+
+.slideshow-indicator::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.slideshow-indicator:hover {
+    background: rgba(0, 0, 0, 0.4);
+    transform: scale(1.2);
+}
+
+.slideshow-indicator.active {
+    background: var(--primary-color, #000);
+    width: 32px;
+    border-radius: 16px;
+}
+
+.slideshow-indicator.active::after {
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Messages */
+.slideshow-message {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-secondary, #666);
+}
+
+.slideshow-message.error {
+    color: #c33;
+}
+
+/* Responsive Design */
+@media (max-width: 900px) {
+    .form-inline {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .podcast-form input {
+        width: 100%;
+    }
+    
+    .join-button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .slideshow-container {
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+    
+    .slideshow-slide {
+        padding: 3rem 1.5rem;
+    }
+    
+    .slide-content {
+        gap: 2.5rem;
+    }
+    
+    .template-category {
+        font-size: 0.8125rem;
+        padding: 0.375rem 0.875rem;
+    }
+    
+    .podcast-card {
+        border-radius: 16px;
+    }
+    
+    .say-logo {
+        top: 0.75rem;
+        right: 0.75rem;
+        padding: 0.25rem 0.625rem 0.25rem 0.375rem;
+    }
+    
+    .say-logo img {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .say-logo span {
+        font-size: 0.8125rem;
+    }
+    
+    .episode-description {
+        font-size: 0.875rem;
+    }
+    
+    .person-avatar {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .person-avatar span {
+        font-size: 0.875rem;
+    }
+    
+    .attribution-text {
+        font-size: 0.75rem;
+    }
+    
+    .podcast-player {
+        padding: 1.25rem 1.5rem;
+    }
+    
+    .podcast-cta {
+        padding: 1.5rem;
+    }
+    
+    .form-inline {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .podcast-form input {
+        width: 100%;
+    }
+    
+    .join-button {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .template-stats {
+        gap: 1rem;
+    }
+    
+    .stat-item {
+        font-size: 0.875rem;
+        padding: 0.375rem 0.75rem;
+    }
+    
+    
+    .slideshow-nav {
+        width: 44px;
+        height: 44px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .slideshow-prev {
+        left: 1rem;
+    }
+    
+    .slideshow-next {
+        right: 1rem;
+    }
+    
+    .slideshow-nav svg {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .audio-player-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .audio-play-button {
+        width: 48px;
+        height: 48px;
+        margin: 0 auto;
+    }
+    
+    .audio-progress {
+        width: 100%;
+    }
+    
+    .slideshow-indicators {
+        padding: 1rem;
+    }
+    
+    .slideshow-indicator {
+        width: 8px;
+        height: 8px;
+    }
+    
+    .slideshow-indicator.active {
+        width: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .slideshow-slide {
+        padding: 2rem 1rem;
+    }
+    
+    .slide-content {
+        gap: 2rem;
+    }
+    
+    .template-title {
+        font-size: 1.5rem;
+    }
+    
+    .template-description {
+        font-size: 0.9375rem;
+    }
+    
+    .podcast-player {
+        padding: 1rem;
+    }
+    
+    .podcast-cta {
+        padding: 1.25rem 1rem;
+    }
+    
+    .episode-stats {
+        font-size: 0.75rem;
+    }
+    
+    .cta-intro p {
+        font-size: 0.875rem;
+    }
+    
+    .join-button {
+        font-size: 0.8125rem;
+        padding: 0.75rem 1.25rem;
+    }
+    
+    .slideshow-nav {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .slideshow-prev {
+        left: 0.5rem;
+    }
+    
+    .slideshow-next {
+        right: 0.5rem;
+    }
+}

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Successful - AI Interview Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="/" class="text-xl font-bold text-gray-900">AI Interview Platform</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/admin.html" class="text-gray-600 hover:text-gray-900">Dashboard</a>
+                    <button id="signOutBtn" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors">
+                        Sign Out
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="text-center">
+            <!-- Success Icon -->
+            <div class="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-green-100 mb-8">
+                <svg class="h-12 w-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+
+            <!-- Success Message -->
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Subscription Successful!</h1>
+            <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+                Thank you for subscribing! Your payment has been processed successfully and your account has been upgraded.
+            </p>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="mb-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p class="text-gray-600">Updating your account...</p>
+            </div>
+
+            <!-- Success State -->
+            <div id="successState" class="hidden mb-8">
+                <div class="bg-white rounded-lg shadow-sm border p-6 max-w-md mx-auto">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Your New Plan</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Plan:</span>
+                            <span class="font-semibold" id="planName">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Monthly Interviews:</span>
+                            <span class="font-semibold" id="planLimit">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Price:</span>
+                            <span class="font-semibold" id="planPrice">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
+                <a href="/admin.html" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                    Go to Dashboard
+                </a>
+                <a href="/pricing.html" class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                    View Pricing
+                </a>
+            </div>
+
+            <!-- Additional Information -->
+            <div class="mt-12 bg-blue-50 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-blue-900 mb-4">What's Next?</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+                    <div>
+                        <div class="flex items-center mb-2">
+                            <svg class="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            <h4 class="font-semibold text-blue-900">Create Templates</h4>
+                        </div>
+                        <p class="text-blue-700 text-sm">Start creating custom interview templates for your specific needs.</p>
+                    </div>
+                    <div>
+                        <div class="flex items-center mb-2">
+                            <svg class="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            <h4 class="font-semibold text-blue-900">Conduct Interviews</h4>
+                        </div>
+                        <p class="text-blue-700 text-sm">Begin conducting AI-powered interviews with your increased monthly limit.</p>
+                    </div>
+                    <div>
+                        <div class="flex items-center mb-2">
+                            <svg class="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            <h4 class="font-semibold text-blue-900">Analyze Results</h4>
+                        </div>
+                        <p class="text-blue-700 text-sm">Use advanced analytics to gain insights from your interview data.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize authentication
+        firebase.auth().onAuthStateChanged(async (user) => {
+            if (user) {
+                await checkSubscriptionStatus();
+            } else {
+                window.location.href = '/auth.html';
+            }
+        });
+
+        // Sign out functionality
+        document.getElementById('signOutBtn').addEventListener('click', () => {
+            firebase.auth().signOut();
+        });
+
+        // Check subscription status and update UI
+        async function checkSubscriptionStatus() {
+            try {
+                const user = firebase.auth().currentUser;
+                if (!user) return;
+
+                const idToken = await user.getIdToken();
+                const response = await fetch('/api/subscription', {
+                    headers: {
+                        'Authorization': `Bearer ${idToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    updateSuccessUI(data);
+                    // Notify opener to refresh subscription details if opened from pricing panel
+                    try {
+                        window.opener?.postMessage({ type: 'subscriptionUpdated' }, '*');
+                    } catch (e) {
+                        console.error('Failed to postMessage to opener:', e);
+                    }
+                } else {
+                    console.error('Failed to load subscription data');
+                    showError();
+                }
+            } catch (error) {
+                console.error('Error checking subscription status:', error);
+                showError();
+            }
+        }
+
+        // Update UI with subscription information
+        function updateSuccessUI(subscriptionData) {
+            const loadingState = document.getElementById('loadingState');
+            const successState = document.getElementById('successState');
+            const planName = document.getElementById('planName');
+            const planLimit = document.getElementById('planLimit');
+            const planPrice = document.getElementById('planPrice');
+
+            // Hide loading, show success
+            loadingState.classList.add('hidden');
+            successState.classList.remove('hidden');
+
+            const subscription = subscriptionData.subscription;
+            
+            if (subscription.plan && subscription.plan !== 'free') {
+                const plan = subscriptionData.pricingPlans[subscription.plan];
+                if (plan) {
+                    planName.textContent = plan.name;
+                    planLimit.textContent = plan.includedInterviews.toLocaleString();
+                    planPrice.textContent = `$${plan.price}/month`;
+                } else {
+                    planName.textContent = 'Premium Plan';
+                    planLimit.textContent = 'Unlimited';
+                    planPrice.textContent = 'Custom';
+                }
+            } else {
+                // Still on free trial
+                planName.textContent = 'Free Trial';
+                planLimit.textContent = subscriptionData.freeTrialLimit.toString();
+                planPrice.textContent = 'Free';
+            }
+        }
+
+        // Show error state
+        function showError() {
+            const loadingState = document.getElementById('loadingState');
+            loadingState.innerHTML = `
+                <div class="text-red-600 mb-4">
+                    <svg class="w-8 h-8 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                    </svg>
+                    <p>Unable to verify subscription status</p>
+                    <p class="text-sm mt-2">Please contact support if this issue persists.</p>
+                </div>
+            `;
+        }
+
+        // Auto-redirect to dashboard after 10 seconds
+        setTimeout(() => {
+            window.location.href = '/auth.html';
+        }, 10000);
+    </script>
+</body>
+</html> 

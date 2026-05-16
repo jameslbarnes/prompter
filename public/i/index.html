@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Loading Interview...</title>
+    <meta name="description" content="">
+    <meta property="og:title" content="">
+    <meta property="og:description" content="">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Replace the local Socket.IO script with CDN version -->
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
+    <!-- Add Firebase libraries -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="../js/firebase-config.js"></script>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        /* Calling Screen Styles */
+        .calling-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            min-height: 400px;
+        }
+        
+        .calling-avatar {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin-bottom: 2rem;
+        }
+        
+        .avatar-inner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: #1f2937;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            border: 2px solid #374151;
+            z-index: 4;
+        }
+        
+        .avatar-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 2px solid #10a37f;
+            opacity: 0;
+            animation: ring-pulse 3s ease-out infinite;
+        }
+        
+        .avatar-ring:nth-child(1) {
+            width: 100px;
+            height: 100px;
+            animation-delay: 0s;
+        }
+        
+        .avatar-ring:nth-child(2) {
+            width: 110px;
+            height: 110px;
+            animation-delay: 1s;
+        }
+        
+        .avatar-ring:nth-child(3) {
+            width: 120px;
+            height: 120px;
+            animation-delay: 2s;
+        }
+        
+        @keyframes ring-pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0.8;
+            }
+            50% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1.2);
+                opacity: 0;
+            }
+        }
+        
+        .calling-status {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: white;
+            margin-bottom: 1rem;
+            letter-spacing: -0.025em;
+        }
+        
+        .calling-dots {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .calling-dots span {
+            width: 8px;
+            height: 8px;
+            background: #10a37f;
+            border-radius: 50%;
+            animation: dot-bounce 1.4s ease-in-out infinite;
+        }
+        
+        .calling-dots span:nth-child(1) {
+            animation-delay: 0s;
+        }
+        
+        .calling-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .calling-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes dot-bounce {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+        
+        /* Full-screen calling overlay */
+        #interviewCallingOverlay {
+            background: var(--bg-primary);
+        }
+        
+        #interviewCallingOverlay .calling-status {
+            color: var(--text-primary);
+        }
+        
+        /* Video-enabled calling screen adjustments */
+        .video-enabled .calling-status,
+        .video-enabled #interviewCallingOverlay .calling-status {
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .video-enabled .avatar-inner {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        .video-enabled .avatar-ring {
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .video-enabled .calling-dots span {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .calling-screen {
+                padding: 3rem 1rem;
+                min-height: 300px;
+            }
+            
+            .calling-avatar {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .avatar-inner {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .avatar-inner svg {
+                width: 30px;
+                height: 30px;
+            }
+            
+            .calling-status {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Remove any header borders for this page */
+        .header {
+            border-bottom: none !important;
+            box-shadow: none !important;
+        }
+        /* Removed - top progress bar moved to circular progress */
+        
+        /* Override the large top margin since there's no header */
+        .main-content {
+            margin-top: 20px !important;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                margin-top: 10px !important;
+            }
+        }
+        
+        /* Adjust interview content spacing without top progress bar */
+        .interview-content {
+            padding-top: 1rem !important;
+        }
+        
+        @media (max-width: 768px) {
+            .interview-content {
+                padding-top: 0.5rem !important;
+            }
+        }
+        
+        /* Ensure main content is above other elements */
+        .app-container {
+            position: relative;
+            z-index: 10;
+        }
+        
+        
+        .main-content {
+            position: relative;
+            z-index: 10;
+            /* background-color: rgba(255, 255, 255, 0.95); */
+            border-radius: 16px;
+            /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); */
+        }
+        
+        /* Make the interview interface semi-transparent */
+        .modern-interview-container {
+            /* background-color: rgba(255, 255, 255, 0.9); */
+        }
+        
+        /* Ensure file upload area has proper background */
+        #fileUploadArea {
+            background-color: transparent !important;
+        }
+        
+        /* Make landing page text white */
+        #fileUploadArea h2, 
+        #fileUploadArea p, 
+        #fileUploadArea label,
+        #fileUploadArea .text-gray-700,
+        #fileUploadArea .text-gray-600,
+        #fileUploadArea .text-gray-500 {
+            color: white !important;
+        }
+        
+        /* Also update dark mode text colors to be white */
+        #fileUploadArea .dark\\:text-gray-300,
+        #fileUploadArea .dark\\:text-gray-400 {
+            color: white !important;
+        }
+        
+        /* Question area with subtle background - disabled when thinking panel is shown */
+        
+        /* Left-align questions on all screen sizes */
+        .question-display {
+            margin-left: 0;
+            margin-right: auto;
+            text-align: left;
+        }
+        
+        .question-area {
+            text-align: left;
+        }
+        
+        /* Restrict question display to 600px on desktop */
+        @media (min-width: 769px) {
+            .question-display {
+                max-width: 600px;
+            }
+        }
+        
+        /* Fix thinking panel sizing and alignment in audio-only mode */
+        .thinking-active .question-display {
+            max-width: 100% !important;
+            margin: 0 auto !important;
+        }
+        
+        /* Ensure thinking panel fills available width */
+        .thinking-active #thinkingTraceDisplay.thinking-inline {
+            width: 100% !important;
+            max-width: 800px !important;
+            margin: 0 auto !important;
+        }
+        
+        /* Fix thinking panel in integrated desktop layout */
+        @media (min-width: 768px) {
+            /* Ensure question area is visible during thinking */
+            .video-enabled.thinking-active #currentQuestionAreaVideo {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+            
+            .video-enabled.thinking-active .current-question-display-video {
+                width: 100% !important;
+                max-width: none !important;
+                padding: 0 !important;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+            
+            .video-enabled.thinking-active #thinkingTraceDisplay {
+                width: 100% !important;
+                max-width: none !important;
+                font-size: 1rem !important;
+                background: rgba(0, 0, 0, 0.8) !important;
+                border-radius: 8px !important;
+                overflow: hidden !important;
+                display: block !important;
+                visibility: visible !important;
+            }
+            
+            .video-enabled.thinking-active .thinking-trace-minimized-content {
+                padding: 0.75rem 1rem !important;
+                cursor: pointer !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                color: white !important;
+            }
+            
+            .video-enabled.thinking-active .thinking-trace-content {
+                max-height: 300px !important;
+                overflow-y: auto !important;
+                padding: 1rem !important;
+                color: white !important;
+            }
+            
+            .video-enabled.thinking-active .thinking-progress-container {
+                flex: 1 !important;
+                margin-right: 1rem !important;
+            }
+            
+            .video-enabled.thinking-active .thinking-progress-bar {
+                background-color: rgba(255, 255, 255, 0.2) !important;
+                height: 4px !important;
+                border-radius: 2px !important;
+                margin-top: 0.5rem !important;
+            }
+            
+            .video-enabled.thinking-active .thinking-progress-fill {
+                background-color: #3b82f6 !important;
+                height: 100% !important;
+                border-radius: 2px !important;
+            }
+        }
+        
+        /* Center the question area during thinking */
+        .thinking-active .question-area {
+            text-align: center !important;
+        }
+        
+        /* When video is enabled, show video question area and hide regular one */
+        .video-enabled .question-area {
+            display: none !important;
+        }
+        
+        .video-enabled .question-area-video {
+            display: block !important;
+            margin-top: 1rem;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            background: transparent;
+            border-radius: 12px;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 90%;
+        }
+        
+        /* Removed top progress bar styles for video mode */
+        
+        .video-enabled .question-area-video .question-display {
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            font-size: 1.75rem;
+        }
+        
+        .video-enabled .interview-content {
+            padding-top: 2rem;
+        }
+        
+        /* Make progress bar elements white on video background */
+        .video-enabled .time-counter {
+            color: white;
+        }
+        
+        .video-enabled .time-display {
+            color: white !important;
+        }
+        
+        .video-enabled .interview-context {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+        
+        /* Removed - top progress bar moved to circular progress */
+        
+        /* Make recording controls text white on video background */
+        .video-enabled .modern-recording-status {
+            color: white !important;
+        }
+        
+        .video-enabled .keyboard-hints {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+        
+        .video-enabled .hint-item {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+        
+        .video-enabled kbd {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        
+        /* Desktop integrated layout for video mode */
+        @media (min-width: 769px) {
+            .video-enabled .modern-recording-controls {
+                max-width: 800px;
+                margin: 0 auto;
+                padding-bottom: 3rem;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+            
+            .video-enabled .recording-controls-inner {
+                display: flex;
+                align-items: center;
+                gap: 1.5rem;
+                width: 100%;
+                background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.45));
+                padding: 1rem 1.5rem;
+                border-radius: 16px;
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .video-enabled .question-area-video-chyron {
+                position: relative !important;
+                bottom: auto !important;
+                flex: 1;
+                min-height: 60px !important; /* Prevent collapse */
+                margin-bottom: 0 !important;
+                padding: 0 !important;
+                max-width: none !important;
+                display: block !important;
+            }
+            
+            .video-enabled .question-display-chyron {
+                background: transparent;
+                padding: 0.75rem 0;
+                margin: 0;
+                box-shadow: none;
+                border: none;
+                font-size: 1.7rem;
+            }
+            
+            .video-enabled .recording-visual-feedback {
+                margin-bottom: 0;
+                flex-shrink: 0;
+            }
+            
+            .video-enabled .recording-status-area {
+                display: none;
+            }
+        }
+        
+        /* Chyron-style question display for video mode */
+        .question-area-video-chyron {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            right: 0;
+            margin-bottom: 1rem;
+            padding: 0 2rem;
+            display: none;
+        }
+        
+        /* On mobile, use relative positioning */
+        @media (max-width: 768px) {
+            .question-area-video-chyron {
+                position: relative !important;
+                bottom: auto !important;
+                margin-bottom: 1rem !important;
+            }
+            
+            /* On mobile, the question area needs to be visible outside the controls wrapper */
+            .video-enabled .recording-controls-inner {
+                display: block !important; /* Not flex on mobile */
+            }
+            
+            /* Ensure the controls inner wrapper doesn't hide content during thinking */
+            .video-enabled.thinking-active .recording-controls-inner {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+        }
+        
+        .video-enabled .question-area-video-chyron {
+            display: block !important;
+        }
+        
+        /* Override hidden class when video is enabled */
+        .video-enabled .question-area-video-chyron.hidden {
+            display: block !important;
+        }
+        
+        /* Keep question area visible during thinking on desktop */
+        @media (min-width: 768px) {
+            .video-enabled.thinking-active .question-area-video-chyron {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                width: 100% !important;
+            }
+            
+            /* During thinking, ensure the integrated bar stays visible */
+            .video-enabled.thinking-active .recording-controls-inner {
+                display: flex !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                min-height: 80px !important;
+            }
+            
+            /* During thinking, hide the record button area temporarily */
+            .video-enabled.thinking-active .recording-visual-feedback {
+                display: none !important;
+            }
+        }
+        
+        .question-display-chyron {
+            color: white;
+            padding: 1.25rem 2rem;
+            font-size: 1.5rem;
+            line-height: 1.5;
+            font-weight: 500;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* Desktop side-by-side layout adjustment */
+        @media (min-width: 769px) {
+            .video-enabled .question-display-chyron {
+                text-align: left;
+                max-width: none;
+                margin: 0;
+            }
+        }
+        
+        /* Hide the old video question area when using chyron */
+        .video-enabled .question-area {
+            display: none !important;
+        }
+        
+        /* Note: Removed the rule that was hiding .question-area-video since we're using .question-area-video-chyron */
+        
+        /* Thinking panel in chyron mode */
+        .video-enabled .question-display-chyron #thinkingTraceDisplay {
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.8)) !important;
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border-radius: 12px !important;
+            color: white !important;
+        }
+        
+        .video-enabled .question-display-chyron .thinking-progress-bar {
+            background-color: rgba(255, 255, 255, 0.2) !important;
+        }
+        
+        .video-enabled .question-display-chyron .thinking-progress-fill {
+            background-color: rgba(255, 255, 255, 0.8) !important;
+        }
+        
+        .video-enabled .question-display-chyron .thinking-trace-minimized-content {
+            color: white !important;
+        }
+        
+        .video-enabled .question-display-chyron .thinking-trace-content {
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
+        
+        /* Mobile adjustments for video-enabled question area */
+        @media (max-width: 768px) {
+            /* Removed - top progress bar moved to circular progress */
+            
+            .question-area-video-chyron {
+                padding: 0 1rem;
+                margin-bottom: 0.75rem;
+            }
+            
+            .question-display-chyron {
+                font-size: 1rem;
+                padding: 1rem 1.5rem;
+                max-width: 100%;
+                background: linear-gradient(to bottom, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45));
+            }
+            
+            /* Ensure question area is visible during thinking on mobile */
+            .video-enabled.thinking-active .question-area-video-chyron {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                min-height: 60px !important;
+            }
+            
+            /* Ensure thinking panel is visible on mobile */
+            .video-enabled.thinking-active #thinkingTraceDisplay {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                background: rgba(0, 0, 0, 0.8) !important;
+                border-radius: 8px !important;
+                padding: 0.75rem !important;
+            }
+            
+            .video-enabled.thinking-active .thinking-trace-minimized-content {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                color: white !important;
+            }
+            
+            .video-enabled.thinking-active .thinking-progress-container {
+                flex: 1 !important;
+                margin-right: 0.5rem !important;
+            }
+            
+            .video-enabled .interview-content {
+                padding-top: 1rem;
+            }
+            
+            /* Removed - styles now in thinking-progress-bar.css */
+        }
+        
+        /* Recording controls with background */
+        .modern-recording-controls {
+            /* background-color: rgba(255, 255, 255, 0.9); */
+            border-radius: 12px;
+            padding: 20px;
+            /* backdrop-filter: blur(10px); */
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+        }
+        
+        /* Ensure recording controls stay visible during thinking on mobile */
+        @media (max-width: 768px) {
+            .video-enabled.thinking-active .modern-recording-controls {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+        }
+        
+        /* Toggle Switch Styles */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 28px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 28px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #2196F3;
+        }
+        
+        input:focus + .toggle-slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(32px);
+        }
+        
+        /* Dark mode adjustments */
+        [data-theme="dark"] .toggle-slider {
+            background-color: #4a5568;
+        }
+        
+        [data-theme="dark"] input:checked + .toggle-slider {
+            background-color: #3182ce;
+        }
+        
+        /* Circular Progress Bar Styles */
+        .circular-progress-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .circular-progress {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            pointer-events: none;
+            opacity: 1; /* Always visible */
+            transition: opacity 0.3s ease;
+        }
+        
+        .circular-progress .progress-bg {
+            stroke: rgba(16, 163, 127, 0.2); /* Subtle green background */
+            stroke-width: 4;
+        }
+        
+        .circular-progress .progress-fill {
+            stroke: #10a37f;
+            stroke-width: 4;
+            stroke-linecap: round;
+            transform: rotate(-90deg);
+            transform-origin: center;
+            transition: stroke-dashoffset 0.3s ease;
+        }
+        
+        /* Video mode adjustments */
+        .video-enabled .circular-progress .progress-bg {
+            stroke: rgba(16, 163, 127, 0.3); /* Green background in video mode */
+        }
+        
+        .video-enabled .circular-progress .progress-fill {
+            stroke: #10a37f; /* Green progress in video mode */
+        }
+        
+        /* Recording state progress fill - keep green */
+        /* .recording .circular-progress .progress-fill {
+            stroke: #ef4444;
+        } */
+        
+        /* Adjust button position within wrapper */
+        .circular-progress-wrapper .modern-record-btn {
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .circular-progress {
+                width: 90px;
+                height: 90px;
+            }
+            
+            /* Position submit button to the right on mobile */
+            .recording-visual-feedback {
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center;
+                justify-content: center;
+                gap: 1rem;
+            }
+            
+            .recording-visual-feedback .circular-progress-wrapper {
+                flex-shrink: 0;
+                position: relative;
+            }
+            
+            /* Hide time counter when submit button is visible */
+            .recording-visual-feedback:has(.submit-next-btn:not(.hidden)) .circular-time-counter {
+                display: none;
+            }
+            
+            /* Submit button positioning on mobile */
+            .recording-visual-feedback .submit-next-btn {
+                position: relative !important;
+                margin: 0 !important;
+                flex-shrink: 0;
+                width: 50px !important;
+                height: 50px !important;
+                min-width: 50px !important;
+                min-height: 50px !important;
+            }
+            
+            /* Desktop overrides to ensure proper layout */
+            .recording-controls-inner > .submit-next-btn {
+                display: none !important;
+            }
+        }
+        
+        /* Desktop layout - show submit button to the right */
+        @media (min-width: 769px) {
+            .recording-visual-feedback {
+                flex-direction: row !important;
+                gap: 1.5rem;
+            }
+
+            .recording-visual-feedback .submit-next-btn:not(.hidden) {
+                display: flex !important;
+                margin-left: 1rem;
+            }
+        }
+        
+        /* Time Counter Styles */
+        .circular-time-counter {
+            margin-top: 1rem;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .recording-visual-feedback .circular-time-counter {
+            opacity: 1;
+        }
+        
+        .circular-time-counter .time-display {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .video-enabled .circular-time-counter .time-display {
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Show time counter when there's progress */
+        .has-progress .circular-time-counter {
+            opacity: 1;
+        }
+        
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .circular-time-counter {
+                margin-top: 0.75rem;
+            }
+            
+            .circular-time-counter .time-display {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+    
+</head>
+<body>
+
+    <main class="app-container">
+        <div class="main-content">
+            <!-- Hidden resume storage -->
+            <div id="resumeSection" class="hidden">
+                <textarea id="resumeText" class="hidden"></textarea>
+            </div>
+
+            <!-- Calling Screen Overlay (shown while loading) -->
+            <div id="initialCallingScreen" class="fixed inset-0 z-40 flex items-center justify-center" style="background-color: #111827;">
+                <div class="calling-screen">
+                    <div class="calling-avatar">
+                        <div class="avatar-ring"></div>
+                        <div class="avatar-ring"></div>
+                        <div class="avatar-ring"></div>
+                        <div class="avatar-inner">
+                            <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <h2 class="calling-status">Connecting to your interviewer</h2>
+                    <div class="calling-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- File upload area (initially visible, hidden after start) -->
+            <div id="fileUploadArea" class="file-upload-area max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+                <!-- Logo integrated into the page -->
+                <div class="text-center mb-8">
+                    <a href="https://generalsemantics.nyc" target="_blank" class="inline-block hover:opacity-80 transition-opacity">
+                        <img src="../saylogo.png" alt="Say Logo" class="h-12 mx-auto">
+                    </a>
+                </div>
+                
+                <!-- Main intro text -->
+                <div id="introText" class="text-center mb-10">
+                    <h2 id="introTextHeading" class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-4"></h2>
+                    <p id="introTextSubheading" class="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-xl mx-auto"></p>
+                    
+                    <!-- Admin/Organization Info -->
+                    <div id="adminInfo" class="mt-6 text-sm text-gray-500 dark:text-gray-400 hidden">
+                        <p>Created by <span id="adminName" class="font-medium text-gray-700 dark:text-gray-300"></span><span id="adminOrg" class="hidden"> • <span id="adminOrgText" class="font-medium text-gray-700 dark:text-gray-300"></span></span></p>
+                    </div>
+                </div>
+                
+                <!-- Form Fields Container -->
+                <div id="formFieldsContainer" class="hidden">
+                    <!-- Step 1: Basic Information -->
+                    <div id="step1Container" class="space-y-6">
+                        <!-- Name Input Section -->
+                        <div id="nameSection">
+                            <label for="userName" class="block text-base font-medium text-white mb-2">Your Name</label>
+                            <input type="text" id="userName" name="userName" class="w-full p-4 border-2 border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-800 text-gray-100 placeholder-gray-500 transition duration-150 ease-in-out" placeholder="Enter your name">
+                            <p id="nameError" class="text-red-500 text-sm mt-1 hidden">Please enter your name.</p>
+                        </div>
+
+                        <!-- Email Input Section -->
+                        <div id="emailSection">
+                            <label for="userEmail" class="block text-base font-medium text-white mb-2">Your Email</label>
+                            <input type="email" id="userEmail" name="userEmail" class="w-full p-4 border-2 border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-800 text-gray-100 placeholder-gray-500 transition duration-150 ease-in-out" placeholder="Enter your email address">
+                            <p id="emailError" class="text-red-500 text-sm mt-1 hidden">Please enter a valid email address.</p>
+                        </div>
+
+                        <!-- Next Button for Step 1 -->
+                        <div class="text-center mt-8">
+                            <button id="nextToStep2Btn" class="primary-button w-full sm:w-auto text-lg py-3 px-10 transition-all duration-150 ease-in-out transform hover:scale-105">
+                                Continue
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Context Upload (hidden initially) -->
+                    <div id="step2Container" class="hidden space-y-6">
+                        <!-- File upload section -->
+                        <div id="uploadSection" class="space-y-4">
+                            <!-- Content will be replaced by context-upload.js -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Start Button Container (shown on step 2) -->
+                <div id="startButtonContainer" class="text-center mt-8 space-y-4 hidden">
+                    <!-- Video Recording Toggle (shown when ready to start) -->
+                    <div id="videoToggleSection" class="max-w-md mx-auto bg-gray-800 rounded-lg p-4 border border-gray-700 hidden">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                                <label for="enableVideoRecording" class="text-sm font-medium text-gray-200">
+                                    Include video recording
+                                </label>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="enableVideoRecording" name="enableVideoRecording" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button id="startChatBtn" class="primary-button w-full sm:w-auto text-lg py-3 px-10 transition-all duration-150 ease-in-out transform hover:scale-105" disabled>Begin 5-10 Minute Interview</button>
+                    <div class="text-sm text-center text-gray-500 dark:text-gray-400 max-w-lg mx-auto">
+                       For the best experience, find a quiet place and set aside 5-10 minutes to complete your voice-based interview without interruptions.
+                    </div>
+                </div>
+                
+                <!-- Back button at very bottom (shown on step 2) -->
+                <div id="backButtonContainer" class="text-center mt-8 hidden">
+                    <button id="backToStep1Btn" class="text-sm text-gray-400 hover:text-gray-200 inline-flex items-center transition-colors">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        Back
+                    </button>
+                </div>
+                <!-- Added Example Report Button (Note: script.js adds this button dynamically if needed) -->
+           
+            </div>
+            
+            <!-- Modern Interview Interface -->
+            <div id="interviewInterface" class="hidden modern-interview-container">
+                <!-- Progress Bar at Top (Hidden - moved to record button) -->
+                <div class="top-progress-bar-container" style="display: none;">
+                    <div class="top-progress-bar">
+                        <div id="recordingProgressBar" class="top-progress-fill"></div>
+                    </div>
+                    <!-- Time Counter -->
+                    <div class="time-counter top-time-counter">
+                        <div class="time-display">
+                            <span id="currentRecordingTime">0:00</span>/<span id="targetRecordingTime">5:00</span>
+                        </div>
+                        <div class="interview-context" id="interviewContext"></div>
+                    </div>
+                </div>
+
+                
+                <div class="interview-content">
+                    <!-- Question Display Area (original location) -->
+                    <div id="currentQuestionArea" class="question-area">
+                        <div id="currentQuestionDisplay" class="question-display"></div>
+                        
+                        <!-- Info message with modern styling -->
+                        <div id="interviewInfoMessage" class="hidden info-message">
+                            <div class="info-icon">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <span>Our AI is analyzing your resume to generate personalized questions about your AI readiness.</span>
+                        </div>
+                    </div>
+
+                    <!-- Video Preview Area -->
+                    <div id="videoPreviewContainer" class="video-preview-container hidden">
+                        <video id="videoPreview" class="video-preview" autoplay muted playsinline webkit-playsinline></video>
+                        <!-- Video controls removed to hide camera toggle icon -->
+                    </div>
+
+
+                    <!-- Modern Recording Controls -->
+                    <div id="recordingControls" class="modern-recording-controls">
+                        <!-- Desktop wrapper for side-by-side layout -->
+                        <div class="recording-controls-inner">
+                            <!-- Question Display Chyron for video mode -->
+                            <div id="currentQuestionAreaVideo" class="question-area-video-chyron hidden">
+                                <div id="currentQuestionDisplayVideo" class="question-display-chyron"></div>
+                            </div>
+                            
+                            <!-- Visual feedback area -->
+                            <div class="recording-visual-feedback">
+                                <!-- Circular Progress Wrapper -->
+                                <div class="circular-progress-wrapper">
+                                    <!-- SVG for circular progress -->
+                                    <svg class="circular-progress" width="100" height="100" viewBox="0 0 100 100">
+                                        <circle class="progress-bg" cx="50" cy="50" r="45" fill="none" stroke-width="4" />
+                                        <circle class="progress-fill" cx="50" cy="50" r="45" fill="none" stroke-width="4" 
+                                                stroke-dasharray="282.743" stroke-dashoffset="282.743" />
+                                    </svg>
+                                    
+                                    <!-- Main Record Button -->
+                                    <button id="recordBtn" class="modern-record-btn" title="Start Recording (or press Enter)">
+                                        <div class="record-btn-inner">
+                                            <!-- Microphone Icon -->
+                                            <svg class="mic-icon" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                                            </svg>
+                                            <!-- Stop Icon (hidden initially) -->
+                                            <svg class="stop-icon hidden" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                                <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+                                            </svg>
+                                            <!-- Thinking Ellipses (hidden initially) -->
+                                            <div class="thinking-ellipses hidden">
+                                                <span class="ellipse-dot"></span>
+                                                <span class="ellipse-dot"></span>
+                                                <span class="ellipse-dot"></span>
+                                            </div>
+                                        </div>
+                                    </button>
+                                </div>
+                                
+                                <!-- Time Counter (moved from top) -->
+                                <div class="circular-time-counter">
+                                    <div class="time-display">
+                                        <span id="currentRecordingTimeCircular">0:00</span>/<span id="targetRecordingTimeCircular">5:00</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Submit Button (shown when time limit reached) -->
+                                <button id="generateReportBtn" class="submit-next-btn hidden" disabled title="Submit Interview">
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <!-- Pause Button (appears when recording) -->
+                            <button id="pauseBtn" class="modern-pause-btn hidden" title="Pause Recording (or press Space)">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6"/>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Status and Instructions -->
+                        <div class="recording-status-area">
+                            <div id="recordingStatus" class="modern-recording-status hidden">
+                                <span class="status-text"></span>
+                            </div>
+                            <div class="keyboard-hints">
+                                <span class="hint-item">
+                                    <kbd>Enter</kbd> to record
+                                </span>
+                                <span class="hint-item hidden" id="spaceHint">
+                                    <kbd>Space</kbd> to pause
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div id="errorMessage" class="modern-error-message"></div>
+                    </div>
+                </div>
+
+            </div> <!-- End interviewInterface -->
+
+            <!-- Report Section (Remains hidden until report generation) -->
+            <div id="reportSection" class="hidden"></div>
+            
+            <!-- Email Notification Message -->
+            <div id="emailNotificationMessage" class="hidden fixed inset-0 bg-gray-900 bg-opacity-95 z-50 flex items-center justify-center p-4">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-8 text-center">
+                    <div class="mb-6">
+                        <svg class="w-20 h-20 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Interview Complete!</h2>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6">
+                        Thank you for completing your interview. Your personalized report is being generated and will be sent to <strong id="userEmailDisplay" class="text-gray-900 dark:text-white"></strong> within 5 minutes.
+                    </p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                        Please check your inbox (and spam folder) for your detailed analysis and insights.
+                    </p>
+                    <button id="completionRedirectBtn" class="primary-button">
+                        Return to Homepage
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Make config available globally
+        // This will be populated by the config module when it loads
+        window.config = window.config || {};
+        
+        // Pre-fill form fields from URL parameters
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const adminEmail = urlParams.get('adminEmail');
+            const adminName = urlParams.get('adminName');
+            
+            if (adminEmail) {
+                const emailInput = document.getElementById('email');
+                if (emailInput) {
+                    emailInput.value = adminEmail;
+                    // Trigger input event to update form state
+                    emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
+            
+            if (adminName) {
+                const nameInput = document.getElementById('name');
+                if (nameInput) {
+                    nameInput.value = adminName;
+                    // Trigger input event to update form state
+                    nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
+        });
+    </script>
+    <!-- Load utils.js first since modules depend on it -->
+    <script src="../js/utils.js"></script>
+    <!-- Main JavaScript - Modular Structure -->
+    <script type="module" src="../js/main.js"></script>
+    
+    <!-- Interview Diagnostics (Development Only) -->
+    <script type="module" src="../js/interview-diagnostics.js"></script>
+    
+
+    <!-- Test Button for Report Generation -->
+    <div style="position: fixed; bottom: 20px; left: 20px; z-index: 1000; display: none;">
+        <button id="testReportBtn" style="background: #4a90e2; color: white; padding: 10px 20px; border-radius: 5px; border: none; cursor: pointer; font-size: 14px;">
+            Test Report Generation (Dev)
+        </button>
+    </div>
+
+    <!-- Copyright Footer -->
+    
+</body>
+</html>

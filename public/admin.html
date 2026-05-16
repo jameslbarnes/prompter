@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' wss: ws: https://*.googleapis.com https://firebase.googleapis.com https://firebaseapp.com https://*.firebaseio.com https://YOUR_FIREBASE_PROJECT.firebaseapp.com https://YOUR_FIREBASE_PROJECT.firebasestorage.app https://accounts.google.com; img-src 'self' data: https: blob:; media-src 'self' blob: data: https://storage.googleapis.com; frame-src 'self' https://YOUR_FIREBASE_PROJECT.firebaseapp.com https://accounts.google.com;">
+    <title>Interview Creator - Admin</title>
+    <link rel="icon" type="image/png" href="saylogo.png" sizes="48x48">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Firebase libraries -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <!-- Add Marked.js for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@5.1.2/marked.min.js"></script>
+    <!-- Configure marked.js to disable deprecated options -->
+    <script>
+        if (typeof marked !== 'undefined') {
+            marked.setOptions({ mangle: false });
+            marked.use({
+                headerIds: false,
+                headerPrefix: false
+            });
+        }
+    </script>
+    <!-- ADDED: Global App State -->
+    <script src="state.js"></script>
+    <script src="state-init.js"></script>
+    <link rel="stylesheet" href="admin-new.css">
+    <style>
+      .active-journal-button {
+        background-color: #4B5563 !important; /* Tailwind gray-600 */
+        color: #E5E7EB !important;          /* Tailwind gray-200 */
+      }
+      
+      /* Notifications styles */
+      #notificationsMenu {
+        max-height: 24rem;
+        overflow-y: auto;
+      }
+      
+      #notificationBadge {
+        animation: pulse 2s infinite;
+      }
+      
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        }
+        70% {
+          box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        }
+      }
+      
+      .notification-item:hover {
+        background-color: rgba(55, 65, 81, 0.5);
+      }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="flex items-center"> <!-- Wrapper for toggle and title -->
+            <div class="sidebar-toggle" id="sidebarToggle">
+                <svg class="sidebar-toggle-icon close h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                <svg class="sidebar-toggle-icon menu h-4 w-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </div>
+            <img src="saylogo.png" alt="SayLogo" style="height: 48px; width: 48px; margin-left: 0.5rem; vertical-align: middle;"> <!-- Updated Logo Size -->
+            <span class="ml-2 text-xl font-semibold text-white" style="vertical-align: middle;">Say Studio</span>
+            <!-- Delimiter -->
+            <span id="headerDelimiter" class="mx-2 text-gray-500 hidden" style="vertical-align: middle;">|</span>
+            <!-- Placeholder for active interview title -->
+            <span id="activeInterviewHeaderTitle" class="text-sm font-medium text-gray-300 hidden truncate" style="vertical-align: middle;"></span>
+        </div>
+
+        <div class="flex items-center space-x-4">
+            <!-- Notifications Jewel -->
+            <div class="relative" id="notificationsContainer">
+                <button id="notificationsBtn" class="relative text-gray-400 hover:text-white p-2 rounded-md hover:bg-gray-700 transition-colors" title="Notifications">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    <!-- Notification Badge -->
+                    <span id="notificationBadge" class="absolute -top-1 -right-1 hidden bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold"></span>
+                </button>
+                <!-- Notifications Dropdown -->
+                <div id="notificationsMenu" class="absolute right-0 mt-2 w-80 bg-gray-800 rounded-md shadow-lg z-50 hidden max-h-96 overflow-y-auto">
+                    <div class="p-4 border-b border-gray-700">
+                        <h3 class="text-sm font-semibold text-white">Notifications</h3>
+                    </div>
+                    <div id="notificationsList" class="divide-y divide-gray-700">
+                        <!-- Notifications will be populated here -->
+                    </div>
+                    <div id="noNotifications" class="p-4 text-center text-gray-400 text-sm hidden">
+                        No new notifications
+                    </div>
+                </div>
+            </div>
+            <!-- Begin Interview Button -->
+            <button id="beginInterviewBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2 px-4 rounded transition-colors hidden" title="Begin Interview">
+                Begin Interview
+            </button>
+            <button id="pricingBtn" class="text-gray-400 hover:text-white text-sm px-3 py-1 rounded-md hover:bg-gray-700 transition-colors whitespace-nowrap" title="View Pricing & Usage">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                </svg>
+                Pricing
+            </button>
+            <button id="signOutBtn" class="text-gray-400 hover:text-white text-sm px-3 py-1 rounded-md hover:bg-gray-700 transition-colors" title="Sign Out">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Sign Out
+            </button>
+            <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+                <svg class="sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+                <svg class="moon-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Login Form - Initially visible, hidden after authentication -->
+    <div id="authContainer" class="auth-container">
+        <div>
+            <h2 class="text-xl font-semibold mb-4">Admin Login</h2>
+            
+            <!-- Google Sign-In Button -->
+            <button id="googleSignInBtn" class="w-full bg-white text-gray-800 border border-gray-300 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center mb-4">
+                <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Sign in with Google
+            </button>
+        </div>
+    </div>
+
+    <!-- New Page Wrapper - Hidden until authenticated -->
+    <div id="pageWrapper" class="hidden">
+        <!-- Main Content - Hidden until authenticated -->
+        <div id="mainContent" class="container"> <!-- REMOVED hidden class -->
+            <div class="layout-container">
+                <!-- Panel 1: Interview Selector (Sidebar) -->
+                <div class="sidebar bg-gray-800" id="sidebar">
+                    <!-- NEW: My Journal / My Sessions Entry Point -->
+                    <div class="px-2 py-3 border-b border-gray-700">
+                        <button id="myActivityBtn" class="w-full flex items-center justify-center text-sm font-medium text-gray-200 bg-gray-700 hover:bg-gray-600 py-2 px-3 rounded-md transition-colors duration-150 mb-2 hidden">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v11.494m0 0A7.5 7.5 0 1012 6.253V17.747m0 0A7.5 7.5 0 1012 6.253V17.747z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5M3.75 12a8.25 8.25 0 0016.5 0H3.75z" /> <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /> <!-- Slightly more generic journal/pen icon -->
+                            </svg>
+                           Interview Feed
+                        </button>
+                        <!-- Templates button hidden - keeping code path intact
+                        <button id="templatesBtn" class="w-full flex items-center justify-center text-sm font-medium text-gray-200 bg-gray-700 hover:bg-gray-600 py-2 px-3 rounded-md transition-colors duration-150">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                           Templates
+                        </button>
+                        -->
+                    </div>
+
+                    <!-- Sidebar Header -->
+                     <div class="sidebar-header">
+                        <span class="sidebar-title">My Interviewers</span>
+                        <button id="userSettingsBtn" title="User Settings" class="ml-2 text-gray-400 hover:text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </button>
+                        <div class="sidebar-actions flex space-x-2">
+                            <button id="newInterviewBtn" title="New Interview">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                </svg>
+                            </button>
+                            <button id="refreshBtn" title="Refresh List">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search Bar with Sort Dropdown -->
+                    <div class="px-3 py-2 border-b border-gray-700 relative">
+                        <div class="flex items-center space-x-2">
+                            <div class="relative flex-1">
+                                <input type="text" id="interviewSearchInput" class="w-full py-2 pl-8 pr-3 bg-gray-700 border border-gray-600 text-white text-sm rounded-md focus:ring-accent-primary focus:border-accent-primary" placeholder="Search interviewers...">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                <button id="clearSearchBtn" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white text-xs hidden" title="Clear search">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <button id="sortDropdownToggle" class="text-gray-400 hover:text-white p-1 rounded transition-colors flex-shrink-0" title="Sort options">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                        </div>
+                        <!-- Dropdown Menu - Full Width -->
+                        <div id="sortDropdownMenu" class="absolute left-0 right-0 top-full mt-1 mx-3 bg-gray-700 border border-gray-600 rounded-md shadow-lg z-50 hidden">
+                            <div class="py-1">
+                                <div class="px-3 py-2 text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-600">
+                                    Order by
+                                </div>
+                                <button class="sort-option w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-gray-600 hover:text-white transition-colors" data-value="lastUpdated">
+                                    <span class="sort-check hidden mr-2">✓</span>Last updated
+                                </button>
+                                <button class="sort-option w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-gray-600 hover:text-white transition-colors" data-value="completions">
+                                    <span class="sort-check hidden mr-2">✓</span># interviews
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-content">
+                        <div id="interviewsList" class="space-y-1 px-1">
+                            <!-- Interview cards will be added here dynamically -->
+                            <div class="interview-card animate-fade-in p-3">
+                                <p class="text-sm text-gray-500">Loading interviews...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                 <!-- Main Content Area -->
+                <div class="main-content-area" style="position: relative;">
+                    <!-- NEW: Streaming Panel (Initially Hidden) - Positioned within main content area -->
+                    <div id="streamingPanel" class="absolute bg-bg-secondary flex shadow-xl" style="top: 0; left: 0; width: 50%; height: 100%; transform: translateX(-100%); transition: transform 0.3s ease-in-out; display: none; z-index: 70;">
+                        <div class="flex-grow flex flex-col bg-bg-primary rounded-r-md relative overflow-hidden">
+                            <!-- Close button on the right side -->
+                            <button id="closeStreamingPanelBtn" class="absolute top-1/2 right-0 transform translate-x-1/2 -translate-y-1/2 bg-bg-tertiary border border-border-color text-text-primary p-2 rounded-full shadow-md z-75" title="Close Streaming Panel">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            
+                            <!-- Streaming content background -->
+                            <div class="absolute top-0 left-0 w-full h-full overflow-hidden">
+                                <pre class="streaming-content text-xs whitespace-pre-wrap h-full overflow-y-auto p-4"></pre>
+                            </div>
+                            
+                            <!-- Overlay with thinking indicator -->
+                            <div class="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-80">
+                                <div class="text-center">
+                                    <div class="flex space-x-2 mb-4 justify-center">
+                                        <div class="w-3 h-3 bg-accent-primary rounded-full animate-pulse"></div>
+                                        <div class="w-3 h-3 bg-accent-primary rounded-full animate-pulse" style="animation-delay: 150ms;"></div>
+                                        <div class="w-3 h-3 bg-accent-primary rounded-full animate-pulse" style="animation-delay: 300ms;"></div>
+                                    </div>
+                                    <p class="text-base font-medium text-gray-300">AI Copilot is processing...</p>
+                                    <p class="text-sm text-gray-400 mt-1">This may take a moment.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- NEW Global Filter Dropdown Wrapper - Initially Hidden -->
+                    <div id="globalUserFilterContainer" class="p-4 hidden border-b border-gray-700 mb-4">
+                        <label for="emailFilterDropdown" class="text-sm font-medium text-gray-300 mr-2">Filter by User:</label>
+                        <select id="emailFilterDropdown" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-md focus:ring-accent-primary focus:border-accent-primary p-2">
+                            <option value="all">All Users</option>
+                            <!-- Email options will be populated here by admin.js -->
+                        </select>
+                    </div>
+                    <!-- END Global Filter Dropdown Wrapper -->
+
+                    <!-- Panel 2: Config Settings (Now Panel 1 in this area) -->
+                    <div class="panel p-4 overflow-y-auto" id="configPanel">
+
+                        <!-- NEW Config Panel Header -->
+                        <div class="panel-custom-header" data-panel-title="Details">
+                            <svg class="panel-function-icon icon-details hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <div class="panel-header-content flex flex-col flex-1 min-w-0"> <!-- Added wrapper class for better control -->
+                                <span id="configPanelHeaderTitle" class="panel-header-title">Details</span>
+                                <p id="configPanelHeaderSubheadline" class="panel-header-subheadline">Select an interview to view details</p>
+                                <p id="headerStatisticsLine" class="panel-header-subheadline hidden">
+                                    <span id="headerInterviewStats">No interviews yet</span>
+                                </p>
+                            </div>
+                            <div class="panel-header-actions flex items-center space-x-2">
+                                <button id="shareUrlBtn" class="hidden text-gray-400 hover:text-white text-sm flex items-center px-3 py-1 rounded-md hover:bg-gray-700 transition-colors" title="Copy Share URL">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                                    </svg>
+                                    Share URL
+                                </button>
+                                <button id="collapseConfigPanelBtn" class="panel-collapse-btn" title="Collapse/Expand Details Panel">
+                                    <svg class="icon-collapse" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                                    <svg class="icon-expand hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ADDED: Journal View Container -->
+                        <div id="activityFeedContainer" class="p-4 overflow-y-auto hidden">
+                            <!-- NEW: Email Filter Dropdown - MOVED -->
+                            <!-- END NEW: Email Filter Dropdown -->
+                            <div id="activityFeedDisplayArea" class="space-y-4">
+                                <!-- Journal entries will be loaded here -->
+                            </div>
+                        </div>
+                        <!-- End ADDED: Journal View Container -->
+
+                        <!-- Specification Null State (Initially Visible, hidden when editing/creating) -->
+                        <div id="specificationNullState" class="">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                            </svg>
+                            <p class="text-center text-gray-400">Select an interviewer from the list, <a href="#templates" class="text-accent-primary hover:text-accent-secondary underline">find a template</a>, or use the <span class="font-medium text-gray-300">AI Editor</span> to generate or refine your interview guide.</p>
+                        </div>
+
+                        <!-- Wrapper for Specification Content (Hidden during Null State) -->
+                        <div id="specificationContentWrapper" class="hidden">
+                            <!-- REMOVED H2 Interview Details -->
+
+                            <!-- REMOVED: interviewUrlDisplay DIV moved to header button -->
+
+                            <!-- Tab Navigation -->
+                            <div class="spec-tabs flex">
+                                <button class="spec-tab-button active" data-tab="spec-interview-details">Interview Guide</button>
+                                <button class="spec-tab-button" data-tab="spec-files">Context</button>
+                                <button class="spec-tab-button" data-tab="spec-responses">Interviews</button>
+                                <button class="spec-tab-button" data-tab="spec-content">Content</button>
+                                <button class="spec-tab-button" data-tab="spec-campaigns">Promotion</button>
+                            </div>
+
+                            <!-- Tab Content -->
+                            <div id="spec-interview-details" class="spec-tab-content">
+                                <!-- Interview Information -->
+                                <div class="mb-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                        <div>
+                                            <h3 class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Title</h3>
+                                            <input type="text" id="specTitle" class="w-full py-2 px-3 bg-gray-700 rounded text-white border border-gray-600 focus:border-accent-primary focus:ring-accent-primary" placeholder="Untitled Interview">
+                                        </div>
+                                    </div>
+                                    <div class="mb-4">
+                                        <h3 class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Description</h3>
+                                        <textarea id="specDescription" class="w-full py-2 px-3 bg-gray-700 rounded text-white border border-gray-600 focus:border-accent-primary focus:ring-accent-primary h-20 text-sm" placeholder="No description yet"></textarea>
+                                    </div>
+                                    <div class="mb-4">
+                                        <h3 class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Interview Purpose</h3>
+                                        <textarea id="specPurpose" class="w-full py-2 px-3 bg-gray-700 rounded text-white border border-gray-600 focus:border-accent-primary focus:ring-accent-primary h-20 text-sm" placeholder="What is the main purpose and goal of this interview?"></textarea>
+                                    </div>
+                                    <div class="mb-4">
+                                        <h3 class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Required Information</h3>
+                                        <textarea id="specRequiredInformation" class="w-full py-2 px-3 bg-gray-700 rounded text-white border border-gray-600 focus:border-accent-primary focus:ring-accent-primary h-32 text-sm" placeholder="List the key information this interview must collect (one per line)"></textarea>
+                                    </div>
+                                    <div class="mb-4">
+                                        <h3 class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Personal Thank You Note</h3>
+                                        <textarea id="specUserNote" class="w-full py-2 px-3 bg-gray-700 rounded text-white border border-gray-600 focus:border-accent-primary focus:ring-accent-primary h-20 text-sm" placeholder="Write a personal message that will appear at the beginning of the report, as if you're forwarding it to them. Example: 'Thanks so much for taking the time to share your insights! I found your perspective on X particularly valuable. Here's your interview summary for your records.'"></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Preview Sections with Edit Buttons -->
+                                <div class="space-y-6">
+                                    <!-- Initial Question -->
+                                    <div class="mb-6">
+                                        <h3 class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Initial Question</h3>
+                                        <textarea id="specInitialQuestion" class="w-full py-2 px-3 bg-gray-700 rounded text-white border border-gray-600 focus:border-accent-primary focus:ring-accent-primary h-20 text-sm" placeholder="Enter the initial question that starts the interview"></textarea>
+                                    </div>
+
+                                    <!-- Follow-up Question -->
+                                    <div class="mb-6">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <h3 class="text-xs font-medium text-gray-400 uppercase tracking-wider flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                </svg>
+                                                Example Follow-up Question
+                                            </h3>
+                                            <button class="edit-preview-btn text-gray-400 hover:text-white text-sm flex items-center" data-edit-type="followup" title="Edit Follow-up Prompt">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                                Edit Prompt
+                                            </button>
+                                        </div>
+                                        <div id="previewFollowupQuestion" class="p-3 bg-gray-700 rounded text-sm text-gray-300 border border-gray-600 whitespace-pre-wrap font-mono min-h-[50px]"></div>
+                                    </div>
+
+                                    <!-- User Report -->
+                                    <div class="mb-6">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <h3 class="text-xs font-medium text-gray-400 uppercase tracking-wider flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                </svg>
+                                                Example Individual Summary
+                                            </h3>
+                                            <button class="edit-preview-btn text-gray-400 hover:text-white text-sm flex items-center" data-edit-type="report" title="Edit Report Prompt">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                                Edit Prompt
+                                            </button>
+                                        </div>
+                                        <div id="previewReport" class="p-3 bg-gray-700 rounded text-sm text-gray-300 border border-gray-600 whitespace-pre-wrap font-mono min-h-[150px]"></div>
+                                    </div>
+
+                                    <!-- Report From -->
+
+
+                                    <!-- Admin Report -->
+                                    <div class="mb-6 hidden">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <h3 class="text-xs font-medium text-gray-400 uppercase tracking-wider flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                </svg>
+                                                Example Admin-Only Summary
+                                            </h3>
+                                            <button class="edit-preview-btn text-gray-400 hover:text-white text-sm flex items-center" data-edit-type="admin-report" title="Edit Admin Report Prompt">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                                Edit Prompt
+                                            </button>
+                                        </div>
+                                        <div id="previewAdminReportContent" class="p-3 bg-gray-700 rounded text-sm text-gray-300 border border-gray-600 whitespace-pre-wrap font-mono min-h-[150px]"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Save Button -->
+                                <button id="saveCopilotInterview" class="w-full primary-button" disabled>Save Interview</button>
+                            </div>
+
+                        <!-- Files Tab Content -->
+                        <div id="spec-files" class="spec-tab-content hidden">
+                            <div class="mb-4">
+                                <h3 class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Reference Documents</h3>
+                                <p class="text-sm text-gray-400 mb-3">Upload supporting materials (resumes, job descriptions, product specs, etc.) that the AI will reference during interviews. Access these in prompts using the <code class="bg-gray-600 px-1 py-0.5 rounded text-xs">{{CONTEXT}}</code> variable.</p>
+                                
+                                <!-- Admin File Input Area - Always Visible in this tab -->
+                                <div id="fileUploadSection" class="mb-4">
+                                    <label for="contextFileInput" class="block text-sm font-medium text-gray-300 mb-1">Upload Reference Files</label>
+                                    <div class="flex gap-2">
+                                        <button id="contextAddButton" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 text-gray-300 rounded-md text-sm font-medium transition-colors flex items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                            </svg>
+                                            Add Document
+                                        </button>
+                                        <input type="file" id="contextFileInput" multiple class="hidden" accept=".txt,.pdf,.doc,.docx,.md,.csv,.json,.xml">
+                                    </div>
+                                    
+                                    
+                                    <!-- Display Uploaded Files -->
+                                    <div id="uploadedFilesList" class="mt-4 space-y-2">
+                                        <p class="text-sm text-gray-500 italic">No files uploaded for this interview yet.</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Checkbox for End-User Upload Requirement -->
+                                <div class="mb-4 flex items-center">
+                                    <input type="checkbox" id="specHasExternalDocument" class="h-4 w-4 text-accent-primary bg-gray-700 border-gray-600 rounded focus:ring-accent-primary focus:ring-offset-gray-800">
+                                    <label for="specHasExternalDocument" class="ml-2 text-sm font-medium text-gray-300">Require end-user to upload document(s) before starting interview</label>
+                                </div>
+
+                                <!-- NEW: Enable Web Search Checkbox -->
+                                <div class="mb-4 flex items-center">
+                                    <input type="checkbox" id="specEnableWebSearch" class="h-4 w-4 text-accent-primary bg-gray-700 border-gray-600 rounded focus:ring-accent-primary focus:ring-offset-gray-800">
+                                    <label for="specEnableWebSearch" class="ml-2 text-sm font-medium text-gray-300">Enable Web Search for Follow-up Questions</label>
+                                </div>
+
+                                <!-- NEW: Enable Thinking for Follow-up Questions Checkbox -->
+                                <div class="mb-4 flex items-center">
+                                    <input type="checkbox" id="specEnableThinking" class="h-4 w-4 text-accent-primary bg-gray-700 border-gray-600 rounded focus:ring-accent-primary focus:ring-offset-gray-800" checked>
+                                    <label for="specEnableThinking" class="ml-2 text-sm font-medium text-gray-300">Enable Thinking for Follow-up Questions</label>
+                                </div>
+
+
+                                <!-- NEW: Model Selection for Follow-up Questions -->
+                                <div class="mb-4">
+                                    <label for="specFollowupModel" class="block text-sm font-medium text-gray-300 mb-1">Follow-up Questions Model</label>
+                                    <select id="specFollowupModel" class="w-full py-2 px-3 bg-gray-700 rounded text-white border border-gray-600 focus:border-accent-primary focus:ring-accent-primary">
+                                        <option value="claude-opus-4-5">Claude Opus 4.5 (Most Capable)</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Video Recording Toggle -->
+                                <div id="videoRecordingSection" class="mb-4 flex items-center">
+                                    <input type="checkbox" id="specEnableVideoRecording" class="h-4 w-4 text-accent-primary bg-gray-700 border-gray-600 rounded focus:ring-accent-primary focus:ring-offset-gray-800">
+                                    <label for="specEnableVideoRecording" class="ml-2 text-sm font-medium text-gray-300">Enable Video Recording</label>
+                                </div>
+                                <div id="videoRecordingDescription" class="mb-4 ml-6 text-xs text-gray-400">
+                                    <p>When enabled, users can optionally record video alongside their audio responses. This provides richer interview data but requires additional storage and processing.</p>
+                                </div>
+                                
+
+                                <!-- NEW: Custom Completion Redirect URL -->
+                                <div class="mb-4">
+                                    <label for="specCompletionRedirect" class="block text-sm font-medium text-gray-300 mb-1">Completion Redirect URL</label>
+                                    <input type="text" id="specCompletionRedirect" class="w-full py-2 px-3 bg-gray-700 rounded text-white border border-gray-600 focus:border-accent-primary focus:ring-accent-primary" placeholder="https://example.com/thank-you">
+                                    <p class="text-xs text-gray-400 mt-1">Users will be sent to this link after finishing the interview.</p>
+                                </div>
+                            </div>
+                            <!-- Save Button for Files Tab -->
+                            <button id="saveCopilotInterviewFromFilesTab" class="w-full primary-button mt-4" disabled>Update Interview</button>
+                        </div>
+
+                        <!-- Responses Tab Content -->
+                        <div id="spec-responses" class="spec-tab-content hidden">
+                            <!-- Summary Statistics Section (Hidden - moved to header) -->
+                            <div id="responsesStatisticsSection" class="hidden">
+                                <!-- Stats now in header, keeping elements for JS compatibility -->
+                                <span id="totalInterviewsCount" class="hidden">0</span>
+                                <span id="uniqueUsersCount" class="hidden">0</span>
+                                <span id="avgResponsesPerInterview" class="hidden">0</span>
+                                <span id="lastInterviewDate" class="hidden">Never</span>
+                                <span id="avgInterviewDuration" class="hidden">--</span>
+                            </div>
+
+                            <!-- Q&A Carousel Section -->
+                            <div id="interviewQACarouselSection" class="mb-6 hidden">
+                                <h3 class="text-lg font-semibold mb-3">Interview Responses</h3>
+                                <div id="interviewQACarouselContainer" class="qa-carousel-main-container">
+                                    <!-- Carousels will be added here dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- Loading Indicator -->
+                            <div id="responsesLoadingIndicator" class="hidden mb-4">
+                                <p class="text-sm text-gray-500">Loading responses...</p>
+                            </div>
+
+                            <!-- Responses List -->
+                            <div id="responsesListContainer" class="hidden">
+                                <!-- Responses will be dynamically added here -->
+                            </div>
+
+                            <!-- No Responses Message -->
+                            <div id="noResponsesMessage" class="hidden text-gray-500">
+                                <p>No responses yet. The AI has not generated any responses for this interview.</p>
+                            </div>
+
+                            <!-- Error Message -->
+                            <div id="responsesErrorMessage" class="hidden text-red-500">
+                                <p>An error occurred while loading responses.</p>
+                            </div>
+                        </div>
+
+                        <!-- Content Tab -->
+                        <div id="spec-content" class="spec-tab-content hidden">
+                            <!-- Video Gallery Section -->
+                            <div class="mb-6">
+                                <h3 class="text-sm font-medium text-gray-300 uppercase tracking-wider mb-3">Generated Videos</h3>
+                                
+                                <!-- Loading Indicator -->
+                                <div id="contentLoadingIndicator" class="hidden mb-4">
+                                    <p class="text-sm text-gray-500">Loading videos...</p>
+                                </div>
+
+                                <!-- Videos Grid -->
+                                <div id="contentVideosGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <!-- Videos will be dynamically added here -->
+                                </div>
+
+                                <!-- No Storyboards Message -->
+                                <div id="noContentMessage" class="hidden text-gray-500 text-center py-8">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 16h4m10 0h4" />
+                                    </svg>
+                                    <p class="text-lg font-medium mb-2">No storyboards created yet</p>
+                                    <p class="text-sm mt-2">Storyboards are packages of video content from your interviews that you can import into your video editing workflows.</p>
+                                    <p class="text-sm mt-2">Create a storyboard by clicking "Create storyboard" on any analyst message.</p>
+                                </div>
+
+                                <!-- Error Message -->
+                                <div id="contentErrorMessage" class="hidden text-red-500 text-center py-8">
+                                    <p>An error occurred while loading videos.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Promotion Tab -->
+                        <div id="spec-campaigns" class="spec-tab-content hidden">
+                            <div class="mb-6">
+                                <div class="mb-4">
+                                    <h3 class="text-sm font-medium text-gray-300 uppercase tracking-wider mb-2">Email Campaigns</h3>
+                                    <p class="text-xs text-gray-500">Send personalized interview invitations at scale</p>
+                                </div>
+                                
+                                <button id="promoteInterviewerBtn" onclick="if(window.handleNewCampaign) window.handleNewCampaign(event); else console.error('handleNewCampaign not found');" class="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg transition-all transform hover:scale-[1.02] shadow-lg">
+                                    <span class="flex items-center justify-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                        </svg>
+                                        <span class="font-medium">Promote Interviewer</span>
+                                    </span>
+                                </button>
+                                
+                                <!-- Active Campaigns -->
+                                <div id="campaignsLoadingIndicator" class="text-gray-400 text-sm py-4">
+                                    Loading campaigns...
+                                </div>
+                                
+                                <div id="campaignsList" class="space-y-3 hidden">
+                                    <!-- Campaign cards will be added here dynamically -->
+                                </div>
+                                
+                                <!-- No Campaigns Message -->
+                                <div id="noCampaignsMessage" class="hidden text-gray-500 text-center py-8">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                    <p class="text-sm">No campaigns yet. Click "New Campaign" to get started.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div> <!-- End Specification Content Wrapper -->
+
+                </div> <!-- End Config Panel -->
+  <!-- Panel 1: Copilot (Now Panel 2 in this area) -->
+  <div class="panel" id="copilotPanel">
+    <!-- Chat Header -->
+    <div class="copilot-header">
+        <div class="flex justify-between items-center w-full">
+            <div class="flex items-center">
+                <svg class="panel-function-icon icon-copilot hidden mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+                <div> <!-- Wrapper for title and subtitle -->
+                    <h2 id="copilotTitle">AI Copilot</h2>
+                    <p id="copilotSubtitle" class="ml-0">I'll help you create your interview step by step</p> <!-- Removed ml-2 to align with config panel -->
+                </div>
+            </div>
+            <div class="flex items-center">
+                <div id="copilotModeToggle" class="hidden flex space-x-1 border border-gray-600 rounded-md p-0.5">
+                    <button id="editorModeBtn" class="copilot-mode-btn active px-2 py-1 text-xs rounded-md">Builder</button>
+                    <button id="analystModeBtn" class="copilot-mode-btn px-2 py-1 text-xs rounded-md">Producer</button>
+                </div>
+                <button id="collapseCopilotPanelBtn" class="panel-collapse-btn ml-2" title="Collapse/Expand Copilot Panel">
+                    <svg class="icon-collapse" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                    <svg class="icon-expand hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Journal Thread Tabs Container (Initially Hidden) -->
+    <div id="journalThreadTabs" class="hidden border-b border-gray-700 bg-gray-800">
+        <div class="flex items-center overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+            <div id="threadTabsList" class="flex">
+                <!-- Thread tabs will be added here dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Analyst Thread Dropdown Container (Initially Hidden) -->
+    <div id="analystThreadDropdown" class="hidden border-b border-gray-700 px-4 py-2">
+        <div class="flex items-center space-x-2">
+            <label class="text-sm text-gray-400">Thread:</label>
+            <select id="analystThreadSelect" class="flex-1 bg-gray-700 border border-gray-600 text-white text-sm rounded-md px-3 py-1 focus:outline-none focus:border-accent-primary">
+                <!-- Thread options will be added here dynamically -->
+            </select>
+            <button id="newAnalystThreadBtn" class="p-1 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="New Thread">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+            </button>
+            <button id="deleteAnalystThreadBtn" class="p-1 text-gray-400 hover:text-red-500 hover:bg-gray-700 rounded" title="Delete Thread">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Chat Messages -->
+    <div id="copilotMessages" class="flex-1 overflow-y-auto p-4 space-y-4">
+        <!-- Initial AI Message -->
+        <div class="message ai-message animate-fade-in">
+            <div class="message-content">
+                <p>👋 Hi there! I'll help you create an interview template that suits your needs. Let's start by understanding who you're interviewing and what you're trying to learn.</p>
+                <p class="mt-2">I can help you create interviews for various purposes including:</p>
+                <ul class="list-disc ml-5 space-y-1 mt-2 text-sm">
+                    <li>Speaking & Training</li>
+                    <li>Personal Development</li>
+                    <li>Market Research</li>
+                    <li>Recruiting</li>
+                    <li>Legacy & Memorialization</li>
+                    <li>Customer Feedback</li>
+                    <li>Academic Research</li>
+                    <li>Healthcare & Wellness</li>
+                    <li>Product Development</li>
+                    <li>Team Building</li>
+                    <li>Creative & Media</li>
+                    <li>Compliance & Audit</li>
+                </ul>
+                <p class="mt-3">Could you tell me:</p>
+                <ol class="list-decimal ml-5 space-y-1 mt-2">
+                    <li>Who will you be interviewing? (e.g., job candidates, customers, experts in a field)</li>
+                    <li>What's the main topic or purpose of this interview?</li>
+                </ol>
+            </div>
+        </div>
+        <!-- User and AI messages will be added here -->
+    </div>
+
+
+
+    <!-- Chat Input -->
+    <div class="copilot-input-area">
+        <!-- File upload display area -->
+        <div id="copilotFilePreview" class="hidden px-3 py-2 bg-gray-700 border border-gray-600 border-b-0 rounded-t-md">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center text-sm text-gray-300">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <span id="copilotFileName">file.txt</span>
+                    <span id="copilotFileSize" class="ml-2 text-gray-400">(0 KB)</span>
+                </div>
+                <button id="removeCopilotFile" class="text-gray-400 hover:text-red-400 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="flex items-end">
+            <button id="attachCopilotFile" class="hidden bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 rounded-l-md border border-gray-600 border-r-0" title="Add context">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+            </button>
+            <textarea id="copilotInput" class="flex-1 bg-gray-700 border border-gray-600 rounded-l-md p-3 text-white focus:outline-none focus:border-accent-primary" placeholder="Type your message here..."></textarea>
+            <input type="file" id="copilotFileInput" class="hidden" accept=".txt,.pdf,.doc,.docx,.md,.csv,.json,.xml,.png,.jpg,.jpeg,.gif,.webp,.svg" />
+            <button id="sendCopilotMessage" class="bg-accent-primary hover:bg-accent-secondary text-white px-4 rounded-r-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+</div> <!-- End Main Content Area -->
+
+</div> <!-- End Layout Container -->
+</div> <!-- End Main Content -->
+    <!-- Report Detail Overlay (Revised) -->
+    <div id="reportDetailOverlay" class="fixed inset-0 bg-black" style="background-color: rgba(0, 0, 0, 0.7); z-index: 65; transition: opacity 0.3s ease-in-out;"></div>
+
+    <!-- Report Detail Panel (Initially Hidden) -->
+    <div id="reportDetailPanel" class="hidden">
+        <button id="closeReportPanelXBtn" title="Close Panel">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+        </button>
+        <!-- Right Content Area (Now on the left) -->
+        <div class="report-detail-content-area">
+             <!-- Interview Content (Hidden by default) -->
+             <div id="interviewContent" class="report-detail-content">
+                 <h2 class="text-xl font-semibold mb-4 text-white">Interview Transcript</h2>
+                 <div id="interviewContentBody" class="space-y-4">
+                     <!-- Q&A will be loaded here -->
+                     <p class="text-gray-400">Loading transcript...</p>
+                 </div>
+             </div>
+
+             <!-- Report Content (Hidden by default) -->
+             <div id="reportContent" class="report-detail-content hidden">
+                 <h2 class="text-xl font-semibold text-white mb-3">User-Facing Summary</h2> <!-- Adjusted margin -->
+                 <div class="flex items-center space-x-3 mb-4"> <!-- NEW: Container for icon buttons -->
+                     <button id="playUserReportAudioBtn" class="p-2 rounded-full text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-primary" title="Play User-Facing Summary Audio">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 play-icon" viewBox="0 0 20 20" fill="currentColor">
+                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                         </svg>
+                    
+                     </button>
+                     <button id="downloadUserReportAudioBtn" class="p-1.5 rounded-md text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-primary" title="Download User-Facing Summary Audio">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                           <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                         </svg>
+                     </button>
+                     <button id="regenerateUserReportBtn" class="p-1.5 rounded-md text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-primary" title="Regenerate User-Facing Summary">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                           <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                         </svg>
+                     </button>
+                     <button id="viewUserReportBtn" class="p-1.5 rounded-md text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-primary" title="View User-Facing Report">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                           <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                         </svg>
+                     </button>
+                 </div>
+                 <div id="reportContentBody" class="markdown-body">
+                     <!-- Rendered Markdown will appear here -->
+                      <p class="text-gray-400">Loading report...</p>
+                 </div>
+             </div>
+
+
+            <!-- ADDED: Interview Preview Content (Hidden by default) -->
+            <!-- REMOVED: interviewPreviewContent div was here -->
+        </div>
+
+        <!-- Left Navigation (Now on the right) -->
+        <nav class="report-detail-nav">
+            <h3 class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">Report Details</h3>
+            <button class="panel-nav-button active" data-target="interviewContent">Interview Transcript</button>
+            <button class="panel-nav-button" data-target="reportContent">Generated Report</button>
+            <!-- REMOVED: Live Preview tab button was here -->
+        </nav>
+    </div>
+
+    <!-- NEW: Interview Live Preview Panel (Initially Hidden) -->
+    <div id="interviewLivePreviewPanel" class="fixed bg-bg-secondary flex shadow-xl" style="top: 5px; right: 0; width: 60%; height: calc(100vh - 10px); transform: translateX(100%); transition: transform 0.3s ease-in-out; display: none; z-index: 70;">
+        <button id="closeInterviewLivePreviewPanelBtn" class="absolute top-1/2 left-0 transform -translate-x-1/2 -translate-y-1/2 bg-bg-tertiary border border-border-color text-text-primary p-2 rounded-full shadow-md z-75" title="Close Preview">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+        </button>
+        <div class="flex-grow flex flex-col p-1 bg-bg-primary rounded-l-md relative"> 
+            <!-- Removed header div that contained title and refresh button -->
+            <iframe id="livePreviewIframe" src="about:blank" class="w-full h-full border-0 rounded-b-md bg-white"></iframe>
+            <!-- Repositioned and restyled Refresh Button -->
+            <button id="refreshLivePreviewFrameBtn" 
+                    class="absolute top-2 right-2 bg-bg-tertiary hover:bg-accent-primary text-gray-400 hover:text-white rounded-full p-2 shadow-md z-80"
+                    title="Refresh Preview">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+            </button>
+        </div>
+    </div>
+    <!-- Overlay for the new live preview panel -->
+    <div id="interviewLivePreviewOverlay" class="fixed inset-0 bg-black" style="background-color: rgba(0, 0, 0, 0.7); opacity: 0; pointer-events: none; transition: opacity 0.3s ease-in-out; z-index: 65;"></div>
+    
+    <!-- NEW: Interview Modal Version (Initially Hidden) -->
+    <div id="interviewModalOverlay" class="fixed inset-0 hidden flex items-center justify-center" style="z-index: 100; background-color: rgba(0, 0, 0, 0.75);">
+        <div id="interviewModal" class="flex flex-col" style="width: 80vw; height: 80vh; min-width: 800px; min-height: 600px; max-width: 1400px; max-height: 900px; background-color: #1a1a1a; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-4 border-b border-gray-700">
+                <h3 class="text-lg font-medium text-white">Interview Preview</h3>
+                <div class="flex items-center space-x-2">
+                    <button id="refreshModalIframeBtn" 
+                            class="text-gray-400 hover:text-white p-2 rounded hover:bg-gray-700 transition-colors"
+                            title="Refresh">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </button>
+                    <button id="closeInterviewModalBtn" 
+                            class="text-gray-400 hover:text-white p-2 rounded hover:bg-gray-700 transition-colors"
+                            title="Close">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <!-- Modal Body -->
+            <div class="flex-1 p-4 bg-gray-800" style="overflow: hidden;">
+                <iframe id="modalIframe" src="about:blank" class="border-0 rounded-lg bg-white" style="width: 100%; height: 100%;"></iframe>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- NEW: User Settings Panel (Initially Hidden) -->
+    <div id="userSettingsPanel" class="fixed bg-gray-800 flex shadow-xl" style="top: 5px; right: 0; width: 450px; height: calc(100vh - 10px); transform: translateX(100%); transition: transform 0.3s ease-in-out; display: none; z-index: 70;">
+        <button id="closeUserSettingsPanelBtn" class="absolute top-1/2 left-0 transform -translate-x-1/2 -translate-y-1/2 bg-gray-700 border border-gray-600 text-text-primary p-2 rounded-full shadow-md z-75" title="Close Settings">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+        </button>
+        <div class="flex-grow flex flex-col p-6 bg-gray-700 rounded-l-md relative space-y-6">
+            <h2 class="text-xl font-semibold text-text-primary mb-2">User Settings</h2>
+
+            <div>
+                <label for="userDisplayNameInput" class="block text-sm font-medium text-text-secondary mb-1">Display Name</label>
+                <input type="text" id="userDisplayNameInput" class="w-full py-2 px-3 bg-gray-700 rounded text-white border border-gray-600 focus:border-accent-primary focus:ring-accent-primary" placeholder="Your Name">
+            </div>
+
+            <div>
+                <label for="userOrganizationInput" class="block text-sm font-medium text-text-secondary mb-1">Organization (Optional)</label>
+                <input type="text" id="userOrganizationInput" class="w-full py-2 px-3 bg-gray-700 rounded text-white border border-gray-600 focus:border-accent-primary focus:ring-accent-primary" placeholder="Your Company">
+            </div>
+
+            <!-- Gmail Integration Section -->
+            <div class="border-t border-gray-600 pt-4">
+                <h3 class="text-lg font-medium text-text-primary mb-3">Email Integration</h3>
+                
+                <div id="gmailNotConnected" class="space-y-3">
+                    <p class="text-sm text-text-secondary">Connect your Gmail account to send emails directly from your inbox instead of our generic email service.</p>
+                    
+                    <button id="connectGmailBtn" class="w-full bg-white text-gray-800 border border-gray-300 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                            <path fill="#EA4335" d="M22 8.608v8.142a3.25 3.25 0 0 1-3.25 3.25h-2.764l.015-10.576L22 8.608Z"/>
+                            <path fill="#34A853" d="m15.986 20 .014-10L12 13l-4-3v10h7.986Z"/>
+                            <path fill="#FBBC04" d="M8 20H5.25A3.25 3.25 0 0 1 2 16.75V8.608l6 4.5V20Z"/>
+                            <path fill="#4285F4" d="M22 8.608V8.25C22 6.731 20.769 5.5 19.25 5.5H18l-6 4.5-6-4.5H4.75A3.25 3.25 0 0 0 1.5 8.75v-.142L12 15.5l10-6.892Z"/>
+                        </svg>
+                        Connect Gmail Account
+                    </button>
+                </div>
+                
+                <div id="gmailConnected" class="hidden space-y-3">
+                    <div class="bg-green-900 bg-opacity-20 border border-green-600 rounded-md p-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="text-sm text-green-400">Gmail Connected</span>
+                            </div>
+                            <button id="disconnectGmailBtn" class="text-xs text-red-400 hover:text-red-300">Disconnect</button>
+                        </div>
+                        <p id="gmailAccountEmail" class="text-xs text-gray-400 mt-1 ml-7"></p>
+                    </div>
+                    
+                    <div class="text-xs text-gray-500">
+                        <p>Emails will be sent from your Gmail account with better deliverability and trust.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-auto"> <!-- Pushes button to the bottom -->
+                 <button id="saveUserSettingsBtn" class="w-full primary-button py-2.5" disabled>Save Settings</button>
+            </div>
+        </div>
+    </div>
+    <!-- Overlay for the new user settings panel -->
+    <div id="userSettingsOverlay" class="fixed inset-0 bg-black" style="background-color: rgba(0, 0, 0, 0.7); opacity: 0; pointer-events: none; transition: opacity 0.3s ease-in-out; z-index: 65;"></div>
+
+    <!-- NEW: Pricing Panel (Initially Hidden) -->
+    <div id="pricingPanel" class="fixed bg-gray-800 flex shadow-xl" style="top: 5px; right: 0; width: 80%; max-width: 900px; height: calc(100vh - 10px); transform: translateX(100%); transition: transform 0.3s ease-in-out; display: none; z-index: 70;">
+        <button id="closePricingPanelBtn" class="absolute top-1/2 left-0 transform -translate-x-1/2 -translate-y-1/2 bg-gray-700 border border-gray-600 text-text-primary p-2 rounded-full shadow-md z-75" title="Close Pricing">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+        </button>
+        <div class="flex-grow flex flex-col bg-gray-700 rounded-l-md relative">
+            <iframe id="pricingIframe" src="pricing.html" class="w-full h-full border-0 rounded-l-md bg-white"></iframe>
+        </div>
+    </div>
+    <!-- Overlay for the pricing panel -->
+    <div id="pricingOverlay" class="fixed inset-0 bg-black" style="background-color: rgba(0, 0, 0, 0.7); opacity: 0; pointer-events: none; transition: opacity 0.3s ease-in-out; z-index: 65;"></div>
+
+    <!-- NEW: Templates Panel (Initially Hidden) -->
+    <div id="templatesPanel" class="fixed bg-gray-800 flex shadow-xl" style="top: 5px; right: 0; width: 60%; height: calc(100vh - 10px); transform: translateX(100%); transition: transform 0.3s ease-in-out; display: none; z-index: 70;">
+        <button id="closeTemplatesPanelBtn" class="absolute top-1/2 left-0 transform -translate-x-1/2 -translate-y-1/2 bg-gray-700 border border-gray-600 text-text-primary p-2 rounded-full shadow-md z-75" title="Close Templates">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+        </button>
+        <div class="flex-grow flex flex-col bg-gray-700 rounded-l-md relative">
+            <!-- Templates Panel Header -->
+            <div class="flex items-center justify-between p-4 border-b border-gray-600">
+                <div>
+                    <h2 class="text-lg font-semibold text-white">Interview Templates</h2>
+                    <p class="text-sm text-gray-300">Manage and use your saved interview templates</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <label for="templateCategoryFilter" class="text-sm font-medium text-gray-300">Category:</label>
+                    <select id="templateCategoryFilter" class="bg-gray-600 border border-gray-500 text-white text-sm rounded-md focus:ring-accent-primary focus:border-accent-primary px-3 py-1">
+                        <option value="">All Categories</option>
+                        <option value="speaking-training">Speaking & Training</option>
+                        <option value="personal-development">Personal Development</option>
+                        <option value="market-research">Market Research</option>
+                        <option value="recruiting">Recruiting</option>
+                        <option value="storytelling">Storytelling</option>
+                        <option value="customer-feedback">Customer Feedback</option>
+                        <option value="academic-research">Academic Research</option>
+                        <option value="healthcare-wellness">Healthcare & Wellness</option>
+                        <option value="product-development">Product Development</option>
+                        <option value="team-building">Team Building</option>
+                        <option value="creative-media">Creative & Media</option>
+                        <option value="compliance-audit">Compliance & Audit</option>
+                    </select>
+                </div>
+            </div>
+            <!-- Templates Content -->
+            <div class="flex-grow overflow-y-auto p-4">
+                <div id="templatesContainer" class="space-y-4">
+                    <!-- Templates will be loaded here -->
+                    <div class="text-center text-gray-400 py-8">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                        <p>Loading templates...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Overlay for the templates panel -->
+    <div id="templatesOverlay" class="fixed inset-0 bg-black" style="background-color: rgba(0, 0, 0, 0.7); opacity: 0; pointer-events: none; transition: opacity 0.3s ease-in-out; z-index: 65;"></div>
+
+    <!-- NEW: Edit Preview Panel (Initially Hidden) -->
+    <div id="editPreviewPanel" class="fixed bg-gray-800 flex shadow-xl" style="top: 5px; right: 0; width: 600px; height: calc(100vh - 10px); transform: translateX(100%); transition: transform 0.3s ease-in-out; display: none; z-index: 70;">
+        <button id="closeEditPreviewPanelBtn" class="absolute top-1/2 left-0 transform -translate-x-1/2 -translate-y-1/2 bg-gray-700 border border-gray-600 text-text-primary p-2 rounded-full shadow-md z-75" title="Close Edit Panel">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+        </button>
+        <div class="flex-grow flex flex-col p-6 bg-gray-700 rounded-l-md relative overflow-y-auto">
+            <h2 id="editPreviewTitle" class="text-xl font-semibold text-text-primary mb-4">Edit Initial Question</h2>
+            
+            <!-- Edit Form Content -->
+            <div id="editPreviewContent">
+                <!-- Initial Question Edit (shown when editing initial) -->
+                <div id="editInitialSection" class="hidden">
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-300 mb-3">First Question</label>
+                        <p class="text-xs text-gray-400 mb-3 leading-relaxed">The first question shown to interviewees. Available tags: {{NAME}} (user's name), {{CONTEXT}}</p>
+                        <textarea id="editInitialPromptText" class="w-full py-4 px-4 bg-gray-600 rounded-lg text-white text-sm border border-gray-500 focus:border-accent-primary focus:ring-accent-primary focus:ring-2 focus:ring-opacity-50 h-48 leading-relaxed font-mono resize-y" placeholder="System prompt for generating the initial question" style="min-height: 200px;"></textarea>
+                    </div>
+                </div>
+
+                <!-- Follow-up Question Edit (shown when editing followup) -->
+                <div id="editFollowupSection" class="hidden">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Example Follow-up Question</label>
+                        <p class="text-xs text-gray-400 mb-2">This is a preview of what a follow-up question might look like.</p>
+                        <textarea id="editFollowupQuestionText" class="w-full py-2 px-3 bg-gray-600 rounded text-white text-sm border border-gray-500 focus:border-accent-primary focus:ring-accent-primary h-24" placeholder="Example follow-up question" readonly></textarea>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-300 mb-3">Follow-up Prompt (System Instructions)</label>
+                        <p class="text-xs text-gray-400 mb-3 leading-relaxed">This prompt generates follow-up questions based on user responses. Available tags: {{CONTEXT}}, {{QA_CONTENT}}</p>
+                        <textarea id="editFollowupPromptText" class="w-full py-4 px-4 bg-gray-600 rounded-lg text-white text-sm border border-gray-500 focus:border-accent-primary focus:ring-accent-primary focus:ring-2 focus:ring-opacity-50 h-48 leading-relaxed font-mono resize-y" placeholder="System prompt for generating follow-up questions" style="min-height: 200px;"></textarea>
+                    </div>
+                </div>
+
+                <!-- Report Edit (shown when editing report) -->
+                <div id="editReportSection" class="hidden">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Example User Report</label>
+                        <p class="text-xs text-gray-400 mb-2">This is a preview of what the user-facing report might look like.</p>
+                        <textarea id="editReportText" class="w-full py-2 px-3 bg-gray-600 rounded text-white text-sm border border-gray-500 focus:border-accent-primary focus:ring-accent-primary h-32" placeholder="Example report content" readonly></textarea>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-300 mb-3">Report Prompt (System Instructions)</label>
+                        <p class="text-xs text-gray-400 mb-3 leading-relaxed">This prompt generates the user-facing report. Available tags: {{CONTEXT}}, {{QA_CONTENT}}</p>
+                        <textarea id="editReportPromptText" class="w-full py-4 px-4 bg-gray-600 rounded-lg text-white text-sm border border-gray-500 focus:border-accent-primary focus:ring-accent-primary focus:ring-2 focus:ring-opacity-50 h-48 leading-relaxed font-mono resize-y" placeholder="System prompt for generating user reports" style="min-height: 200px;"></textarea>
+                    </div>
+                </div>
+
+
+                <!-- Admin Report Edit (shown when editing admin-report) -->
+                <div id="editAdminReportSection" class="hidden">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Example Admin Report</label>
+                        <p class="text-xs text-gray-400 mb-2">This is a preview of what the admin-only report might look like.</p>
+                        <textarea id="editAdminReportText" class="w-full py-2 px-3 bg-gray-600 rounded text-white text-sm border border-gray-500 focus:border-accent-primary focus:ring-accent-primary h-32" placeholder="Example admin report content" readonly></textarea>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-300 mb-3">Admin Report Prompt (System Instructions)</label>
+                        <p class="text-xs text-gray-400 mb-3 leading-relaxed">This prompt generates the admin-only report. Available tags: {{CONTEXT}}, {{QA_CONTENT}}</p>
+                        <textarea id="editAdminReportPromptText" class="w-full py-4 px-4 bg-gray-600 rounded-lg text-white text-sm border border-gray-500 focus:border-accent-primary focus:ring-accent-primary focus:ring-2 focus:ring-opacity-50 h-48 leading-relaxed font-mono resize-y" placeholder="System prompt for generating admin reports" style="min-height: 200px;"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="mt-8 pt-6 border-t border-gray-600">
+                <div class="flex space-x-4">
+                    <button id="cancelEditPreviewBtn" class="flex-1 px-6 py-3 text-gray-300 hover:text-white border border-gray-600 rounded-lg hover:bg-gray-600 transition-colors font-medium">Cancel</button>
+                    <button id="regeneratePreviewBtn" class="flex-1 px-6 py-3 bg-accent-primary hover:bg-accent-secondary text-white rounded-lg transition-colors font-medium">Regenerate Preview</button>
+                    <button id="saveEditPreviewBtn" class="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Overlay for the edit preview panel -->
+    <div id="editPreviewOverlay" class="fixed inset-0 bg-black" style="background-color: rgba(0, 0, 0, 0.7); opacity: 0; pointer-events: none; transition: opacity 0.3s ease-in-out; z-index: 65;"></div>
+
+    <!-- B-Roll Prompts Panel (Initially Hidden) -->
+    <div id="brollPromptsPanel" class="fixed bg-gray-800 flex shadow-xl" style="top: 5px; right: 0; width: 500px; height: calc(100vh - 10px); transform: translateX(100%); transition: transform 0.3s ease-in-out; display: none; z-index: 70;">
+        <button id="closeBrollPromptsPanelBtn" class="absolute top-1/2 left-0 transform -translate-x-1/2 -translate-y-1/2 bg-gray-700 border border-gray-600 text-text-primary p-2 rounded-full shadow-md z-75" title="Close B-Roll Prompts">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+        </button>
+        <div class="flex-grow flex flex-col p-6 bg-gray-700 rounded-l-md relative">
+            <h2 class="text-xl font-semibold text-text-primary mb-2">Review B-Roll Prompts</h2>
+            <p class="text-gray-300 text-sm mb-4">
+                These prompts will appear as text overlays during narration segments to guide video editors.
+                Each prompt should describe an 8-second Veo3 video clip.
+            </p>
+            <div id="brollPromptsContent" class="flex-grow overflow-y-auto">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-600 mt-auto">
+                <button onclick="window.handleBrollPromptsCancel()" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500">
+                    Cancel
+                </button>
+                <button onclick="window.handleBrollPromptsGenerate()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    Generate Video
+                </button>
+            </div>
+        </div>
+    </div>
+    <div id="brollPromptsOverlay" class="fixed inset-0 bg-black" style="background-color: rgba(0, 0, 0, 0.7); opacity: 0; pointer-events: none; transition: opacity 0.3s ease-in-out; z-index: 65;"></div>
+
+    <!-- Interview Selection Panel (Initially Hidden) -->
+    <div id="interviewSelectionPanel" class="fixed bg-gray-800 flex shadow-xl" style="top: 5px; right: 0; width: 60%; height: calc(100vh - 10px); transform: translateX(100%); transition: transform 0.3s ease-in-out; display: none; z-index: 70;">
+        <button id="closeInterviewSelectionPanelBtn" class="absolute top-1/2 left-0 transform -translate-x-1/2 -translate-y-1/2 bg-gray-700 border border-gray-600 text-text-primary p-2 rounded-full shadow-md z-75" title="Close Interview Selection">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+        </button>
+        <div class="flex-grow flex flex-col bg-gray-700 rounded-l-md relative">
+            <!-- Fixed Header -->
+            <div class="p-6 pb-0 border-b border-gray-600">
+                <h2 class="text-xl font-semibold text-white mb-2">Select an Interview</h2>
+                <p class="text-sm text-gray-300 mb-4">First select an interview template, then choose which response to use as context.</p>
+                <div class="mb-4">
+                    <input type="text" id="interviewSelectionSearchInput" class="w-full py-2 px-3 bg-gray-600 rounded text-white border border-gray-500 focus:border-accent-primary focus:ring-accent-primary" placeholder="Search interviews...">
+                </div>
+            </div>
+            
+            <!-- Scrollable Content Area -->
+            <div class="flex-1 overflow-hidden flex flex-col min-h-0 p-6">
+                <div id="interviewSelectionList" class="flex-1 overflow-y-auto">
+                    <div class="text-center text-gray-500 py-8">Loading interview templates...</div>
+                </div>
+                
+                <div id="responseSelectionList" class="flex-1 overflow-y-auto hidden">
+                    <div class="back-button mb-4">
+                        <button id="backToInterviewsBtn" class="text-sm text-gray-400 hover:text-white flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Back to interviews
+                        </button>
+                    </div>
+                    <div id="responsesList" class="space-y-2">
+                        <!-- Responses will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="interviewSelectionOverlay" class="fixed inset-0 bg-black" style="background-color: rgba(0, 0, 0, 0.7); opacity: 0; pointer-events: none; transition: opacity 0.3s ease-in-out; z-index: 65;"></div>
+
+    <!-- Global Audio Player Container -->
+    <div id="globalAudioPlayerContainer" class="fixed bottom-0 left-0 right-0 h-20 bg-gray-800 border-t border-gray-700 p-3 shadow-lg flex items-center justify-between transform translate-y-full transition-transform duration-300" style="display: flex;">
+        <audio id="globalAudioPlayerElement"></audio>
+        <div class="flex items-center space-x-3">
+            <button id="globalPlayPauseBtn" class="p-2 rounded-full hover:bg-gray-700">
+                <svg id="globalPlayIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                </svg>
+                <svg id="globalPauseIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white hidden" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd" />
+                </svg>
+            </button>
+            <div class="text-white">
+                <p id="globalTrackTitle" class="text-sm font-medium truncate max-w-[200px] md:max-w-[300px]">No track loaded</p>
+                <p id="globalTrackArtist" class="text-xs text-gray-400">Select audio to play</p>
+            </div>
+        </div>
+        <div class="flex-grow mx-4 flex items-center space-x-3">
+            <span id="globalCurrentTime" class="text-xs text-gray-400">0:00</span>
+            <input type="range" id="globalSeekBar" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer" value="0" min="0" max="100">
+            <span id="globalDuration" class="text-xs text-gray-400">0:00</span>
+        </div>
+        <div class="flex items-center space-x-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M7 3a1 1 0 000 2h0a2 2 0 012 2v1a2 2 0 00-2 2H5a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V9a2 2 0 012-2h0a1 1 0 100-2H9a1 1 0 00-1-1H7zM13 3a1 1 0 000 2h0a2 2 0 012 2v1a2 2 0 00-2 2h-2a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V9a2 2 0 012-2h0a1 1 0 100-2h-3a1 1 0 00-1-1h-1z" />
+            </svg>
+            <input type="range" id="globalVolumeBar" class="w-20 h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer" value="100" min="0" max="100">
+        </div>
+    </div>
+
+    <!-- Sharing Modal -->
+    <div id="sharingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-white">Share Interview</h3>
+                <button id="closeSharingModal" class="text-gray-400 hover:text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <p class="text-sm text-gray-300 mb-3">Share this interview with other users by entering their email addresses. They will be able to view and edit the interview.</p>
+                
+                <label for="shareEmailInput" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                <div class="flex space-x-2">
+                    <input type="email" id="shareEmailInput" class="flex-1 py-2 px-3 bg-gray-700 rounded text-white border border-gray-600 focus:border-accent-primary focus:ring-accent-primary" placeholder="user@example.com">
+                    <button id="addShareEmailBtn" class="bg-accent-primary hover:bg-accent-secondary text-white px-4 py-2 rounded">Add</button>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h4 class="text-sm font-medium text-gray-300 mb-2">Currently Shared With:</h4>
+                <div id="sharedEmailsList" class="space-y-2 max-h-32 overflow-y-auto">
+                    <p class="text-sm text-gray-500 italic">Not shared with anyone yet.</p>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <button id="cancelSharingBtn" class="px-4 py-2 text-gray-300 hover:text-white border border-gray-600 rounded hover:bg-gray-700">Cancel</button>
+                <button id="saveSharingBtn" class="px-4 py-2 bg-accent-primary hover:bg-accent-secondary text-white rounded">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Refactored JavaScript modules -->
+    <script src="js/debug-utils.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/dom-elements.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/utility-functions.js"></script>
+    <script src="js/auth.js"></script>
+    
+    <!-- Add the streaming panel script inline since it's small and needed early -->
+    <script>
+    // Streaming Panel Module
+    // Handles the streaming overlay panel that shows AI thinking/processing
+
+    // Apply streaming panel state
+    function applyStreamingPanelState() {
+        const panel = document.getElementById('streamingPanel');
+        
+        if (!panel) {
+            console.warn("Streaming panel element not found.");
+            return;
+        }
+
+        const isOpen = appState.uiState.streamingPanel.isOpen;
+
+        if (isOpen) {
+            panel.style.display = 'flex';
+            void panel.offsetWidth; // Trigger reflow
+            panel.style.transform = 'translateX(0)';
+        } else {
+            panel.style.transform = 'translateX(-100%)';
+            setTimeout(() => {
+                if (!appState.uiState.streamingPanel.isOpen) {
+                    panel.style.display = 'none';
+                    // Clear streaming content
+                    const streamingContent = panel.querySelector('.streaming-content');
+                    if (streamingContent) {
+                        streamingContent.textContent = '';
+                    }
+                }
+            }, 300); // Match CSS transition duration
+        }
+    }
+
+    // Initialize streaming panel
+    function initializeStreamingPanel() {
+        // Add close button event listener
+        const closeBtn = document.getElementById('closeStreamingPanelBtn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                appState.setStreamingPanelOpen(false);
+                applyStreamingPanelState();
+            });
+        }
+    }
+
+    // Helper function to add streaming content
+    function addStreamingContent(text, type = 'content') {
+        const streamingContent = document.querySelector('#streamingPanel .streaming-content');
+        if (!streamingContent) return;
+
+        const bluePalette = ['#001f3f', '#003366', '#004080', '#0059b3', '#0073e6'];
+        const words = text.split(/(\s+)/);
+        
+        words.forEach(word => {
+            if (word.trim() !== '') {
+                const span = document.createElement('span');
+                span.style.color = bluePalette[Math.floor(Math.random() * bluePalette.length)];
+                span.textContent = word;
+                streamingContent.appendChild(span);
+            } else {
+                streamingContent.appendChild(document.createTextNode(word));
+            }
+        });
+        
+        if (type === 'thinking') {
+            streamingContent.appendChild(document.createTextNode('\n'));
+        }
+        
+        streamingContent.scrollTop = streamingContent.scrollHeight;
+    }
+
+    // Clear streaming content
+    function clearStreamingContent() {
+        const streamingContent = document.querySelector('#streamingPanel .streaming-content');
+        if (streamingContent) {
+            streamingContent.textContent = '';
+        }
+    }
+
+    // Expose functions globally
+    window.applyStreamingPanelState = applyStreamingPanelState;
+    window.initializeStreamingPanel = initializeStreamingPanel;
+    window.addStreamingContent = addStreamingContent;
+    window.clearStreamingContent = clearStreamingContent;
+    </script>
+    
+    <script type="module" src="js/audio-player.js"></script>
+    <script type="module" src="js/modules/video-broll-prompts.js"></script>
+    
+    <script type="module" src="js/chat-copilot.js"></script>
+    <script src="js/copilot-file-handler.js"></script>
+    <script src="js/file-management.js"></script>
+    <script src="js/url-hash-management.js"></script>
+    <script src="js/ui-theme.js"></script>
+    <script src="js/sidebar.js"></script>
+    <script src="js/interview-management.js" defer></script>
+    <script src="js/interview-list.js" defer></script>
+    <script src="js/interview-sharing.js"></script>
+    <script src="js/specification-ui.js"></script>
+    <script src="js/specification-null-state.js"></script>
+    <script src="js/interview-save.js"></script>
+    <script src="js/edit-preview-panel.js"></script>
+    <script src="js/header-title.js"></script>
+    <script src="js/panel-management.js"></script>
+    <script src="js/user-settings.js"></script>
+    <script src="js/pricing-panel.js"></script>
+    <script src="js/templates-panel.js"></script>
+    <script src="js/create-from-responses.js"></script>
+    <script src="js/interview-selection-panel.js"></script>
+    <!-- File/Text Upload Modal -->
+    <div id="uploadOptionsModal" class="fixed inset-0 z-50 hidden">
+        <div class="fixed inset-0 bg-black bg-opacity-50" id="uploadOptionsOverlay"></div>
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div class="bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-white mb-4">Add Reference Document</h3>
+                    <div class="space-y-3">
+                        <button id="uploadFileOption" class="w-full p-4 bg-gray-700 hover:bg-gray-600 rounded-lg flex items-center space-x-3 transition-colors">
+                            <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <div class="text-left">
+                                <div class="font-medium text-white">Upload File</div>
+                                <div class="text-sm text-gray-400">PDF, DOC, TXT, or other documents</div>
+                            </div>
+                        </button>
+                        <button id="pasteTextOption" class="w-full p-4 bg-gray-700 hover:bg-gray-600 rounded-lg flex items-center space-x-3 transition-colors">
+                            <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                            <div class="text-left">
+                                <div class="font-medium text-white">Paste Text</div>
+                                <div class="text-sm text-gray-400">Copy and paste document content</div>
+                            </div>
+                        </button>
+                        <button id="scrapeWebsiteOption" class="w-full p-4 bg-gray-700 hover:bg-gray-600 rounded-lg flex items-center space-x-3 transition-colors">
+                            <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9M3 12a9 9 0 019-9m0 18a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9"></path>
+                            </svg>
+                            <div class="text-left">
+                                <div class="font-medium text-white">Scrape Website</div>
+                                <div class="text-sm text-gray-400">Extract content from a webpage</div>
+                            </div>
+                        </button>
+                    </div>
+                    <button id="closeUploadModal" class="mt-4 w-full p-2 text-gray-400 hover:text-white transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Text Paste Modal -->
+    <div id="textPasteModal" class="fixed inset-0 z-50 hidden">
+        <div class="fixed inset-0 bg-black bg-opacity-50" id="textPasteOverlay"></div>
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div class="bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col">
+                <div class="p-6 pb-0">
+                    <h3 class="text-lg font-semibold text-white mb-4">Paste Document Content</h3>
+                    <input 
+                        type="text" 
+                        id="pastedTextFileName" 
+                        class="w-full mb-4 px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:border-accent-primary"
+                        placeholder="Enter a filename (e.g., document.txt)"
+                    />
+                </div>
+                <div class="px-6 flex-1 overflow-hidden">
+                    <textarea 
+                        id="pastedTextContent" 
+                        class="w-full h-full p-3 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:border-accent-primary resize-none"
+                        placeholder="Paste your document content here..."
+                    ></textarea>
+                </div>
+                <div class="p-6 pt-4 flex justify-end space-x-3">
+                    <button id="cancelTextPaste" class="px-4 py-2 text-gray-400 hover:text-white transition-colors">
+                        Cancel
+                    </button>
+                    <button id="confirmTextPaste" class="px-4 py-2 bg-accent-primary hover:bg-accent-secondary text-white rounded-md transition-colors">
+                        Add Document
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Website Scrape Modal -->
+    <div id="websiteScrapeModal" class="fixed inset-0 z-50 hidden">
+        <div class="fixed inset-0 bg-black bg-opacity-50" id="websiteScrapeOverlay"></div>
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div class="bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-white mb-4">Scrape Website Content</h3>
+                    <div class="mb-4">
+                        <label for="websiteUrl" class="block text-sm font-medium text-gray-300 mb-2">Website URL</label>
+                        <input 
+                            type="url" 
+                            id="websiteUrl" 
+                            class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:border-accent-primary"
+                            placeholder="https://example.com"
+                        />
+                    </div>
+                    <div class="mb-4">
+                        <label for="scrapeDepth" class="block text-sm font-medium text-gray-300 mb-2">Include subpages</label>
+                        <select 
+                            id="scrapeDepth" 
+                            class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:border-accent-primary"
+                        >
+                            <option value="0">Main page only</option>
+                            <option value="1" selected>Main page + 1 level of subpages</option>
+                            <option value="2">Main page + 2 levels of subpages</option>
+                        </select>
+                    </div>
+                    <div id="websiteScrapeStatus" class="hidden mb-4 text-sm text-gray-400">
+                        <div class="flex items-center">
+                            <svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span id="websiteScrapeStatusText">Scraping website...</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button id="cancelWebsiteScrape" class="px-4 py-2 text-gray-400 hover:text-white transition-colors">
+                            Cancel
+                        </button>
+                        <button id="confirmWebsiteScrape" class="px-4 py-2 bg-accent-primary hover:bg-accent-secondary text-white rounded-md transition-colors">
+                            Scrape Website
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/template-stats-backfill.js"></script>
+    <script src="js/journal-threads.js"></script>
+    <script src="js/analyst-threads.js"></script>
+    <script type="module" src="js/journal-view.js"></script>
+    <script type="module" src="js/responses-tab.js"></script>
+    <script src="js/content-tab.js"></script>
+    <script src="js/campaigns-tab.js"></script>
+    <script src="js/promote-interviewer.js"></script>
+    
+    <!-- Main JavaScript -->
+    <script type="module" src="admin.js"></script>
+</body>
+</html> 

@@ -1,0 +1,37 @@
+/* Header Component */
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+    background: #1F2937; /* Tailwind gray-800 */
+    border-bottom: 1px solid var(--border-color);
+    height: var(--header-height);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+/* Style for the active interview title in the header */
+.header #activeInterviewHeaderTitle {
+    display: none; /* Hidden by default */
+    color: #ffffff; /* White color */
+    font-family: 'Crimson Pro', 'Georgia', serif; /* Modern serif with flowing curves */
+    font-size: 0.88rem; /* 14.08px - 20% smaller than 1.1rem */
+    font-weight: 300; /* Light weight for elegance */
+    letter-spacing: 0.02em;
+    margin-left: 0.5rem;
+    font-style: normal;
+    line-height: 1.2;
+}
+
+.header.show-interview-title #activeInterviewHeaderTitle {
+    display: inline; /* Show when header has the class */
+}
+
+
+/* Main header button styling (ensure Begin Interview looks good here) */
+.header .primary-button {
+    align-self: center; /* Helps with vertical alignment in flex container */
+} 

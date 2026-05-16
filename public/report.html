@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.gstatic.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com; connect-src 'self' wss: ws: https://*.googleapis.com https://firebase.googleapis.com; img-src 'self' data: https:; media-src 'self' blob: https://storage.googleapis.com;">
+    <title>Personal AI Readiness Report (PAIRR)</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- Add marked.js for markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@5.1.2/marked.min.js"></script>
+    <script>
+        // Configure marked to disable deprecated mangle parameter
+        marked.setOptions({ mangle: false });
+    </script>
+    <!-- Add Firebase libraries -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <!-- Add state management -->
+    <script src="state.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_FIREBASE_WEB_API_KEY",
+            authDomain: "YOUR_FIREBASE_PROJECT.firebaseapp.com",
+            projectId: "YOUR_FIREBASE_PROJECT_ID",
+            messagingSenderId: "927285056741",
+            appId: "1:927285056741:web:c4314ee0ca2b2b4df7f00c",
+            measurementId: "G-8LN1ERR4Y7"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        
+        // Initialize Firestore
+        const db = firebase.firestore();
+    </script>
+    <!-- Load Three.js for 3D visualizations - load synchronously to ensure it's available -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Load visualization libraries before overlay -->
+    <script src="js/flowing-text-viz.js"></script>
+    <!-- Load shape visualization and dynamic overlay after THREE.js -->
+    <script src="js/simple-shape-overlay.js"></script>
+    
+    <!-- Load modular report JavaScript -->
+    <script type="module" src="js/report/report-main.js"></script>
+    <style>
+        html, body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; 
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-primary); 
+            font-family: var(--font-sans);
+            color: var(--text-primary);
+            padding-top: 80px; /* Add padding to account for fixed header */
+            overflow-y: auto; /* Ensure vertical scrolling is always allowed */
+            -webkit-overflow-scrolling: touch; /* Enable momentum scrolling on touch devices */
+        }
+
+        .header {
+            flex-shrink: 0; 
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000; /* Increased z-index to ensure it's above other content */
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            min-height: 80px; /* Changed from fixed height to min-height */
+            display: flex;
+            align-items: center;
+        }
+
+        .header-content {
+            max-width: 100%;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem; /* Reduced padding on mobile */
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+            gap: 0.5rem;
+            position: relative; /* Ensure proper positioning context */
+            z-index: 1001; /* Ensure header content is above other elements */
+        }
+
+        .title-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem; /* Reduced gap */
+            flex-shrink: 0;
+            min-width: 0; /* Allow text to shrink */
+        }
+
+        .header-title {
+            font-size: 0.9rem; /* Smaller on mobile */
+            color: var(--text-primary);
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .header-buttons {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem; /* Reduced gap */
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        /* Mobile navigation toggle */
+        .mobile-nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+            order: -1; /* Put it first */
+            position: relative; /* Ensure proper positioning */
+            z-index: 1002; /* Ensure it's above all other elements */
+        }
+
+        .mobile-nav-toggle:hover {
+            color: var(--accent-primary);
+        }
+
+        .mobile-nav-toggle svg {
+            width: 24px;
+            height: 24px;
+            pointer-events: none; /* Prevent SVG from blocking clicks */
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .theme-toggle:hover {
+            color: var(--accent-primary);
+        }
+
+        .theme-toggle svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Header button styling - more compact on mobile */
+        .header-buttons .primary-button {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.5rem 0.625rem; /* Slightly smaller padding */
+            font-size: 0.8rem; /* Smaller text */
+            font-weight: 400;
+            transition: all 0.2s ease;
+            border-radius: 0.375rem;
+            white-space: nowrap;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-buttons .primary-button:hover:not(:disabled) {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--accent-primary);
+            transform: none;
+            box-shadow: none;
+        }
+
+        .header-buttons .primary-button:disabled {
+            opacity: 0.5;
+            color: var(--text-secondary);
+            border-color: var(--border-color);
+        }
+
+        .header-buttons .primary-button svg {
+            width: 16px; /* Smaller icons */
+            height: 16px;
+            opacity: 0.7;
+            flex-shrink: 0;
+        }
+
+        .header-buttons .primary-button:hover:not(:disabled) svg {
+            opacity: 1;
+        }
+
+
+        /* Two-column layout styles */
+        .app-container-cols {
+            display: flex; 
+            flex-grow: 1; 
+            overflow: visible; /* Changed from hidden to visible for mobile scrolling */
+        }
+
+        .report-sidebar-custom {
+            width: 280px; 
+            flex-shrink: 0; 
+            background-color: var(--bg-secondary, #1f2937);
+            border-right: 1px solid var(--border-color, #374151);
+            padding: 1.5rem;
+            overflow-y: auto; 
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-primary) var(--bg-tertiary);
+            min-height: calc(100vh - 80px); /* Use min-height instead of 100vh */
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .report-sidebar-custom::-webkit-scrollbar {
+            width: 6px;
+        }
+        .report-sidebar-custom::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+        .report-sidebar-custom::-webkit-scrollbar-thumb {
+            background-color: var(--accent-primary);
+            border-radius: 3px;
+        }
+
+        .main-content-cols {
+            flex-grow: 1; 
+            overflow-y: auto; 
+            background-color: var(--bg-primary);
+            min-height: calc(100vh - 80px); /* Ensure minimum height for content */
+        }
+        
+        .report-content-section {
+            min-height: calc(100vh - 80px); /* Changed from min-height: 100% */
+            padding: 1.5rem; /* Add consistent padding */
+        }
+
+        /* Navigation button styles (sidebar) */
+        .report-nav-button {
+            color: var(--text-secondary); 
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+            border-left: 3px solid transparent; 
+            display: flex !important;
+            visibility: visible !important;
+            margin-bottom: 0.5rem;
+            min-height: 48px;
+            align-items: center;
+        }
+        .report-nav-button:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        .report-nav-button.active {
+            background-color: var(--accent-primary-faded, rgba(59, 130, 246, 0.15)); 
+            color: var(--accent-primary-text, var(--text-primary)); 
+            border-left-color: var(--accent-primary);
+            font-weight: 500; 
+        }
+        .report-nav-button.active svg {
+            color: var(--accent-primary); 
+        }
+        
+        /* Ensure navigation container is visible */
+        #reportDetailNav {
+            display: block !important;
+            visibility: visible !important;
+        }
+
+        /* Mobile overlay for sidebar */
+        .mobile-nav-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 150;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            pointer-events: none; /* Prevent blocking clicks when hidden */
+        }
+
+        .mobile-nav-overlay.show {
+            opacity: 1;
+            pointer-events: auto; /* Allow clicks when visible */
+        }
+
+        /* Scrollbar for main content sections */
+        .magazine-style-report-container, 
+        .transcript-container-custom {
+            height: 100%; 
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-primary) var(--bg-secondary);
+        }
+        .magazine-style-report-container::-webkit-scrollbar, 
+        .transcript-container-custom::-webkit-scrollbar {
+            width: 8px;
+        }
+        .magazine-style-report-container::-webkit-scrollbar-track, 
+        .transcript-container-custom::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        .magazine-style-report-container::-webkit-scrollbar-thumb, 
+        .transcript-container-custom::-webkit-scrollbar-thumb {
+            background-color: var(--accent-primary);
+            border-radius: 4px;
+        }
+
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 90px; /* More space for potentially taller header */
+                overflow-y: scroll; /* Force scrolling on mobile */
+                -webkit-overflow-scrolling: touch; /* Enable momentum scrolling on iOS */
+            }
+
+            .app-container-cols {
+                flex-direction: column; /* Stack vertically on mobile */
+                overflow: visible; /* Ensure overflow is visible on mobile */
+            }
+
+            .main-content-cols {
+                width: 100%;
+                margin-left: 0;
+                overflow-y: visible; /* Allow natural document flow on mobile */
+                min-height: auto; /* Remove min-height constraint on mobile */
+            }
+
+            .report-content-section {
+                padding: 1rem; /* Reduce padding on mobile */
+                min-height: auto; /* Remove min-height constraint on mobile */
+            }
+
+            .header {
+                min-height: 90px; /* Allow header to be taller on mobile */
+            }
+
+            .header-content {
+                padding: 0.5rem;
+                gap: 0.25rem;
+            }
+
+            .title-section {
+                flex: 1;
+                min-width: 0;
+                gap: 0.5rem;
+            }
+
+            .header-title {
+                font-size: 0.9rem; /* Increased from 0.8rem */
+                max-width: none; /* Remove restrictive max-width */
+                white-space: normal !important; /* Override whitespace-nowrap class */
+                line-height: 1.2;
+                word-break: break-word; /* Allow breaking long words */
+            }
+
+            .header-title img {
+                width: 24px !important;
+                height: 24px !important;
+            }
+
+            .mobile-nav-toggle {
+                display: block;
+                min-width: 44px; /* Ensure proper touch target */
+                min-height: 44px;
+                touch-action: manipulation; /* Optimize for touch interactions */
+                -webkit-tap-highlight-color: rgba(0,0,0,0.1); /* Subtle tap highlight instead of transparent */
+            }
+
+            .header-buttons {
+                gap: 0.25rem;
+                flex-wrap: wrap;
+            }
+
+            .header-buttons .primary-button {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.75rem;
+                min-width: 44px; /* Minimum touch target */
+                min-height: 44px;
+                justify-content: center;
+                touch-action: manipulation; /* Ensure buttons are clickable */
+            }
+
+            .header-buttons .primary-button svg {
+                width: 18px;
+                height: 18px;
+                margin: 0;
+            }
+
+            /* Mobile sidebar - slide out from left */
+            .report-sidebar-custom {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                width: 280px;
+                z-index: 200;
+                transform: translateX(-100%);
+                padding-top: 90px; /* Account for header */
+            }
+
+            .report-sidebar-custom.show {
+                transform: translateX(0);
+            }
+
+            /* Mobile navigation overlay - only show on mobile when needed */
+            .mobile-nav-overlay {
+                display: block; /* Always present on mobile */
+            }
+
+            /* Full width main content on mobile */
+            .main-content-cols {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .report-content-section {
+                padding: 1rem; /* Reduce padding on mobile */
+            }
+
+            /* Make QA pairs more readable on mobile */
+            .qa-pair {
+                margin-bottom: 1rem;
+                padding: 0.75rem;
+            }
+
+            .qa-question {
+                font-size: 0.9rem;
+                margin-bottom: 0.75rem;
+                line-height: 1.4;
+            }
+
+            .qa-answer {
+                font-size: 0.85rem;
+                line-height: 1.5;
+            }
+
+            /* Improve button sizing in transcript */
+            .play-transcript-audio-btn {
+                padding: 0.5rem !important;
+                min-width: 44px; /* Ensure touch target is large enough */
+                min-height: 44px;
+                touch-action: manipulation; /* Ensure audio buttons are clickable */
+            }
+
+            /* Better spacing for report content */
+            #reportContent.magazine-content h1 {
+                font-size: 1.75rem;
+                line-height: 1.2;
+                margin: 0.75rem 0 1rem 0;
+            }
+
+            #reportContent.magazine-content h2 {
+                font-size: 1.25rem;
+                margin-top: 1.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            #reportContent.magazine-content h3 {
+                font-size: 1.1rem;
+                margin-top: 1rem;
+                margin-bottom: 0.5rem;
+            }
+
+            #reportContent.magazine-content p {
+                font-size: 0.9rem;
+                line-height: 1.6;
+                margin-bottom: 1rem;
+            }
+
+            /* Profile tags responsive */
+            .profile-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .profile-tag {
+                font-size: 0.75rem;
+                padding: 0.3rem 0.6rem;
+            }
+
+            /* Ensure all interactive elements have proper touch targets */
+            .report-nav-button {
+                min-height: 48px;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: rgba(59, 130, 246, 0.1);
+            }
+
+            /* Fix any z-index conflicts */
+            .success-message {
+                position: relative;
+                z-index: 1;
+            }
+        }
+
+        /* Extra small screens */
+        @media (max-width: 480px) {
+            .header-title {
+                font-size: 0.85rem; /* Slightly smaller but still visible */
+            }
+            
+            .header-title span {
+                display: block; /* Keep title visible, don't hide completely */
+                max-width: 200px; /* Allow more space for title */
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap; /* Only on very small screens, use ellipsis instead of hiding */
+            }
+
+            .header-buttons .primary-button span {
+                display: none; /* Hide button text on very small screens */
+            }
+
+            .header-buttons .primary-button {
+                padding: 0.5rem;
+                min-width: 44px;
+                min-height: 44px;
+            }
+
+            .report-content-section {
+                padding: 0.75rem;
+            }
+
+            #reportContent.magazine-content h1 {
+                font-size: 1.5rem;
+            }
+
+            #reportContent.magazine-content p {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Styles for content rendered by formatMagazineContent (within #reportContent) */
+        /* These are specific overrides/additions for report.html */
+        #reportContent.magazine-content h1 {
+            font-size: 2.25rem; /* Slightly smaller for better fit */
+            font-weight: 700;
+            margin: 1rem 0 1.5rem 0; 
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+        #reportContent.magazine-content h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 1.75rem;
+            margin-bottom: 0.75rem;
+            color: var(--accent-primary);
+        }
+        #reportContent.magazine-content h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-primary);
+        }
+        #reportContent.magazine-content p {
+            margin-bottom: 0.85rem;
+            font-size: 0.95rem; 
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+        #reportContent.magazine-content ul, #reportContent.magazine-content ol {
+            margin: 0.85rem 0;
+            padding-left: 1.75rem; 
+        }
+        #reportContent.magazine-content li {
+            margin: 0.4rem 0;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+        #reportContent.magazine-content li::before {
+            content: "•";
+            color: var(--accent-primary);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+            top: 0.05em; 
+        }
+        #reportContent.magazine-content strong {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        #reportContent.magazine-content blockquote {
+            border-left: 3px solid var(--accent-primary);
+            padding: 0.5rem 1rem;
+            margin: 1rem 0;
+            background: var(--blockquote-bg, rgba(59, 130, 246, 0.05)); 
+            border-radius: 0 3px 3px 0;
+            color: var(--text-secondary); 
+        }
+        #reportContent.magazine-content blockquote p {
+            margin-bottom: 0.4rem; 
+            font-size: 0.9rem;
+        }
+        #reportContent.magazine-content code:not(pre > code) {
+            background-color: var(--bg-tertiary);
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 85%;
+            border-radius: 3px;
+            font-family: var(--font-mono);
+        }
+        #reportContent.magazine-content pre {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 0.85rem;
+            overflow: auto;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        #reportContent.magazine-content pre code {
+            padding: 0;
+            background: none;
+            border-radius: 0;
+        }
+
+        /* Transcript specific styles */
+        .qa-pair { 
+            margin-bottom: 0.75rem; 
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .qa-question { 
+            font-weight: 500; 
+            color: var(--text-primary); 
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        .qa-answer { 
+            color: var(--text-secondary); 
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+
+        /* Success Message */
+        .success-message {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            color: white; margin-bottom: 1rem; padding: 1rem;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 6px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        .success-message svg { width: 24px; height: 24px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes success-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+
+        /* Profile Header Tags */
+        .profile-header { display: flex; justify-content: flex-start; align-items: center; margin: 0.5rem 0 1.5rem 0; gap: 0.75rem; flex-wrap: wrap; }
+        .profile-tag { display: inline-flex; align-items: center; padding: 0.4rem 0.8rem; border-radius: 16px; font-size: 0.8rem; font-weight: 500; color: white; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); }
+        .adoption-tag { background-color: #6cb897; }
+        .anxiety-tag { background-color: #7b7de2; }
+        .profile-tag-icon { margin-right: 0.4rem; }
+
+        /* Root variables - Single definition */
+        :root {
+            --bg-primary: #111827; 
+            --bg-secondary: #1f2937;
+            --bg-tertiary: #374151;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --border-color: #374151;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #1d4ed8;
+            --accent-primary-faded: rgba(59, 130, 246, 0.15); 
+            --accent-primary-text: var(--text-primary); 
+            --blockquote-bg: rgba(59, 130, 246, 0.05);
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+
+        /* Light theme overrides */
+        :root[data-theme="light"],
+        body[data-theme="light"],
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #e2e8f0;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --blockquote-bg: rgba(59, 130, 246, 0.1);
+        }
+
+        /* Global audio player visibility */
+        #globalAudioPlayerContainer {
+            display: flex !important;
+            min-height: 80px;
+        }
+        
+        #globalAudioPlayerContainer.visible {
+            transform: translateY(0) !important;
+            opacity: 1 !important;
+        }
+        
+        /* Prevent volume controls from wrapping */
+        #globalAudioPlayerContainer > div:first-child {
+            flex-shrink: 0;
+            min-width: fit-content;
+        }
+        
+        #globalAudioPlayerContainer > div:last-child {
+            flex-shrink: 0;
+            min-width: fit-content;
+        }
+        
+        /* Ensure seek bar container takes remaining space */
+        #globalAudioPlayerContainer .flex-grow {
+            min-width: 0; /* Allow it to shrink */
+        }
+
+        /* Profile Header Tags */
+        .profile-header { display: flex; justify-content: flex-start; align-items: center; margin: 0.5rem 0 1.5rem 0; gap: 0.75rem; flex-wrap: wrap; }
+        .profile-tag { display: inline-flex; align-items: center; padding: 0.4rem 0.8rem; border-radius: 16px; font-size: 0.8rem; font-weight: 500; color: white; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); }
+        .adoption-tag { background-color: #6cb897; }
+        .anxiety-tag { background-color: #7b7de2; }
+        .profile-tag-icon { margin-right: 0.4rem; }
+
+        /* Report Metadata */
+        .report-metadata {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .report-metadata .metadata-item {
+            margin-bottom: 0.25rem;
+        }
+        
+        .report-metadata .metadata-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Report Action Buttons */
+        #reportActionButtons {
+            /* No background or borders - clean minimal design */
+        }
+
+        /* Screen reader only text */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* Icon buttons */
+        .icon-button {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary, #9ca3af);
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            min-height: 40px;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        /* Dark theme icon colors */
+        [data-theme="dark"] .icon-button,
+        body:not([data-theme]) .icon-button {
+            color: #9ca3af;
+        }
+        
+        /* Light theme icon colors */
+        [data-theme="light"] .icon-button {
+            color: #6b7280;
+        }
+
+        .icon-button:hover:not(:disabled) {
+            background: var(--bg-tertiary, rgba(255, 255, 255, 0.1));
+            color: var(--text-primary);
+        }
+
+        .icon-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .icon-button svg {
+            min-width: 20px;
+            width: 20px;
+            height: 20px;
+            fill: currentColor !important;
+            pointer-events: none;
+            display: block !important;
+            flex-shrink: 0;
+        }
+        
+        /* Listen button - now in action bar with other buttons */
+        
+        /* Ensure SVG paths are visible */
+        .icon-button svg path {
+            fill: currentColor !important;
+        }
+
+        /* Dropdown menu styles */
+        #reportDropdownMenu {
+            position: absolute;
+            background: var(--bg-secondary, #1f2937);
+            border: 1px solid var(--border-color, #374151);
+        }
+        
+        .dropdown-item {
+            width: 100%;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            color: var(--text-primary, #f3f4f6);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+
+        .dropdown-item:hover:not(:disabled) {
+            background: var(--bg-tertiary);
+        }
+
+        .dropdown-item:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .dropdown-item svg {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            vertical-align: middle;
+            color: var(--text-secondary);
+        }
+
+        /* Like button styles */
+        #likeReportButton.liked {
+            /* No background change - just change the icon color */
+        }
+
+        #likeReportButton.liked:hover:not(:disabled) {
+            background: var(--bg-tertiary, rgba(255, 255, 255, 0.1));
+            transform: translateY(-1px);
+        }
+
+        /* Like icon states */
+        #likeReportButton svg {
+            transition: all 0.2s ease;
+        }
+        
+        #likeReportButton.liked svg {
+            color: var(--accent-primary); /* Use accent color when liked */
+        }
+
+        #likeCount {
+            text-align: center;
+            margin-left: 4px;
+            flex-shrink: 0;
+        }
+        
+        /* Fix for like button SVG */
+        #likeReportButton {
+            display: inline-flex !important;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        #likeReportButton svg {
+            width: 20px !important;
+            min-width: 20px !important;
+            height: 20px !important;
+            flex-shrink: 0 !important;
+        }
+
+        /* Mobile styles for report action buttons */
+        @media (max-width: 768px) {
+            #reportActionButtons {
+                flex-direction: row; /* Keep horizontal on mobile */
+                gap: 0.5rem; /* Slightly reduce gap */
+                align-items: center;
+                flex-wrap: wrap; /* Allow wrapping if needed */
+            }
+
+            #reportActionButtons .primary-button {
+                justify-content: center;
+                width: auto; /* Auto width instead of full */
+                padding: 0.875rem 1rem;
+                font-size: 0.875rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #reportActionButtons {
+                padding: 0.75rem;
+                margin: 0 0 1rem 0;
+                gap: 0.375rem; /* Even smaller gap on very small screens */
+            }
+
+            #reportActionButtons .primary-button {
+                padding: 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            #reportActionButtons .primary-button span {
+                margin-left: 0.5rem;
+            }
+            
+            /* Ensure icon buttons stay small but usable */
+            #reportActionButtons .icon-button {
+                min-width: 36px;
+                min-height: 36px;
+                padding: 0.375rem;
+            }
+        }
+
+        /* Global Audio Player Responsive Styles */
+        @media (max-width: 768px) {
+            #globalAudioPlayerContainer {
+                height: auto; /* Allow height to adjust */
+                padding: 0.5rem; /* Reduced padding */
+                flex-wrap: wrap; /* Allow wrapping instead of column */
+                align-items: center; /* Center items */
+                justify-content: space-between;
+            }
+
+            #globalAudioPlayerContainer .flex.items-center.space-x-3 { /* Play/Pause and Title/Artist */
+                justify-content: center; /* Center play/pause */
+                margin-bottom: 0.35rem; /* Reduced margin */
+            }
+            
+            #globalAudioPlayerContainer .flex-grow.mx-4 { /* Seek bar and time */
+                margin-left: 1rem;
+                margin-right: 1rem;
+                flex-basis: 100%;
+                margin-bottom: 0.35rem; /* Reduced margin */
+            }
+
+            #globalTrackTitle {
+                max-width: 140px; 
+                font-size: 0.85rem; /* Reduced font size */
+            }
+            #globalTrackArtist {
+                font-size: 0.75rem; /* Reduced font size */
+            }
+
+            #globalAudioPlayerContainer .flex.items-center.space-x-2 { /* Volume controls */
+                justify-content: center; /* Center volume */
+            }
+            #globalVolumeBar {
+                width: 90px; /* Adjust volume bar width */
+            }
+        }
+
+        @media (max-width: 480px) {
+            #globalAudioPlayerContainer {
+                padding: 0.35rem; /* Further reduced padding */
+            }
+
+            #globalAudioPlayerContainer .flex.items-center.space-x-3 { /* Play/Pause and Title/Artist */
+                flex-direction: column; /* Stack title/artist under button */
+                gap: 0.15rem; /* Reduced gap */
+                text-align: center;
+                margin-bottom: 0.25rem; /* Reduced margin */
+            }
+            
+            #globalTrackTitle {
+                font-size: 0.8rem;
+                max-width: 100%;
+            }
+            #globalTrackArtist {
+                font-size: 0.65rem; /* Further reduced font size */
+            }
+
+            #globalAudioPlayerContainer .flex-grow.mx-4 { /* Seek bar and time */
+                flex-direction: column; /* Stack time under seek bar */
+                align-items: center;
+                gap: 0.15rem; /* Reduced gap */
+                 margin-bottom: 0.25rem; /* Reduced margin */
+            }
+            #globalSeekBar {
+                width: 100%;
+                height: 6px; /* Make seekbar thinner */
+            }
+            #globalCurrentTime, #globalDuration {
+                font-size: 0.65rem; /* Further reduced font size */
+            }
+            
+            #globalAudioPlayerContainer .flex.items-center.space-x-2 svg { /* Volume icon */
+                 display: none; /* Hide volume icon on very small screens */
+            }
+            #globalVolumeBar {
+                width: 70px; /* Further reduced volume bar */
+                height: 6px; /* Make volume bar thinner */
+            }
+        }
+
+        /* Thinking dots animation for overlay */
+        .thinking-dots-container {
+            display: inline-flex;
+            gap: 4px;
+            margin-left: 8px;
+        }
+        
+        .thinking-dot {
+            width: 6px;
+            height: 6px;
+            background-color: #F3F4F6;
+            border-radius: 50%;
+            animation: thinking-pulse 1.4s ease-in-out infinite both;
+        }
+        
+        .thinking-dot:nth-child(1) { animation-delay: -0.32s; }
+        .thinking-dot:nth-child(2) { animation-delay: -0.16s; }
+        .thinking-dot:nth-child(3) { animation-delay: 0s; }
+        
+        @keyframes thinking-pulse {
+            0%, 80%, 100% { 
+                opacity: 0.3;
+                transform: scale(0.8); 
+            }
+            40% { 
+                opacity: 1;
+                transform: scale(1); 
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="title-section">
+                <button id="mobileNavToggle" class="mobile-nav-toggle" aria-label="Toggle navigation">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+                <h1 id="headerTitle" class="header-title flex items-center whitespace-nowrap">
+                    <img src="saylogo.png" alt="PAIRR Logo" class="inline-block align-middle mr-2" width="28" height="28" style="border-radius: 4px;">
+                    <span id="headerTitleText">Individual Summary</span>                
+                </h1>
+            </div>
+            <div class="header-buttons flex items-center gap-2">
+                <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+                    <svg class="sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg class="moon-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation Overlay -->
+    <div id="mobileNavOverlay" class="mobile-nav-overlay"></div>
+
+    <main class="app-container">
+        <!-- Two-column layout for report detail view -->
+        <div class="app-container-cols">
+            <!-- Left Sidebar with Navigation -->
+            <aside id="reportSidebar" class="report-sidebar-custom">
+                <div class="mb-4">
+                    <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Interview Details</h3>
+                </div>
+                <nav id="reportDetailNav">
+                    <button class="report-nav-button active w-full text-left px-4 py-3 rounded-lg flex items-center gap-3" data-target="reportContent">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>AI Report</span>
+                    </button>
+                    <button class="report-nav-button w-full text-left px-4 py-3 rounded-lg flex items-center gap-3" data-target="transcriptContentArea">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                        <span>Interview Transcript</span>
+                    </button>
+                </nav>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="main-content-cols">
+                <div id="reportContentWrapper" class="h-full">
+                    <!-- Generated Report Section (Default Active) -->
+                    <div id="reportContent" class="report-content-section magazine-style-report-container magazine-content">
+                        <!-- Report Action Buttons -->
+                        <div id="reportActionButtons" class="flex items-center justify-start gap-3 my-6">
+                            <!-- Watch Video Report button -->
+                            <button id="watchVideoReportButton" class="icon-button hidden" disabled title="Watch Video Report">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+                                </svg>
+                            </button>
+                            
+                            <!-- Like button with count -->
+                            <button id="likeReportButton" class="icon-button" disabled title="Like">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                </svg>
+                                <span id="likeCount" class="text-xs ml-1"></span>
+                            </button>
+                            
+                            <!-- Copy button -->
+                            <button id="copyMarkdownButton" class="icon-button" disabled title="Copy to Clipboard">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M7.502 6h7.128A3.375 3.375 0 0118 9.375v9.375a3 3 0 003-3V6.108c0-1.505-1.125-2.811-2.664-2.94a48.972 48.972 0 00-.673-.05A3 3 0 0015 1.5h-1.5a3 3 0 00-2.663 1.618c-.225.015-.45.032-.673.05C8.662 3.295 7.554 4.542 7.502 6zM13.5 3A1.5 1.5 0 0012 4.5h4.5A1.5 1.5 0 0015 3h-1.5z" clip-rule="evenodd" />
+                                    <path fill-rule="evenodd" d="M3 9.375C3 8.339 3.84 7.5 4.875 7.5h9.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-9.75A1.875 1.875 0 013 20.625V9.375zM6 12a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75H6.75a.75.75 0 01-.75-.75V12zm2.25 0a.75.75 0 01.75-.75h3.75a.75.75 0 010 1.5H9a.75.75 0 01-.75-.75zM6 15a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75H6.75a.75.75 0 01-.75-.75V15zm2.25 0a.75.75 0 01.75-.75h3.75a.75.75 0 010 1.5H9a.75.75 0 01-.75-.75zM6 18a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75H6.75a.75.75 0 01-.75-.75V18zm2.25 0a.75.75 0 01.75-.75h3.75a.75.75 0 010 1.5H9a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                            
+                            
+                            <!-- Publish to Gallery button -->
+                            <button id="publishToGalleryButton" class="icon-button" disabled style="display: none;" title="Publish to Gallery">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                                    <path fill-rule="evenodd" d="M11.47 2.47a.75.75 0 011.06 0l4.5 4.5a.75.75 0 01-1.06 1.06l-3.22-3.22V16.5a.75.75 0 01-1.5 0V4.81L8.03 8.03a.75.75 0 01-1.06-1.06l4.5-4.5zM3 15.75a.75.75 0 01.75.75v2.25a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5V16.5a.75.75 0 011.5 0v2.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V16.5a.75.75 0 01.75-.75z" clip-rule="evenodd" />
+                                </svg>
+                                <span class="sr-only">Publish to Gallery</span>
+                            </button>
+                        </div>
+                        <!-- Report content will be loaded here -->
+                    </div>
+                    
+                    <!-- Interview Transcript Section -->
+                    <div id="transcriptContentArea" class="report-content-section transcript-container-custom hidden">
+                        <div class="flex justify-between items-center mb-6">
+                        
+                            <div class="flex items-center space-x-3">
+                                <button id="playFullReportAudioBtn" class="p-2 rounded-full text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-primary" title="Play Full Report Audio">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 play-icon" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                                    </svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 pause-icon hidden" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                <button id="playFullReportVideoBtn" class="p-2 rounded-full text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-primary hidden" title="Watch Full Report Video">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+                                    </svg>
+                                </button>
+                                <button id="downloadFullReportAudioBtn" class="p-1.5 rounded-md text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-primary" title="Download Report Audio">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="transcriptContent" class="space-y-4">
+                            <p class="text-gray-400">Loading transcript...</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </main>
+
+    <!-- Global Audio Player Container -->
+    <div id="globalAudioPlayerContainer" class="fixed bottom-0 left-0 right-0 h-20 bg-gray-800 border-t border-gray-700 p-3 shadow-lg flex items-center justify-between transform translate-y-full transition-transform duration-300 ease-in-out">
+        <audio id="globalAudioPlayerElement"></audio>
+        <div class="flex items-center space-x-3">
+            <button id="globalPlayPauseBtn" class="p-2 rounded-full hover:bg-gray-700">
+                <svg id="globalPlayIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                </svg>
+                <svg id="globalPauseIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white hidden" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd" />
+                </svg>
+            </button>
+            <div class="text-white">
+                <p id="globalTrackTitle" class="text-sm font-medium truncate max-w-[200px] md:max-w-[300px]">No track loaded</p>
+                <p id="globalTrackArtist" class="text-xs text-gray-400">Select audio to play</p>
+        </div>
+        </div>
+        <div class="flex-grow mx-4 flex items-center space-x-3">
+            <span id="globalCurrentTime" class="text-xs text-gray-400">0:00</span>
+            <input type="range" id="globalSeekBar" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer" value="0" min="0" max="100">
+            <span id="globalDuration" class="text-xs text-gray-400">0:00</span>
+        </div>
+        <div class="flex items-center space-x-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M7 3a1 1 0 000 2h0a2 2 0 012 2v1a2 2 0 00-2 2H5a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V9a2 2 0 012-2h0a1 1 0 100-2H9a1 1 0 00-1-1H7zM13 3a1 1 0 000 2h0a2 2 0 012 2v1a2 2 0 00-2 2h-2a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V9a2 2 0 012-2h0a1 1 0 100-2h-3a1 1 0 00-1-1h-1z" />
+            </svg>
+            <input type="range" id="globalVolumeBar" class="w-20 h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer" value="100" min="0" max="100">
+            <!-- Close button -->
+            <button id="globalCloseBtn" class="p-2 rounded-full hover:bg-gray-700 ml-2" title="Close player">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Report JavaScript is loaded via modules - see js/report/report-main.js -->
+
+</body>
+</html>

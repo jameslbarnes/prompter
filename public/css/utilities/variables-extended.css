@@ -1,0 +1,64 @@
+/* Extended CSS Variables */
+
+:root {
+    /* Font families */
+    --font-sans: 'Nunito', sans-serif;
+    --font-mono: monospace;
+    
+    /* Gradient colors */
+    --gradient-dark-1: #2b5876;
+    --gradient-dark-2: #4e4376;
+    --gradient-dark-3: #2c3e50;
+    --gradient-light-1: #ffffff;
+    --gradient-light-2: #f5f5f5;
+    --gradient-light-3: #e0e0e0;
+    
+    /* RGB values for rgba usage */
+    --bg-primary-rgb: 52, 53, 65;
+    --bg-secondary-rgb: 68, 70, 84;
+    
+    /* Additional colors */
+    --bg-primary: #343541;
+    --bg-secondary: #444654;
+    --bg-tertiary: #2A2B32;
+    --text-primary: #ECECF1;
+    --text-secondary: #8E8EA0;
+    --accent-primary: #10a37f;
+    --accent-secondary: #10b981;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --header-bg: rgba(255, 255, 255, 0.03);
+    --input-bg: #40414F;
+    --input-border: #565869;
+    --file-upload-bg: #40414F;
+    --file-upload-border: #4E4F60;
+    --progress-bg: #444654;
+    --question-bg: #f0f7f5;
+    
+    /* Code block colors */
+    --bg-code: var(--bg-secondary);
+    --text-code: var(--text-secondary);
+}
+
+:root[data-theme="light"] {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f7f7f7;
+    --bg-tertiary: #f0f0f0;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666666;
+    --accent-primary: #10a37f;
+    --accent-secondary: #10b981;
+    --border-color: rgba(0, 0, 0, 0.1);
+    --header-bg: rgba(255, 255, 255, 0.8);
+    --input-bg: #f0f0f0;
+    --input-border: #d1d1d1;
+    --file-upload-bg: #f7f7f8;
+    --file-upload-border: #e5e5e5;
+    --progress-bg: #e5e5e5;
+    --question-bg: #f0f7f5;
+    --bg-primary-rgb: 255, 255, 255;
+    --bg-secondary-rgb: 247, 247, 247;
+    
+    /* Code block colors for light theme */
+    --bg-code: #f5f5f5;
+    --text-code: #333333;
+}

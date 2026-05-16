@@ -1,0 +1,396 @@
+/* Interview Purchase Modal and Balance Display */
+
+/* Balance Display in Main UI */
+.interview-balance {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+.interview-balance span {
+    color: #e5e7eb;
+}
+
+.interview-balance .included-remaining {
+    font-weight: 500;
+}
+
+.interview-balance .purchased-remaining {
+    color: #9ca3af;
+}
+
+.interview-balance #planInterviews,
+.interview-balance #purchasedInterviews {
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+.buy-more-btn {
+    margin-left: auto;
+    padding: 0.375rem 0.75rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.buy-more-btn:hover {
+    background: #2563eb;
+}
+
+/* Purchase Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal-overlay.show {
+    display: flex;
+}
+
+.interview-purchase-modal {
+    background: #1e293b;
+    border-radius: 1rem;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modal-content {
+    padding: 2rem;
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: #9ca3af;
+    font-size: 1.5rem;
+    cursor: pointer;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.375rem;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: rgba(156, 163, 175, 0.1);
+    color: #e5e7eb;
+}
+
+.interview-purchase-modal h2 {
+    color: #f3f4f6;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.interview-purchase-modal h3 {
+    color: #e5e7eb;
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+}
+
+/* Current Balance Section */
+.current-balance {
+    background: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.balance-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.balance-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.balance-label {
+    color: #9ca3af;
+    font-size: 0.875rem;
+}
+
+.balance-value {
+    color: #3b82f6;
+    font-weight: 600;
+    font-size: 1.125rem;
+}
+
+.balance-item.total {
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(156, 163, 175, 0.2);
+}
+
+.balance-item.total .balance-label {
+    color: #e5e7eb;
+    font-weight: 500;
+}
+
+.balance-item.total .balance-value {
+    font-size: 1.25rem;
+}
+
+/* Bundle Options */
+.bundle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.bundle-option {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.bundle-option:hover {
+    border-color: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.bundle-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.bundle-header h4 {
+    color: #f3f4f6;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.savings-badge {
+    background: #10b981;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.bundle-price {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #3b82f6;
+    margin-bottom: 0.75rem;
+}
+
+.bundle-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+    color: #9ca3af;
+    font-size: 0.875rem;
+}
+
+.interviews-count {
+    font-weight: 500;
+}
+
+.price-per {
+    font-size: 0.8125rem;
+}
+
+.purchase-bundle-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.purchase-bundle-btn:hover {
+    background: #2563eb;
+}
+
+.purchase-bundle-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Purchase Notes */
+.purchase-notes {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #334155;
+}
+
+.purchase-notes .note {
+    color: #9ca3af;
+    font-size: 0.875rem;
+    margin: 0.5rem 0;
+    display: flex;
+    align-items: center;
+}
+
+/* Model Selector Modal */
+.model-selector-modal {
+    max-width: 500px;
+}
+
+.model-selector-modal h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.model-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.model-option {
+    background: #0f172a;
+    border: 2px solid #334155;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.model-option:hover {
+    border-color: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.model-option.premium {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border-color: #6366f1;
+}
+
+.model-option.premium:hover {
+    border-color: #818cf8;
+}
+
+.model-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.model-header h3 {
+    color: #f3f4f6;
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+.model-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.model-badge.default {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+}
+
+.model-badge.premium {
+    background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+    color: white;
+}
+
+.model-description {
+    color: #9ca3af;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.model-cost {
+    color: #3b82f6;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.model-option.premium .model-cost {
+    color: #818cf8;
+}
+
+.cancel-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: transparent;
+    color: #9ca3af;
+    border: 1px solid #334155;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancel-btn:hover {
+    background: rgba(156, 163, 175, 0.1);
+    color: #e5e7eb;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+    .modal-content {
+        padding: 1.5rem;
+    }
+    
+    .bundle-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .interview-balance {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+    
+    .buy-more-btn {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+}

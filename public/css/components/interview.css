@@ -1,0 +1,199 @@
+/* Interview Interface Component Styles */
+
+#interviewInterface {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    width: 100%;
+    padding-top: 1rem;
+    position: relative;
+    background-color: transparent;
+}
+
+#currentQuestionArea {
+    background-color: transparent;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    z-index: 45;
+    transition: all 0.3s ease;
+}
+
+#currentQuestionDisplay {
+    font-size: 1.425rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.6;
+    flex: 1;
+    text-align: left;
+}
+
+#interviewInfoMessage {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background-color: rgba(64, 65, 79, 0.3);
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+}
+
+:root[data-theme="light"] #interviewInfoMessage {
+    background-color: rgba(240, 240, 240, 0.5);
+    color: #555;
+}
+
+#interviewInfoMessage svg {
+    flex-shrink: 0;
+    margin-right: 0.5rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--accent-primary);
+}
+
+#viewThinkingToggle {
+    margin-left: auto;
+    margin-top: 0.5rem;
+}
+
+/* Recording Controls */
+#recordingControls {
+    text-align: center;
+    padding: 1rem 0;
+    position: relative;
+    background-color: transparent;
+    transition: all 0.3s ease;
+}
+
+#recordingStatus {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    height: 1.25rem;
+    line-height: 1.25rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#recordBtn.recording {
+    background-color: #dc2626;
+}
+
+#recordBtn.recording:hover:not(:disabled) {
+    background-color: #b91c1c;
+}
+
+/* Recording Indicator */
+.recording-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    height: 1.25rem;
+    line-height: 1.25rem;
+}
+
+/* Pause Button */
+#pauseBtn {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pause-icon-btn {
+    background-color: transparent;
+    color: #757575;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pause-icon-btn:hover:not(:disabled) {
+    color: #555555;
+    background-color: rgba(0,0,0,0.03);
+}
+
+.pause-icon-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    color: #aaaaaa;
+}
+
+#pauseBtn.paused {
+    background-color: transparent;
+    color: var(--accent-primary);
+}
+
+#pauseBtn.paused:hover:not(:disabled) {
+    filter: brightness(110%);
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    #interviewInterface {
+        padding-top: 0.5rem;
+    }
+    
+    #currentQuestionArea {
+        padding: 1rem;
+        min-height: 120px;
+        margin-bottom: 0.5rem; /* Reduced margin to position higher */
+        margin-top: -1rem; /* Pull question area up */
+    }
+    
+    #currentQuestionDisplay {
+        font-size: 1.3rem; /* Adjusted mobile font size */
+    }
+    
+    #interviewInfoMessage {
+        padding: 0.625rem;
+        font-size: 0.75rem;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    #interviewInfoMessage svg {
+        margin-right: 0;
+        margin-bottom: 0.375rem;
+    }
+    
+    #recordingControls {
+        padding: 0.5rem 0;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: transparent !important;
+        box-shadow: none;
+        border-top: none;
+        padding: 0.5rem;
+        margin-top: 0;
+    }
+    
+    #recordingStatus {
+        height: 1rem;
+        margin-bottom: 0.25rem;
+    }
+}
+
+@media (max-width: 640px) {
+    #currentQuestionArea {
+        margin-bottom: 1rem;
+        min-height: 120px;
+    }
+    
+    #recordingControls {
+        margin-top: 0;
+    }
+}

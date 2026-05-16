@@ -1,0 +1,36 @@
+/* Base Styles and Resets */
+
+/* General Body */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: none; /* Use full width */
+    padding: 0;
+    margin: 0;
+}
+
+/* Page Wrapper */
+#pageWrapper {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - var(--header-height)); /* Assumes header is always present when this is visible */
+}
+
+/* Main Content */
+#mainContent.container {
+    flex-grow: 1;
+    overflow-y: auto; /* Allows content within mainContent (like layout-container) to scroll */
+    display: flex; /* To allow .layout-container to use height: 100% effectively */
+    flex-direction: column; /* So .layout-container takes up the column space */
+}
+
+/* General Buttons Reset */
+button {
+    /* Remove default styles if necessary */
+} 

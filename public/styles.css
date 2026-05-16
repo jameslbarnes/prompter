@@ -1,0 +1,7 @@
+/* 
+ * Main Styles Entry Point
+ * This file now imports all modular CSS files
+ * Original styles have been reorganized into modular components
+ */
+
+@import url('./css/main.css');

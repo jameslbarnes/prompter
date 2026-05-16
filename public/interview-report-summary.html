@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Special Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Tailwind gray-100 */
+            color: #1f2937; /* Tailwind gray-800 */
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .report-item-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 4px 0 rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+        .report-item-card:hover {
+            box-shadow: 0 5px 15px 0 rgba(0,0,0,0.1);
+        }
+        .loading-spinner {
+            border: 4px solid #e5e7eb; /* Tailwind gray-200 */
+            border-top: 4px solid #3b82f6; /* Tailwind blue-500 */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 40px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Adding Inter font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="header-card mb-8">
+            <h1 id="interviewTitle" class="text-3xl md:text-4xl font-bold text-gray-800 mb-3">Loading Interview Details...</h1>
+            <p id="interviewDescription" class="text-md text-gray-600"></p>
+        </header>
+
+        <main>
+            <h2 class="text-2xl font-semibold text-gray-700 mb-6">Generated Reports</h2>
+            <div id="reportsList" class="space-y-4">
+                <!-- Reports will be loaded here by JavaScript -->
+            </div>
+            <div id="loadingIndicator" class="text-center py-8 hidden">
+                <div class="loading-spinner"></div>
+                <p class="text-gray-500">Loading reports...</p>
+            </div>
+            <div id="noReportsMessage" class="text-center py-8 hidden">
+                <p class="text-gray-500 text-lg">No reports have been generated for this interview yet.</p>
+            </div>
+            <div id="errorMessage" class="text-center py-8 hidden">
+                <p class="text-red-500 text-lg">Could not load report details. Please try again later.</p>
+                <p id="errorDetails" class="text-red-400 text-sm mt-1"></p>
+            </div>
+        </main>
+
+        <footer class="mt-12 text-center text-sm text-gray-500">
+            <p>&copy; <span id="currentYear"></span> Your Company Name. All rights reserved.</p>
+            <p><a href="/admin.html" class="text-blue-600 hover:underline">Admin Panel</a></p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const interviewTitleEl = document.getElementById('interviewTitle');
+            const interviewDescriptionEl = document.getElementById('interviewDescription');
+            const reportsListEl = document.getElementById('reportsList');
+            const loadingIndicatorEl = document.getElementById('loadingIndicator');
+            const noReportsMessageEl = document.getElementById('noReportsMessage');
+            const errorMessageEl = document.getElementById('errorMessage');
+            const errorDetailsEl = document.getElementById('errorDetails');
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+            function showLoading() {
+                loadingIndicatorEl.classList.remove('hidden');
+                reportsListEl.classList.add('hidden');
+                noReportsMessageEl.classList.add('hidden');
+                errorMessageEl.classList.add('hidden');
+            }
+
+            function showError(message, details = '') {
+                loadingIndicatorEl.classList.add('hidden');
+                errorMessageEl.classList.remove('hidden');
+                reportsListEl.innerHTML = ''; // Clear any partial content
+                errorDetailsEl.textContent = details;
+                console.error("Error fetching data:", message, details);
+            }
+
+            function showNoReports() {
+                loadingIndicatorEl.classList.add('hidden');
+                noReportsMessageEl.classList.remove('hidden');
+            }
+
+            function displayData(data) {
+                loadingIndicatorEl.classList.add('hidden');
+                
+                // Display interview details
+                interviewTitleEl.textContent = data.interviewDetails.title || 'Interview Special Report';
+                if (data.interviewDetails.description) {
+                    interviewDescriptionEl.innerHTML = data.interviewDetails.description.replace(/\n/g, '<br>');
+                } else {
+                    interviewDescriptionEl.textContent = 'Details about the interview will appear here.';
+                }
+
+                // Display reports
+                if (data.reportList && data.reportList.length > 0) {
+                    reportsListEl.innerHTML = ''; // Clear previous content
+                    data.reportList.forEach(report => {
+                        const reportItem = document.createElement('div');
+                        reportItem.className = 'report-item-card';
+                        
+                        const reportDate = report.timestamp ? new Date(report.timestamp).toLocaleDateString() : 'Date N/A';
+                        const reportTime = report.timestamp ? new Date(report.timestamp).toLocaleTimeString() : '';
+
+                        reportItem.innerHTML = `
+                            <h3 class="text-xl font-semibold text-blue-700 mb-1">${report.title || 'Untitled Report'}</h3>
+                            ${report.subtitle ? `<p class="text-gray-600 mb-2 text-sm">${report.subtitle}</p>` : ''}
+                            <p class="text-xs text-gray-500 mb-3">Generated: ${reportDate} ${reportTime}</p>
+                            <a href="/report.html?id=${report.id}" target="_blank" class="inline-block bg-blue-600 text-white text-sm font-medium py-2 px-4 rounded hover:bg-blue-700 transition-colors">View Full Report &rarr;</a>
+                        `;
+                        reportsListEl.appendChild(reportItem);
+                    });
+                    reportsListEl.classList.remove('hidden');
+                } else {
+                    showNoReports();
+                }
+            }
+
+            try {
+                showLoading();
+                const pathParts = window.location.pathname.split('/');
+                const interviewIdIndex = pathParts.indexOf('interviews');
+                if (interviewIdIndex === -1 || !pathParts[interviewIdIndex + 1]) {
+                    throw new Error('Interview ID not found in URL.');
+                }
+                const interviewId = pathParts[interviewIdIndex + 1];
+
+                const response = await fetch(`/api/interview/${interviewId}/special-report-details`);
+                
+                if (!response.ok) {
+                    let errorData;
+                    try {
+                        errorData = await response.json();
+                    } catch (e) {
+                        errorData = { message: 'Failed to parse error response from server.' };
+                    }
+                    throw new Error(`API Error: ${response.status} ${response.statusText}. ${errorData.details || errorData.error || ''}`);
+                }
+                
+                const data = await response.json();
+                displayData(data);
+
+            } catch (error) {
+                console.error('Failed to load interview special report:', error);
+                showError(error.message, error.details || (error.cause ? error.cause.message : ''));
+                interviewTitleEl.textContent = 'Error Loading Report'; // Update title on error
+                interviewDescriptionEl.textContent = 'Could not fetch the interview details at this time.';
+            }
+        });
+    </script>
+</body>
+</html> 

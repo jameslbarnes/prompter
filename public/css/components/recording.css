@@ -1,0 +1,525 @@
+/* Recording Components Styles */
+
+/* Video Preview Container */
+.video-preview-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000; /* Solid black background */
+    overflow: hidden;
+    z-index: 5; /* Behind main content when hidden */
+    animation: fadeIn 0.3s ease;
+    isolation: isolate; /* Create new stacking context to prevent blend effects */
+}
+
+/* When video is visible, ensure it's behind the main interview UI */
+.video-preview-container:not(.hidden) {
+    z-index: 5; /* Behind the main interview container */
+}
+
+.video-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1); /* Mirror the video for selfie view */
+    background: #000; /* Solid black background for video */
+    /* opacity: 0.3; */ /* Subtle background video */
+}
+
+/* Add a gradient overlay for better text readability */
+/* .video-preview-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, 
+        rgba(0, 0, 0, 0.4) 0%, 
+        rgba(0, 0, 0, 0.1) 50%, 
+        rgba(0, 0, 0, 0.4) 100%);
+    pointer-events: none;
+} */
+
+.video-controls {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 8px;
+    z-index: 10; /* Above the video overlay */
+}
+
+.toggle-video-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.toggle-video-btn:hover {
+    background: rgba(0, 0, 0, 0.8);
+    transform: scale(1.1);
+}
+
+.toggle-video-btn.video-off .camera-icon {
+    display: none;
+}
+
+.toggle-video-btn.video-off .camera-off-icon {
+    display: block;
+}
+
+/* Mobile adjustments for video preview */
+@media (max-width: 768px) {
+    /* Video container already takes full screen, no special mobile adjustments needed */
+    
+    .toggle-video-btn {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .toggle-video-btn svg {
+        width: 16px;
+        height: 16px;
+    }
+}
+
+/* Modern Recording Controls */
+.modern-recording-controls {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    animation: slideInUp 0.7s ease 0.2s both;
+    width: 100%;
+    z-index: 500; /* Very high z-index to ensure it's above all content including video */
+    padding: 1rem 0 2rem 0; /* Bottom spacing */
+    background: transparent; /* Ensure transparent background */
+    transform: translateZ(0); /* Force GPU acceleration for better positioning */
+}
+
+.recording-visual-feedback {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+/* Time Counter */
+.time-counter {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.time-counter.active {
+    opacity: 1;
+}
+
+.time-counter .time-display {
+    font-weight: 500;
+}
+
+.time-counter .interview-context {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    font-weight: 300;
+    letter-spacing: 0.025em;
+    opacity: 0.8;
+}
+
+/* Modern Record Button */
+.modern-record-btn {
+    width: 80px;
+    height: 80px;
+    min-width: 80px;
+    min-height: 80px;
+    border-radius: 50%;
+    background: var(--accent-primary);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(16, 163, 127, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.modern-record-btn:hover {
+    box-shadow: 0 4px 16px rgba(16, 163, 127, 0.3);
+    /* No transform to prevent layout shift */
+}
+
+.modern-record-btn:active {
+    transform: scale(0.95);
+}
+
+.modern-record-btn.recording {
+    background: #ef4444;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+    animation: recordPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes recordPulse {
+    0%, 100% {
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 3px 12px rgba(239, 68, 68, 0.3);
+        transform: scale(1.02);
+    }
+}
+
+.record-btn-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.modern-record-btn .mic-icon,
+.modern-record-btn .stop-icon {
+    transition: all 0.2s ease;
+}
+
+.modern-record-btn.recording .mic-icon {
+    display: none;
+}
+
+.modern-record-btn.recording .stop-icon {
+    display: block;
+}
+
+.modern-record-btn.thinking {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    border: 2px solid var(--accent-primary);
+    cursor: not-allowed;
+}
+
+/* Video mode thinking button */
+.video-enabled .modern-record-btn.thinking {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.modern-record-btn.thinking .mic-icon,
+.modern-record-btn.thinking .stop-icon {
+    display: none;
+}
+
+.modern-record-btn.thinking .thinking-ellipses {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.modern-record-btn.thinking .ellipse-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--accent-primary);
+    border-radius: 50%;
+    animation: recordBtnEllipsePulse 1.4s infinite ease-in-out;
+}
+
+/* Video mode thinking dots */
+.video-enabled .modern-record-btn.thinking .ellipse-dot {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.modern-record-btn.thinking .ellipse-dot:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.modern-record-btn.thinking .ellipse-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.modern-record-btn.thinking .ellipse-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes recordBtnEllipsePulse {
+    0%, 80%, 100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+    40% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+/* Modern Pause Button */
+.modern-pause-btn {
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: background 0.2s ease, color 0.2s ease, border 0.2s ease;
+    animation: fadeIn 0.3s ease;
+}
+
+.modern-pause-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--accent-primary);
+    /* No transform to prevent movement */
+}
+
+/* Video mode pause button */
+.video-enabled .modern-pause-btn {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.video-enabled .modern-pause-btn:hover {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: white;
+}
+
+.modern-pause-btn.paused {
+    background: var(--accent-primary);
+    color: white;
+}
+
+/* Submit Next Button (>>) */
+.submit-next-btn {
+    width: 60px;
+    height: 60px;
+    min-width: 60px;
+    min-height: 60px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    border: 2px solid var(--accent-primary);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    flex-shrink: 0;
+    margin-left: 1rem;
+    opacity: 0.9;
+}
+
+.submit-next-btn:hover:not(:disabled) {
+    background: var(--accent-primary);
+    transform: scale(1.1);
+    opacity: 1;
+}
+
+.submit-next-btn:hover:not(:disabled) svg {
+    stroke: white;
+}
+
+.submit-next-btn:active {
+    transform: scale(0.95);
+}
+
+.submit-next-btn:disabled {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+    cursor: not-allowed;
+    opacity: 0.3;
+}
+
+.submit-next-btn svg {
+    width: 18px;
+    height: 18px;
+    stroke: var(--accent-primary);
+    margin: 0 -4px; /* Overlap the arrows slightly */
+    transition: stroke 0.3s ease;
+}
+
+/* Recording Status Area */
+.recording-status-area {
+    text-align: center;
+}
+
+.modern-recording-status {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    min-height: 1.5rem;
+}
+
+.modern-recording-status.recording {
+    color: #ef4444;
+    font-weight: 500;
+}
+
+.modern-recording-status.recording .status-text {
+    display: none;
+}
+
+/* Keyboard Hints */
+.keyboard-hints {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    min-height: 1.25rem;
+}
+
+.hint-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+kbd {
+    background: rgba(var(--bg-secondary-rgb), 0.5);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.125rem 0.375rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-primary);
+}
+
+/* Hide recording controls during thinking state, except the record button, time counter, and status area */
+.thinking-active .modern-recording-controls > *:not(.recording-visual-feedback):not(.time-counter):not(.recording-status-area) {
+    display: none;
+}
+
+/* Ensure record button stays visible when thinking */
+.modern-record-btn.thinking {
+    box-shadow: 0 8px 32px rgba(16, 163, 127, 0.4);
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Prevent viewport shifts on mobile during thinking */
+@media (max-width: 768px) {
+    body.thinking-active {
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+        left: 0;
+        right: 0;
+    }
+    
+    /* Ensure controls don't shift when body is fixed */
+    .thinking-active .modern-recording-controls {
+        position: fixed !important;
+        bottom: 1rem !important;
+        left: 0 !important;
+        right: 0 !important;
+    }
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .modern-recording-controls {
+        bottom: 0;
+        left: 0;
+        right: 0;
+        transform: none;
+        padding: 1rem 0 1.5rem 0; /* Adjusted padding for mobile */
+    }
+    
+    .modern-record-btn {
+        width: 70px;
+        height: 70px;
+        min-width: 70px;
+        min-height: 70px;
+    }
+    
+    .circular-progress {
+        width: 90px;
+        height: 90px;
+    }
+    
+    .modern-pause-btn {
+        top: -50px;
+        width: 40px;
+        height: 40px;
+    }
+    
+    .time-counter {
+        font-size: 0.75rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .time-counter .interview-context {
+        font-size: 0.7rem;
+    }
+    
+    /* Hide keyboard hints on mobile */
+    .keyboard-hints {
+        display: none;
+    }
+    
+    /* Stack buttons vertically on mobile */
+    .recording-visual-feedback {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .submit-next-btn {
+        margin-left: 0;
+        margin-top: 0.5rem;
+        width: 50px;
+        height: 50px;
+        min-width: 50px;
+        min-height: 50px;
+    }
+    
+    .submit-next-btn svg {
+        width: 16px;
+        height: 16px;
+    }
+}

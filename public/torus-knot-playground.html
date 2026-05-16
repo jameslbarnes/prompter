@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Shape Playground</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #visualization {
+            width: 100%;
+            height: 100%;
+        }
+
+        #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 320px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #bbb;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #4a9eff;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #6ab3ff;
+            transform: scale(1.2);
+        }
+
+        .value-display {
+            display: inline-block;
+            background: #1a1a1a;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #4a9eff;
+            font-weight: 600;
+            margin-left: 8px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            background: #4a9eff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover {
+            background: #6ab3ff;
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: #333;
+        }
+
+        button.secondary:hover {
+            background: #444;
+        }
+
+        #status {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(20, 20, 20, 0.9);
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #4a9eff;
+            display: none;
+        }
+
+        #saved-configs {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 280px;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .config-item {
+            background: #1a1a1a;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .config-item:hover {
+            background: #252525;
+            transform: translateX(-2px);
+        }
+
+        .config-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .config-params {
+            font-size: 11px;
+            color: #888;
+        }
+
+        #toggle-saved {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 16px;
+            background: #333;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        #toggle-saved:hover {
+            background: #444;
+        }
+
+        .color-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="color"] {
+            width: 50px;
+            height: 32px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="visualization"></div>
+        
+        <div id="controls">
+            <h2>3D Shape Parameters</h2>
+            
+            <div class="control-group">
+                <label>Shape Type</label>
+                <select id="shape-type" style="width: 100%; padding: 8px; background: #1a1a1a; color: #4a9eff; border: 1px solid #333; border-radius: 4px;">
+                    <option value="torus">Torus Knot</option>
+                    <option value="lissajous">Lissajous Knot</option>
+                </select>
+            </div>
+            
+            <div id="torus-params">
+                <div class="control-group">
+                    <label>Radius <span class="value-display" id="radius-value">4</span></label>
+                    <input type="range" id="radius" min="1" max="10" value="4" step="0.1">
+                </div>
+                
+                <div class="control-group">
+                    <label>Tube Radius <span class="value-display" id="tube-radius-value">0.8</span></label>
+                    <input type="range" id="tube-radius" min="0.1" max="3" value="0.8" step="0.1">
+                </div>
+                
+                <div class="control-group">
+                    <label>P Value <span class="value-display" id="p-value">3</span></label>
+                    <input type="range" id="p" min="1" max="10" value="3" step="1">
+                </div>
+                
+                <div class="control-group">
+                    <label>Q Value <span class="value-display" id="q-value">5</span></label>
+                    <input type="range" id="q" min="1" max="10" value="5" step="1">
+                </div>
+            </div>
+            
+            <div id="lissajous-params" style="display: none;">
+                <div class="control-group">
+                    <label>A Frequency <span class="value-display" id="a-freq-value">3</span></label>
+                    <input type="range" id="a-freq" min="1" max="10" value="3" step="1">
+                </div>
+                
+                <div class="control-group">
+                    <label>B Frequency <span class="value-display" id="b-freq-value">2</span></label>
+                    <input type="range" id="b-freq" min="1" max="10" value="2" step="1">
+                </div>
+                
+                <div class="control-group">
+                    <label>C Frequency <span class="value-display" id="c-freq-value">5</span></label>
+                    <input type="range" id="c-freq" min="1" max="10" value="5" step="1">
+                </div>
+                
+                <div class="control-group">
+                    <label>Scale <span class="value-display" id="scale-value">3</span></label>
+                    <input type="range" id="scale" min="1" max="10" value="3" step="0.1">
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label>Text Speed <span class="value-display" id="speed-value">50</span></label>
+                <input type="range" id="speed" min="10" max="200" value="50" step="10">
+            </div>
+            
+            <div class="control-group">
+                <label>Text Size <span class="value-display" id="text-size-value">0.5</span></label>
+                <input type="range" id="text-size" min="0.1" max="2" value="0.5" step="0.1">
+            </div>
+            
+            <div class="control-group">
+                <label>Background Color</label>
+                <div class="color-controls">
+                    <input type="color" id="bg-color" value="#000000">
+                    <button onclick="setBackgroundPreset('dark')">Dark</button>
+                    <button onclick="setBackgroundPreset('light')">Light</button>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button onclick="saveConfiguration()">Save Config</button>
+                <button class="secondary" onclick="toggleLoremIpsum()">Toggle Text</button>
+                <button class="secondary" onclick="clearVisualization()">Clear</button>
+            </div>
+        </div>
+        
+        <button id="toggle-saved" onclick="toggleSavedConfigs()">Saved Configs</button>
+        
+        <div id="saved-configs">
+            <h2>Saved Configurations</h2>
+            <div id="configs-list"></div>
+        </div>
+        
+        <div id="status"></div>
+    </div>
+
+    <script src="js/torus-knot-viz.js"></script>
+    <script src="js/shape-viz.js"></script>
+    <script>
+        // Initialize visualization
+        const container = document.getElementById('visualization');
+        const viz = new ShapeViz(container);
+        
+        // Lorem ipsum generator
+        const loremWords = [
+            'lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit',
+            'sed', 'do', 'eiusmod', 'tempor', 'incididunt', 'ut', 'labore', 'et', 'dolore',
+            'magna', 'aliqua', 'enim', 'ad', 'minim', 'veniam', 'quis', 'nostrud',
+            'exercitation', 'ullamco', 'laboris', 'nisi', 'aliquip', 'ex', 'ea', 'commodo',
+            'consequat', 'duis', 'aute', 'irure', 'in', 'reprehenderit', 'voluptate',
+            'velit', 'esse', 'cillum', 'fugiat', 'nulla', 'pariatur', 'excepteur', 'sint',
+            'occaecat', 'cupidatat', 'non', 'proident', 'sunt', 'culpa', 'qui', 'officia',
+            'deserunt', 'mollit', 'anim', 'id', 'est', 'laborum'
+        ];
+        
+        let loremInterval = null;
+        let isStreaming = false;
+        
+        function getRandomWords(count) {
+            const words = [];
+            for (let i = 0; i < count; i++) {
+                words.push(loremWords[Math.floor(Math.random() * loremWords.length)]);
+            }
+            return words.join(' ');
+        }
+        
+        function toggleLoremIpsum() {
+            if (isStreaming) {
+                stopLoremIpsum();
+            } else {
+                startLoremIpsum();
+            }
+        }
+        
+        function startLoremIpsum() {
+            isStreaming = true;
+            // Generate continuous lorem ipsum text
+            let fullText = '';
+            for (let i = 0; i < 20; i++) {
+                fullText += loremWords.join(' ') + ' ';
+            }
+            viz.setStreamingText(fullText);
+            
+            document.querySelector('button[onclick="toggleLoremIpsum()"]').textContent = 'Stop Text';
+        }
+        
+        function stopLoremIpsum() {
+            isStreaming = false;
+            viz.setStreamingText('');
+            document.querySelector('button[onclick="toggleLoremIpsum()"]').textContent = 'Start Text';
+        }
+        
+        function clearVisualization() {
+            viz.clear();
+            stopLoremIpsum();
+        }
+        
+        // Update shape parameters
+        function updateShape() {
+            const shapeType = document.getElementById('shape-type').value;
+            
+            if (shapeType === 'torus') {
+                const radius = parseFloat(document.getElementById('radius').value);
+                const tubeRadius = parseFloat(document.getElementById('tube-radius').value);
+                const p = parseInt(document.getElementById('p').value);
+                const q = parseInt(document.getElementById('q').value);
+                
+                viz.updateTorusParams({ radius, tubeRadius, p, q });
+            } else if (shapeType === 'lissajous') {
+                const a = parseInt(document.getElementById('a-freq').value);
+                const b = parseInt(document.getElementById('b-freq').value);
+                const c = parseInt(document.getElementById('c-freq').value);
+                const scale = parseFloat(document.getElementById('scale').value);
+                
+                viz.updateLissajousParams({ a, b, c, scale });
+            }
+            
+            const textSize = parseFloat(document.getElementById('text-size').value);
+            viz.updateTextSize(textSize);
+        }
+        
+        // Shape type change
+        document.getElementById('shape-type').addEventListener('change', (e) => {
+            const shapeType = e.target.value;
+            viz.setShape(shapeType);
+            
+            // Show/hide relevant controls
+            document.getElementById('torus-params').style.display = shapeType === 'torus' ? 'block' : 'none';
+            document.getElementById('lissajous-params').style.display = shapeType === 'lissajous' ? 'block' : 'none';
+            
+            updateShape();
+        });
+        
+        // Background color
+        function setBackgroundPreset(preset) {
+            const color = preset === 'dark' ? '#000000' : '#ffffff';
+            document.getElementById('bg-color').value = color;
+            updateBackgroundColor();
+        }
+        
+        function updateBackgroundColor() {
+            const color = document.getElementById('bg-color').value;
+            viz.scene.background = new THREE.Color(color);
+            document.body.style.background = color;
+            
+            // Adjust text color based on background
+            const isLight = parseInt(color.substring(1), 16) > 0x808080;
+            document.body.style.color = isLight ? '#000' : '#fff';
+        }
+        
+        // Update displays
+        document.getElementById('radius').addEventListener('input', (e) => {
+            document.getElementById('radius-value').textContent = e.target.value;
+            updateShape();
+        });
+        
+        document.getElementById('tube-radius').addEventListener('input', (e) => {
+            document.getElementById('tube-radius-value').textContent = e.target.value;
+            updateShape();
+        });
+        
+        document.getElementById('p').addEventListener('input', (e) => {
+            document.getElementById('p-value').textContent = e.target.value;
+            updateShape();
+        });
+        
+        document.getElementById('q').addEventListener('input', (e) => {
+            document.getElementById('q-value').textContent = e.target.value;
+            updateShape();
+        });
+        
+        // Lissajous parameters
+        document.getElementById('a-freq').addEventListener('input', (e) => {
+            document.getElementById('a-freq-value').textContent = e.target.value;
+            updateShape();
+        });
+        
+        document.getElementById('b-freq').addEventListener('input', (e) => {
+            document.getElementById('b-freq-value').textContent = e.target.value;
+            updateShape();
+        });
+        
+        document.getElementById('c-freq').addEventListener('input', (e) => {
+            document.getElementById('c-freq-value').textContent = e.target.value;
+            updateShape();
+        });
+        
+        document.getElementById('scale').addEventListener('input', (e) => {
+            document.getElementById('scale-value').textContent = e.target.value;
+            updateShape();
+        });
+        
+        document.getElementById('speed').addEventListener('input', (e) => {
+            document.getElementById('speed-value').textContent = e.target.value;
+            viz.updateTextSpeed(parseInt(e.target.value));
+        });
+        
+        document.getElementById('text-size').addEventListener('input', (e) => {
+            document.getElementById('text-size-value').textContent = e.target.value;
+            updateShape();
+        });
+        
+        document.getElementById('bg-color').addEventListener('input', updateBackgroundColor);
+        
+        // Save/Load configurations
+        async function saveConfiguration() {
+            const name = prompt('Enter a name for this configuration:');
+            if (!name) return;
+            
+            const shapeType = document.getElementById('shape-type').value;
+            const config = {
+                name,
+                shapeType,
+                speed: parseInt(document.getElementById('speed').value),
+                textSize: parseFloat(document.getElementById('text-size').value),
+                bgColor: document.getElementById('bg-color').value,
+                timestamp: new Date().toISOString()
+            };
+            
+            if (shapeType === 'torus') {
+                config.radius = parseFloat(document.getElementById('radius').value);
+                config.tubeRadius = parseFloat(document.getElementById('tube-radius').value);
+                config.p = parseInt(document.getElementById('p').value);
+                config.q = parseInt(document.getElementById('q').value);
+            } else if (shapeType === 'lissajous') {
+                config.aFreq = parseInt(document.getElementById('a-freq').value);
+                config.bFreq = parseInt(document.getElementById('b-freq').value);
+                config.cFreq = parseInt(document.getElementById('c-freq').value);
+                config.scale = parseFloat(document.getElementById('scale').value);
+            }
+            
+            try {
+                const response = await fetch('/api/torus-configs', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        // For testing without auth, we'll use session-based auth
+                    },
+                    credentials: 'include', // Include cookies for session
+                    body: JSON.stringify(config)
+                });
+                
+                if (response.ok) {
+                    showStatus('Configuration saved successfully!');
+                    loadSavedConfigs();
+                } else {
+                    const error = await response.json();
+                    showStatus(error.error || 'Failed to save configuration', 'error');
+                }
+            } catch (error) {
+                console.error('Error saving configuration:', error);
+                showStatus('Error saving configuration', 'error');
+            }
+        }
+        
+        async function loadSavedConfigs() {
+            try {
+                const response = await fetch('/api/torus-configs', {
+                    credentials: 'include' // Include cookies for session
+                });
+                const configs = await response.json();
+                
+                const list = document.getElementById('configs-list');
+                list.innerHTML = '';
+                
+                configs.forEach(config => {
+                    const item = document.createElement('div');
+                    item.className = 'config-item';
+                    let paramsText = '';
+                    if (config.shapeType === 'torus') {
+                        paramsText = `Torus: p=${config.p}, q=${config.q}, r=${config.radius}`;
+                    } else if (config.shapeType === 'lissajous') {
+                        paramsText = `Lissajous: a=${config.aFreq}, b=${config.bFreq}, c=${config.cFreq}`;
+                    }
+                    
+                    item.innerHTML = `
+                        <div class="config-name">${config.name}</div>
+                        <div class="config-params">${paramsText}</div>
+                    `;
+                    
+                    item.onclick = () => loadConfiguration(config);
+                    list.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Error loading configurations:', error);
+            }
+        }
+        
+        function loadConfiguration(config) {
+            // Set shape type
+            document.getElementById('shape-type').value = config.shapeType || 'torus';
+            viz.setShape(config.shapeType || 'torus');
+            
+            // Show/hide relevant controls
+            document.getElementById('torus-params').style.display = config.shapeType === 'torus' ? 'block' : 'none';
+            document.getElementById('lissajous-params').style.display = config.shapeType === 'lissajous' ? 'block' : 'none';
+            
+            // Load common parameters
+            document.getElementById('speed').value = config.speed;
+            document.getElementById('text-size').value = config.textSize;
+            document.getElementById('bg-color').value = config.bgColor;
+            document.getElementById('speed-value').textContent = config.speed;
+            document.getElementById('text-size-value').textContent = config.textSize;
+            
+            // Load shape-specific parameters
+            if (config.shapeType === 'torus') {
+                document.getElementById('radius').value = config.radius;
+                document.getElementById('tube-radius').value = config.tubeRadius;
+                document.getElementById('p').value = config.p;
+                document.getElementById('q').value = config.q;
+                document.getElementById('radius-value').textContent = config.radius;
+                document.getElementById('tube-radius-value').textContent = config.tubeRadius;
+                document.getElementById('p-value').textContent = config.p;
+                document.getElementById('q-value').textContent = config.q;
+            } else if (config.shapeType === 'lissajous') {
+                document.getElementById('a-freq').value = config.aFreq;
+                document.getElementById('b-freq').value = config.bFreq;
+                document.getElementById('c-freq').value = config.cFreq;
+                document.getElementById('scale').value = config.scale;
+                document.getElementById('a-freq-value').textContent = config.aFreq;
+                document.getElementById('b-freq-value').textContent = config.bFreq;
+                document.getElementById('c-freq-value').textContent = config.cFreq;
+                document.getElementById('scale-value').textContent = config.scale;
+            }
+            
+            updateShape();
+            updateBackgroundColor();
+            viz.updateTextSpeed(config.speed);
+            showStatus(`Loaded configuration: ${config.name}`);
+        }
+        
+        function toggleSavedConfigs() {
+            const panel = document.getElementById('saved-configs');
+            const button = document.getElementById('toggle-saved');
+            
+            if (panel.style.display === 'block') {
+                panel.style.display = 'none';
+                button.style.display = 'block';
+            } else {
+                panel.style.display = 'block';
+                button.style.display = 'none';
+                loadSavedConfigs();
+            }
+        }
+        
+        function showStatus(message, type = 'success') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.style.display = 'block';
+            status.style.color = type === 'error' ? '#ff4444' : '#4a9eff';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Initialize
+        updateShape();
+        
+        // Start with lorem ipsum
+        startLoremIpsum();
+    </script>
+</body>
+</html>

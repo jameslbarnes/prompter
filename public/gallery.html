@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Interview Gallery - Say.ai</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        :root {
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --bg-tertiary: #374151;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --border-color: #374151;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #1d4ed8;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        .template-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .template-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .report-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .report-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .play-button {
+            background: var(--accent-primary);
+            transition: all 0.2s ease;
+        }
+        
+        .play-button:hover {
+            background: var(--accent-secondary);
+            transform: scale(1.05);
+        }
+        
+        .category-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-gray-800 border-b border-gray-700 fixed top-0 left-0 right-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <img src="saylogo.png" alt="Say.ai" class="h-8 w-8 mr-3">
+                    <h1 class="text-xl font-semibold">Interview Gallery</h1>
+                </div>
+                <nav class="flex items-center space-x-4">
+                    <a href="/" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                    <a href="/index.html" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">Sign In</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-16 min-h-screen">
+        <!-- Hero Section -->
+        <section class="bg-gradient-to-b from-gray-800 to-gray-900 py-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-4xl font-bold mb-4">Explore Interview Templates</h2>
+                <p class="text-xl text-gray-300 mb-8">Try professional interview templates and listen to example reports</p>
+                
+                <!-- Search and Filter -->
+                <div class="max-w-2xl mx-auto">
+                    <div class="flex space-x-4">
+                        <input type="text" id="searchInput" placeholder="Search templates..." 
+                               class="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500">
+                        <select id="categoryFilter" class="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                            <option value="">All Categories</option>
+                            <option value="speaking-training">Speaking & Training</option>
+                            <option value="personal-development">Personal Development</option>
+                            <option value="market-research">Market Research</option>
+                            <option value="recruiting">Recruiting</option>
+                            <option value="storytelling">Storytelling</option>
+                            <option value="customer-feedback">Customer Feedback</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Templates Grid -->
+        <section class="py-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h3 class="text-2xl font-semibold mb-6">Available Templates</h3>
+                <div id="templatesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Template cards will be dynamically loaded here -->
+                    <div class="text-center py-12">
+                        <div class="inline-flex items-center">
+                            <svg class="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span class="ml-2 text-gray-400">Loading templates...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Example Reports Section -->
+        <section class="py-12 bg-gray-800" id="exampleReportsSection" style="display: none;">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h3 class="text-2xl font-semibold mb-6">Example Reports</h3>
+                <div id="reportsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Report cards will be dynamically loaded here -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Audio Player Modal -->
+    <div id="audioPlayerModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h4 class="text-lg font-semibold">Playing Report</h4>
+                <button onclick="closeAudioPlayer()" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <audio id="audioPlayer" controls class="w-full mb-4"></audio>
+            <p id="audioTitle" class="text-sm text-gray-300"></p>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_FIREBASE_WEB_API_KEY",
+            authDomain: "YOUR_FIREBASE_PROJECT.firebaseapp.com",
+            projectId: "YOUR_FIREBASE_PROJECT_ID",
+            messagingSenderId: "927285056741",
+            appId: "1:927285056741:web:c4314ee0ca2b2b4df7f00c",
+            measurementId: "G-8LN1ERR4Y7"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Category display names
+        const categoryDisplayNames = {
+            'speaking-training': 'Speaking & Training',
+            'personal-development': 'Personal Development',
+            'market-research': 'Market Research',
+            'recruiting': 'Recruiting',
+            'storytelling': 'Storytelling',
+            'customer-feedback': 'Customer Feedback'
+        };
+
+        // Category colors
+        const categoryColors = {
+            'speaking-training': '#3b82f6',
+            'personal-development': '#10b981',
+            'market-research': '#8b5cf6',
+            'recruiting': '#6366f1',
+            'storytelling': '#ec4899',
+            'customer-feedback': '#f97316'
+        };
+
+        // Load templates
+        async function loadTemplates() {
+            const templatesGrid = document.getElementById('templatesGrid');
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+
+            try {
+                // Use API endpoint instead of direct Firestore
+                let apiUrl = '/api/gallery/templates';
+                if (categoryFilter) {
+                    apiUrl += `?category=${encodeURIComponent(categoryFilter)}`;
+                }
+
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch templates');
+                }
+
+                const data = await response.json();
+                let templates = data.templates || [];
+
+                // Client-side search filtering
+                if (searchQuery) {
+                    templates = templates.filter(template => 
+                        template.title.toLowerCase().includes(searchQuery) || 
+                        template.description.toLowerCase().includes(searchQuery)
+                    );
+                }
+
+                // Clear loading state
+                templatesGrid.innerHTML = '';
+
+                if (templates.length === 0) {
+                    templatesGrid.innerHTML = '<div class="col-span-full text-center text-gray-400 py-12">No templates found</div>';
+                    return;
+                }
+
+                // Render template cards
+                templates.forEach(template => {
+                    const card = createTemplateCard(template);
+                    templatesGrid.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error('Error loading templates:', error);
+                templatesGrid.innerHTML = '<div class="col-span-full text-center text-red-400 py-12">Error loading templates</div>';
+            }
+        }
+
+        // Create template card
+        function createTemplateCard(template) {
+            const card = document.createElement('div');
+            card.className = 'template-card bg-gray-800 rounded-lg p-6 border border-gray-700';
+            
+            const categoryColor = categoryColors[template.category] || '#6b7280';
+            const categoryName = categoryDisplayNames[template.category] || template.category;
+
+            card.innerHTML = `
+                <div class="mb-4">
+                    <h4 class="text-lg font-semibold mb-2">${template.title || 'Untitled Template'}</h4>
+                    <span class="category-badge" style="background-color: ${categoryColor}20; color: ${categoryColor}; border: 1px solid ${categoryColor}40;">
+                        ${categoryName}
+                    </span>
+                </div>
+                <p class="text-gray-300 text-sm mb-4">${template.description || 'No description available'}</p>
+                <div class="flex space-x-3">
+                    <button onclick="startInterview('${template.originalInterviewId || template.id}')" 
+                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        Try Interview
+                    </button>
+                    <button onclick="viewExampleReports('${template.id}')" 
+                            class="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        View Examples
+                    </button>
+                </div>
+            `;
+
+            return card;
+        }
+
+        // Start interview
+        function startInterview(interviewId) {
+            window.location.href = `/i/?interview=${interviewId}`;
+        }
+
+        // View example reports
+        async function viewExampleReports(templateId) {
+            const reportsSection = document.getElementById('exampleReportsSection');
+            const reportsGrid = document.getElementById('reportsGrid');
+            
+            reportsSection.style.display = 'block';
+            reportsGrid.innerHTML = '<div class="col-span-full text-center"><span class="text-gray-400">Loading example reports...</span></div>';
+            
+            // Scroll to reports section
+            reportsSection.scrollIntoView({ behavior: 'smooth' });
+
+            try {
+                // Use API endpoint instead of direct Firestore
+                const response = await fetch(`/api/gallery/reports/${templateId}?limit=6`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch reports');
+                }
+
+                const data = await response.json();
+                const reports = data.reports || [];
+
+                reportsGrid.innerHTML = '';
+
+                if (reports.length === 0) {
+                    reportsGrid.innerHTML = '<div class="col-span-full text-center text-gray-400 py-12">No example reports available yet</div>';
+                    return;
+                }
+
+                reports.forEach(report => {
+                    const card = createReportCard(report);
+                    reportsGrid.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error('Error loading reports:', error);
+                reportsGrid.innerHTML = '<div class="col-span-full text-center text-red-400 py-12">Error loading reports</div>';
+            }
+        }
+
+        // Create report card
+        function createReportCard(report) {
+            const card = document.createElement('div');
+            card.className = 'report-card bg-gray-700 rounded-lg p-6 border border-gray-600';
+
+            const duration = report.duration ? `${Math.round(report.duration / 60)} min` : 'Unknown duration';
+
+            card.innerHTML = `
+                <h5 class="text-lg font-medium mb-2">${report.galleryTitle || 'Example Report'}</h5>
+                <p class="text-gray-300 text-sm mb-4">${report.galleryDescription || 'Listen to this example report'}</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-gray-400">${duration}</span>
+                    <div class="flex space-x-2">
+                        <button onclick="playAudio('${report.originalReportId}', '${report.galleryTitle}')" 
+                                class="play-button p-2 rounded-full text-white">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+                            </svg>
+                        </button>
+                        <button onclick="viewReport('${report.id}')" 
+                                class="text-gray-400 hover:text-white p-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        // Play audio
+        async function playAudio(reportId, title) {
+            const modal = document.getElementById('audioPlayerModal');
+            const player = document.getElementById('audioPlayer');
+            const titleEl = document.getElementById('audioTitle');
+
+            titleEl.textContent = title || 'Report Audio';
+            
+            // Use the report ID directly with the audio artifact endpoint
+            if (reportId) {
+                player.src = `/api/reports/${reportId}/audio-artifact`;
+            } else {
+                console.error('No report ID provided for audio playback');
+                alert('Unable to play audio - no report ID');
+                return;
+            }
+            
+            modal.classList.remove('hidden');
+            player.play();
+        }
+
+        // Close audio player
+        function closeAudioPlayer() {
+            const modal = document.getElementById('audioPlayerModal');
+            const player = document.getElementById('audioPlayer');
+            
+            player.pause();
+            player.src = '';
+            modal.classList.add('hidden');
+        }
+
+        // View full report
+        function viewReport(publicReportId) {
+            // For public gallery reports, we use a different parameter
+            window.open(`/report.html?publicId=${publicReportId}`, '_blank');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTemplates();
+
+            // Add event listeners
+            document.getElementById('categoryFilter').addEventListener('change', loadTemplates);
+            document.getElementById('searchInput').addEventListener('input', debounce(loadTemplates, 300));
+        });
+
+        // Debounce function
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+    </script>
+</body>
+</html>

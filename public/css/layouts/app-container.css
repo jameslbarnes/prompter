@@ -1,0 +1,71 @@
+/* App Container Layout Styles */
+
+.app-container {
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+    flex: 1;
+    padding: 0 1.5rem;
+    padding-bottom: 2rem;
+    position: relative;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: none;
+    background-color: transparent;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+:root[data-theme="light"] .app-container {
+    background-color: transparent;
+}
+
+.main-content {
+    margin-top: 80px;
+    width: 100%;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: transparent;
+}
+
+.intro-text {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--text-primary);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    max-width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .app-container {
+        padding: 0 0.5rem;
+        padding-bottom: 1rem;
+        padding-top: 0.5rem;
+    }
+    
+    .main-content {
+        margin-top: 70px;
+        padding: 0 0.5rem;
+        padding-bottom: 80px;
+    }
+    
+    .intro-text {
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .main-content {
+        margin-top: 70px;
+    }
+}

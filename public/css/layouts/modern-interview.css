@@ -1,0 +1,267 @@
+/* Modern Interview Layout Styles */
+
+/* Modern Header */
+.modern-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: transparent;
+    border-bottom: 1px solid rgba(var(--bg-secondary-rgb), 0.1);
+    padding: 1rem 0;
+    transition: all 0.3s ease;
+}
+
+.modern-header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    gap: 2rem;
+}
+
+.brand-minimal {
+    display: flex;
+    align-items: center;
+}
+
+.brand-minimal img {
+    border-radius: 6px;
+    opacity: 0.9;
+    transition: opacity 0.2s ease;
+}
+
+.brand-minimal:hover img {
+    opacity: 1;
+}
+
+/* Header Actions */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.modern-generate-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--accent-primary);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.7;
+}
+
+.modern-generate-btn:hover:not(:disabled) {
+    opacity: 1;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 163, 127, 0.3);
+}
+
+.modern-generate-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.modern-theme-toggle {
+    background: rgba(var(--bg-secondary-rgb), 0.5);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-secondary);
+}
+
+.modern-theme-toggle:hover {
+    background: rgba(var(--bg-secondary-rgb), 0.8);
+    color: var(--accent-primary);
+    transform: scale(1.05);
+}
+
+/* Modern Interview Container */
+.modern-interview-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 200px);
+    padding: 2rem;
+    animation: fadeIn 0.5s ease;
+}
+
+.interview-content {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+    padding-top: 13rem; /* Space for the progress bar, timer, and video preview with extra padding */
+    position: relative;
+    z-index: 1; /* Lower than recording controls */
+}
+
+/* Question Area */
+.question-area {
+    text-align: center;
+    animation: slideInUp 0.6s ease;
+    position: relative;
+    z-index: 1; /* Lower z-index than recording controls */
+}
+
+.question-display {
+    font-size: 2rem;
+    font-weight: 300;
+    line-height: 1.5;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+}
+
+/* Info Message */
+.info-message {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(var(--accent-primary), 0.1);
+    color: var(--accent-primary);
+    padding: 0.75rem 1.25rem;
+    border-radius: 24px;
+    font-size: 0.875rem;
+    animation: fadeIn 0.5s ease;
+}
+
+.info-icon {
+    flex-shrink: 0;
+}
+
+/* Modern Error Message */
+.modern-error-message {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    min-height: 1.25rem;
+}
+
+/* Modern Modal */
+.modern-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    animation: fadeIn 0.3s ease;
+}
+
+.modern-modal-content {
+    background: var(--bg-primary);
+    border-radius: 16px;
+    max-width: 800px;
+    width: 100%;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideInUp 0.3s ease;
+}
+
+.modern-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modern-modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.modern-modal-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.modern-modal-close:hover {
+    background: rgba(var(--bg-secondary-rgb), 0.5);
+    color: var(--text-primary);
+}
+
+.modern-modal-body {
+    flex: 1;
+    overflow: hidden;
+    padding: 1.5rem;
+}
+
+/* Animations */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .modern-header-content {
+        padding: 0 1rem;
+        gap: 1rem;
+    }
+    
+    .modern-interview-container {
+        min-height: calc(100vh - 150px);
+        padding: 1rem;
+    }
+    
+    .interview-content {
+        gap: 2rem;
+    }
+    
+    .question-display {
+        font-size: 1.5rem; /* Adjusted mobile font size */
+    }
+    
+    .modern-modal {
+        padding: 1rem;
+    }
+    
+    .modern-modal-content {
+        border-radius: 12px;
+    }
+    
+    .interview-content {
+        padding-top: 12rem; /* Space for progress bar + video preview on mobile with extra padding */
+    }
+}

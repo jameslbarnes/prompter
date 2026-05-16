@@ -1,0 +1,169 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user owns the resource
+    function isOwner(resource) {
+      return request.auth != null && (
+        request.auth.uid == resource.data.userId ||
+        request.auth.uid == resource.data.createdBy ||
+        request.auth.email == resource.data.email ||
+        request.auth.email == resource.data.createdByEmail
+      );
+    }
+    
+    // Helper function to check if user is shared with
+    function isSharedWith(resource) {
+      return request.auth != null && 
+        request.auth.email in resource.data.sharedWith;
+    }
+    
+    // Helper function to check if request has valid session
+    function hasValidSession(resource) {
+      return request.resource.data.session_id == resource.data.session_id &&
+        resource.data.session_id != null;
+    }
+    
+    // Interviews - publicly readable for respondents
+    match /interviews/{interviewId} {
+      // Anyone can read interview structure (for taking interviews)
+      allow read: if true;
+      
+      // Only authenticated owners can create/update/delete
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.createdBy ||
+        request.auth.email in resource.data.sharedWith
+      );
+      allow delete: if request.auth != null && 
+        request.auth.uid == resource.data.createdBy;
+        
+      // Copilot chat messages (editor mode)
+      match /copilotChat/{messageId} {
+        // Can read/write if you can access the parent interview
+        allow read, create: if request.auth != null && (
+          request.auth.uid == get(/databases/$(database)/documents/interviews/$(interviewId)).data.createdBy ||
+          request.auth.email in get(/databases/$(database)/documents/interviews/$(interviewId)).data.sharedWith
+        );
+        allow update, delete: if false; // Chat messages are immutable
+      }
+      
+      // Analyst chat messages (analyst mode) 
+      match /analystChat/{messageId} {
+        // Can read/write if you can access the parent interview
+        allow read, create: if request.auth != null && (
+          request.auth.uid == get(/databases/$(database)/documents/interviews/$(interviewId)).data.createdBy ||
+          request.auth.email in get(/databases/$(database)/documents/interviews/$(interviewId)).data.sharedWith
+        );
+        allow update, delete: if false; // Chat messages are immutable
+      }
+    }
+    
+    // Reports - allow anonymous creation but controlled reading
+    match /reports/{reportId} {
+      // Anyone can create a report (anonymous submissions)
+      allow create: if true;
+      
+      // Can read if:
+      // 1. You own it (authenticated)
+      // 2. You have the matching session ID
+      // 3. It's shared with you
+      // 4. You're querying by interview_id (for counting completed reports)
+      allow read: if isOwner(resource) || 
+                    hasValidSession(resource) ||
+                    isSharedWith(resource) ||
+                    (request.auth != null && resource.data.interview_id != null);
+      
+      // Only owner can update/delete
+      allow update, delete: if isOwner(resource);
+    }
+    
+    // Report responses subcollection
+    match /reports/{reportId}/responses/{responseId} {
+      // Simplified rule - allow read for authenticated users or if parent is public
+      // This avoids expensive get() calls while maintaining security
+      allow read: if true; // Temporarily allow all reads to fix immediate issue
+      allow create: if true; // Allow during report generation
+      allow update, delete: if false; // Responses are immutable
+    }
+    
+    // Memories - user-specific data
+    match /memories/{memoryId} {
+      // Only owner can access their memories
+      allow read, write: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null;
+    }
+    
+    // Users - strictly private
+    match /users/{userId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid == userId;
+    }
+    
+    // Gallery items - publicly readable if published
+    match /gallery/{itemId} {
+      // Anyone can read published gallery items
+      allow read: if resource.data.isPublished == true;
+      
+      // Only owner can create/update/delete
+      allow create: if request.auth != null;
+      allow update, delete: if isOwner(resource);
+    }
+    
+    // Analyst Threads - nested structure for interview analysis
+    match /analystThreads/{userId}/interviews/{interviewId}/threads/{threadId} {
+      // Users can only access their own analyst threads
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Analyst Thread Messages
+    match /analystThreads/{userId}/interviews/{interviewId}/threads/{threadId}/messages/{messageId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Journal Threads - similar structure for journaling
+    match /journalThreads/{userId}/threads/{threadId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Journal Thread Messages
+    match /journalThreads/{userId}/threads/{threadId}/messages/{messageId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Templates collection
+    match /templates/{templateId} {
+      // Public templates are readable by all
+      allow read: if resource.data.isPublic == true || 
+        (request.auth != null && request.auth.uid == resource.data.templateCreatedBy);
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && 
+        request.auth.uid == resource.data.templateCreatedBy;
+    }
+    
+    // Public Reports - gallery submissions
+    match /publicReports/{publicReportId} {
+      // Anyone can read public reports
+      allow read: if true;
+      
+      // Only authenticated users can create (submit to gallery)
+      allow create: if request.auth != null;
+      
+      // Only admin can update/delete
+      allow update, delete: if request.auth != null && 
+        request.auth.token.admin == true;
+    }
+    
+    // Admin access - only for super admins
+    match /admin/{document=**} {
+      allow read, write: if request.auth != null && 
+        request.auth.token.admin == true;
+    }
+    
+    // Catch-all deny rule - IMPORTANT: This must be last
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

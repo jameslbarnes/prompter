@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Orientation Demo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .demo-container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .viz-panel {
+            flex: 1;
+            position: relative;
+            border: 1px solid #333;
+        }
+
+        .viz-label {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(20, 20, 20, 0.9);
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            z-index: 10;
+            border: 1px solid #4a9eff;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 20, 20, 0.95);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            z-index: 20;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #4a9eff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #6ab3ff;
+            transform: translateY(-1px);
+        }
+
+        .info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(20, 20, 20, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 300px;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .comparison-text {
+            color: #4a9eff;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="viz-panel" id="verticalPanel">
+            <div class="viz-label">Vertical (Stacked)</div>
+        </div>
+        <div class="viz-panel" id="horizontalPanel">
+            <div class="viz-label">Horizontal (Ribbon)</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button onclick="toggleText()">Toggle Text Stream</button>
+        <button onclick="clearBoth()">Clear</button>
+    </div>
+
+    <div class="info">
+        <p><span class="comparison-text">Vertical:</span> Text is rotated 90° and stacks perpendicular to the path - ideal for creating a dense, artistic visualization.</p>
+        <br>
+        <p><span class="comparison-text">Horizontal:</span> Text flows along the path like a ribbon - better for readability and creating flowing text streams.</p>
+    </div>
+
+    <script src="js/torus-knot-viz.js"></script>
+    <script src="js/ribbon-text-viz.js"></script>
+    <script src="js/enhanced-ribbon-viz.js"></script>
+    <script src="js/optimized-ribbon-viz.js"></script>
+    <script>
+        // Initialize two visualizations side by side
+        const verticalViz = new TorusKnotViz(document.getElementById('verticalPanel'), {
+            textOrientation: 'vertical',
+            radius: 3,
+            tubeRadius: 0.8,
+            p: 3,
+            q: 5,
+            textSize: 0.4
+        });
+
+        const horizontalViz = new TorusKnotViz(document.getElementById('horizontalPanel'), {
+            textOrientation: 'horizontal',
+            radius: 3,
+            tubeRadius: 0.8,
+            p: 3,
+            q: 5,
+            textSize: 0.4
+        });
+
+        // Sample text for demonstration
+        const demoText = [
+            "The quick brown fox",
+            "jumps over the lazy dog",
+            "Innovation drives progress",
+            "Technology shapes tomorrow",
+            "Creativity knows no bounds",
+            "Ideas transform reality",
+            "Vision becomes achievement",
+            "Dreams inspire action"
+        ];
+
+        let textInterval = null;
+        let textIndex = 0;
+        let isStreaming = false;
+
+        function toggleText() {
+            if (isStreaming) {
+                stopStreaming();
+            } else {
+                startStreaming();
+            }
+        }
+
+        function startStreaming() {
+            isStreaming = true;
+            textIndex = 0;
+            
+            // Stream text to both visualizations
+            textInterval = setInterval(() => {
+                const text = demoText[textIndex % demoText.length];
+                verticalViz.streamText(text);
+                horizontalViz.streamText(text);
+                textIndex++;
+            }, 800);
+        }
+
+        function stopStreaming() {
+            isStreaming = false;
+            if (textInterval) {
+                clearInterval(textInterval);
+                textInterval = null;
+            }
+        }
+
+        function clearBoth() {
+            stopStreaming();
+            verticalViz.clear();
+            horizontalViz.clear();
+        }
+
+        // Auto-start demo
+        setTimeout(startStreaming, 1000);
+    </script>
+</body>
+</html>

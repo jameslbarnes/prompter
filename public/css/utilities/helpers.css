@@ -1,0 +1,154 @@
+/* Utility Helper Classes */
+
+/* Hidden helper */
+.hidden {
+    display: none !important;
+}
+
+/* Text alignment */
+.text-center {
+    text-align: center;
+}
+
+/* Fade animation */
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Gradient animations */
+@keyframes gradientFlow {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes softBreathe {
+    0%, 100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.05);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+@keyframes pulse-animation {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    }
+    70% {
+        transform: scale(1.02);
+        box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+    }
+}
+
+.pulse-animation {
+    animation: pulse-animation 2s infinite;
+}
+
+/* Footer z-index fix */
+footer {
+    position: relative;
+    z-index: 10000;
+}
+
+/* Mobile utility fixes */
+@media (max-width: 768px) {
+    /* General text improvements */
+    p, li {
+        line-height: 1.4;
+    }
+    
+    /* Fix textarea on mobile */
+    textarea {
+        font-size: 16px !important; /* Prevent zoom on iOS */
+    }
+    
+    /* Add some space around all inputs */
+    input, button, textarea {
+        margin: 2px 0;
+    }
+    
+    /* Remove extra margin from flex container on mobile */
+    .flex.items-center.justify-center.space-x-2 {
+        margin-top: 0;
+    }
+    
+    /* Vertical spacing between buttons */
+    .text-center .primary-button {
+        margin-top: 0.75rem;
+    }
+}
+
+/* Better tap targets on mobile */
+@media (max-width: 768px) {
+    .tab-button {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .tab-buttons {
+        width: 100%;
+    }
+    
+    .primary-button {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    #startChatBtn {
+        width: 100%;
+        max-width: 200px;
+    }
+    
+    #removeFileBtn {
+        padding: 0.5rem;
+    }
+}
+
+/* Small mobile specific improvements */
+@media (max-width: 400px) {
+    .header-title {
+        font-size: 0.9rem;
+    }
+    
+    .word-count-info {
+        font-size: 0.7rem;
+    }
+    
+    .file-name {
+        max-width: 150px;
+        font-size: 0.8rem;
+    }
+    
+    .file-drop-area {
+        padding: 1rem 0.5rem;
+    }
+    
+    .tab-button {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+}

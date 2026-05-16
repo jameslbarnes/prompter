@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - AI Interview Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <style>
+        .plan-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .plan-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .popular-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation - Hidden when in iframe -->
+    <nav class="bg-white shadow-sm border-b" id="mainNavigation">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="/" class="text-xl font-bold text-gray-900">AI Interview Platform</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/admin.html" class="text-gray-600 hover:text-gray-900">Dashboard</a>
+                    <button id="signOutBtn" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors">
+                        Sign Out
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Choose Your Plan</h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Start with our free trial and upgrade when you need more interviews. 
+                All plans include unlimited interview templates and full analytics.
+            </p>
+        </div>
+
+        <!-- Current Usage Display -->
+        <div id="currentUsage" class="bg-white rounded-lg shadow-sm border p-6 mb-8 hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Current Usage</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-blue-600" id="usageCount">-</div>
+                    <div class="text-sm text-gray-600">Interviews Completed</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-600" id="usageLimit">-</div>
+                    <div class="text-sm text-gray-600">Monthly Limit</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-purple-600" id="currentPlan">-</div>
+                    <div class="text-sm text-gray-600">Current Plan</div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="bg-gray-200 rounded-full h-2">
+                    <div id="usageProgress" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <div class="text-sm text-gray-600 mt-1" id="usageText">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Pricing Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            <!-- Free Trial -->
+            <div class="plan-card bg-white rounded-lg shadow-sm border p-8">
+                <div class="text-center">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Free Trial</h3>
+                    <div class="text-4xl font-bold text-gray-900 mb-1">$0</div>
+                    <div class="text-gray-600 mb-6">Get started for free</div>
+                    
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-700">3 lifetime interviews</span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-700">Audio summaries for participants</span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-700">Basic AI synthesis</span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-700">Export transcripts</span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-500">Memory across interviews</span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-500">Web search capability</span>
+                        </div>
+                    </div>
+                    
+                    <button class="w-full bg-gray-100 text-gray-800 py-3 px-6 rounded-md font-semibold hover:bg-gray-200 transition-colors" disabled>
+                        Current Plan
+                    </button>
+                </div>
+            </div>
+
+            <!-- Starter Plan -->
+            <div class="plan-card bg-white rounded-lg shadow-sm border p-8">
+                <div class="text-center">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Starter</h3>
+                    <div class="text-4xl font-bold text-gray-900 mb-1">$24.99</div>
+                    <div class="text-gray-600 mb-6">per month</div>
+                    
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-700">50 interviews/month</span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-700">Audio summaries for participants</span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-700">Basic AI synthesis</span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-700">Export transcripts</span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-700">Email support</span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-500">Memory across interviews</span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-500">Web search capability</span>
+                        </div>
+                    </div>
+                    
+                    <button class="w-full bg-blue-600 text-white py-3 px-6 rounded-md font-semibold hover:bg-blue-700 transition-colors" 
+                            onclick="selectPlan('starter')">
+                        Choose Starter
+                    </button>
+                </div>
+            </div>
+
+            <!-- Growth Plan -->
+            <div class="plan-card bg-white rounded-lg shadow-sm border-2 border-purple-500 p-8 relative">
+                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <span class="popular-badge text-white px-4 py-1 rounded-full text-sm font-semibold">
+                        Most Popular
+                    </span>
+                </div>
+                <div class="text-center">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Growth</h3>
+                    <div class="text-4xl font-bold text-gray-900 mb-1">$59.99</div>
+                    <div class="text-gray-600 mb-6">per month</div>
+                    
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-700">50 interviews/month</span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-700"><strong>Memory across interviews</strong></span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-700"><strong>Web search capability</strong></span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-700"><strong>Custom branding</strong></span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-700">Priority support</span>
+                        </div>
+                    </div>
+                    
+                    <button class="w-full bg-purple-600 text-white py-3 px-6 rounded-md font-semibold hover:bg-purple-700 transition-colors" 
+                            onclick="selectPlan('growth')">
+                        Choose Growth
+                    </button>
+                </div>
+            </div>
+
+            <!-- Team Plan -->
+            <div class="plan-card bg-white rounded-lg shadow-sm border p-8">
+                <div class="text-center">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Team</h3>
+                    <div class="text-4xl font-bold text-gray-900 mb-1">$149</div>
+                    <div class="text-gray-600 mb-6">per month</div>
+                    
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-700">10,000 interviews/month</span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-700">Everything in Growth plan</span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-700">Team collaboration features</span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-700">API access (coming soon)</span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-700">Dedicated support</span>
+                        </div>
+                    </div>
+                    
+                    <button class="w-full bg-gray-900 text-white py-3 px-6 rounded-md font-semibold hover:bg-gray-800 transition-colors" 
+                            onclick="selectPlan('team')">
+                        Choose Team
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Interviews Section -->
+        <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-8 mb-8">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">Need More Interviews?</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-lg p-4 text-center cursor-pointer hover:shadow-lg transition-shadow interview-bundle" data-bundle="single">
+                    <div class="text-2xl font-bold text-gray-900">$1</div>
+                    <div class="text-sm text-gray-600">per interview</div>
+                    <button class="mt-3 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors text-sm">
+                        Purchase
+                    </button>
+                </div>
+                <div class="bg-white rounded-lg p-4 text-center cursor-pointer hover:shadow-lg transition-shadow interview-bundle" data-bundle="bulk_50">
+                    <div class="text-2xl font-bold text-gray-900">$47.50</div>
+                    <div class="text-sm text-gray-600">50 interviews</div>
+                    <div class="text-xs text-green-600 font-semibold">Save 5%</div>
+                    <button class="mt-3 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors text-sm">
+                        Purchase
+                    </button>
+                </div>
+                <div class="bg-white rounded-lg p-4 text-center cursor-pointer hover:shadow-lg transition-shadow interview-bundle" data-bundle="bulk_100">
+                    <div class="text-2xl font-bold text-gray-900">$90</div>
+                    <div class="text-sm text-gray-600">100 interviews</div>
+                    <div class="text-xs text-green-600 font-semibold">Save 10%</div>
+                    <button class="mt-3 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors text-sm">
+                        Purchase
+                    </button>
+                </div>
+                <div class="bg-white rounded-lg p-4 text-center cursor-pointer hover:shadow-lg transition-shadow interview-bundle" data-bundle="bulk_500">
+                    <div class="text-2xl font-bold text-gray-900">$425</div>
+                    <div class="text-sm text-gray-600">500 interviews</div>
+                    <div class="text-xs text-green-600 font-semibold">Save 15%</div>
+                    <button class="mt-3 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors text-sm">
+                        Purchase
+                    </button>
+                </div>
+            </div>
+            <p class="text-center text-gray-700 mb-2">
+                <strong>Purchased interviews never expire</strong> and can be used anytime
+            </p>
+            <p class="text-center text-sm text-gray-600">
+            </p>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="bg-white rounded-lg shadow-sm border p-8">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">Frequently Asked Questions</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-2">What happens when I reach my limit?</h4>
+                    <p class="text-gray-600">You'll be notified when you approach your monthly limit. You can upgrade your plan at any time to continue conducting interviews.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-2">Can I change plans anytime?</h4>
+                    <p class="text-gray-600">Yes, you can upgrade or downgrade your plan at any time. Changes take effect at the start of your next billing cycle.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-2">Do unused interviews roll over?</h4>
+                    <p class="text-gray-600">No, unused interviews reset each month. We recommend choosing a plan that matches your typical monthly usage.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-2">Is the free trial renewable?</h4>
+                    <p class="text-gray-600">No, the free trial includes 3 lifetime interviews and does not renew. Once you've used your 3 interviews, you'll need to choose a paid plan to continue.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-2">Is there a setup fee?</h4>
+                    <p class="text-gray-600">No setup fees. You only pay the monthly subscription fee. Cancel anytime with no penalties.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-2">How do additional interviews work?</h4>
+                    <p class="text-gray-600">You can purchase additional interviews at any time. They never expire and are used after your monthly plan interviews are exhausted. Buy in bulk to save up to 30%.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-8 max-w-sm w-full mx-4">
+            <div class="text-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Processing Payment</h3>
+                <p class="text-gray-600">Please wait while we redirect you to Stripe...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let subscriptionData = null;
+
+        // Hide navigation if in iframe
+        if (window.self !== window.top) {
+            document.getElementById('mainNavigation').style.display = 'none';
+        }
+
+        // Initialize authentication
+        firebase.auth().onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadSubscriptionData();
+                updateUI();
+            } else {
+                window.location.href = '/auth.html';
+            }
+        });
+
+        // Sign out functionality
+        document.getElementById('signOutBtn').addEventListener('click', () => {
+            firebase.auth().signOut();
+        });
+
+
+        // Load subscription data
+        async function loadSubscriptionData() {
+            try {
+                const idToken = await currentUser.getIdToken();
+                const response = await fetch('/api/subscription', {
+                    headers: {
+                        'Authorization': `Bearer ${idToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    subscriptionData = await response.json();
+                    console.log('Subscription data loaded:', subscriptionData);
+                } else {
+                    console.error('Failed to load subscription data');
+                }
+            } catch (error) {
+                console.error('Error loading subscription data:', error);
+            }
+        }
+
+        // Update UI based on subscription data
+        function updateUI() {
+            if (!subscriptionData) return;
+
+            const currentUsageDiv = document.getElementById('currentUsage');
+            const usageCount = document.getElementById('usageCount');
+            const usageLimit = document.getElementById('usageLimit');
+            const currentPlan = document.getElementById('currentPlan');
+            const usageProgress = document.getElementById('usageProgress');
+            const usageText = document.getElementById('usageText');
+
+            // Show current usage
+            currentUsageDiv.classList.remove('hidden');
+
+            const subscription = subscriptionData.subscription;
+            const usage = subscription.usage || {};
+            
+            // Determine current plan and limits
+            let planName = 'Free Trial';
+            let limit = subscriptionData.freeTrialLimit || 3;
+            let currentUsage = usage.interviewsCompleted || 0;
+
+            if (subscription.plan && subscription.plan !== 'free') {
+                const plan = subscriptionData.pricingPlans[subscription.plan];
+                if (plan) {
+                    planName = plan.name;
+                    limit = plan.includedInterviews;
+                    currentUsage = usage.currentPeriodUsage || 0;
+                }
+            }
+
+            // Update display
+            usageCount.textContent = currentUsage.toLocaleString();
+            usageLimit.textContent = limit.toLocaleString();
+            currentPlan.textContent = planName;
+
+            // Update progress bar
+            const percentage = Math.min((currentUsage / limit) * 100, 100);
+            usageProgress.style.width = `${percentage}%`;
+            
+            if (percentage >= 90) {
+                usageProgress.classList.remove('bg-blue-600');
+                usageProgress.classList.add('bg-red-600');
+                usageText.textContent = `You're approaching your limit (${percentage.toFixed(1)}% used)`;
+            } else if (percentage >= 75) {
+                usageProgress.classList.remove('bg-blue-600');
+                usageProgress.classList.add('bg-yellow-600');
+                usageText.textContent = `${percentage.toFixed(1)}% of monthly limit used`;
+            } else {
+                usageText.textContent = `${percentage.toFixed(1)}% of monthly limit used`;
+            }
+
+            // Update plan buttons
+            updatePlanButtons(subscription.plan || 'free', subscription);
+        }
+
+        // Update plan buttons based on current subscription
+        function updatePlanButtons(currentPlan, subscription = {}) {
+            const buttons = document.querySelectorAll('[onclick^="selectPlan"]');
+            buttons.forEach(button => {
+                const planId = button.getAttribute('onclick').match(/selectPlan\('(.+)'\)/)[1];
+                
+                if (planId === currentPlan || (currentPlan === 'free' && planId === 'free')) {
+                    button.textContent = 'Current Plan';
+                    button.disabled = true;
+                    button.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-purple-600', 'hover:bg-purple-700', 'bg-gray-900', 'hover:bg-gray-800');
+                    button.classList.add('bg-gray-100', 'text-gray-800');
+                } else {
+                    button.disabled = false;
+                    button.classList.remove('bg-gray-100', 'text-gray-800');
+                    
+                    // Restore original colors
+                    if (planId === 'starter') {
+                        button.classList.add('bg-blue-600', 'hover:bg-blue-700', 'text-white');
+                        button.textContent = 'Choose Starter';
+                    } else if (planId === 'growth') {
+                        button.classList.add('bg-purple-600', 'hover:bg-purple-700', 'text-white');
+                        button.textContent = 'Choose Growth';
+                    } else if (planId === 'team') {
+                        button.classList.add('bg-gray-900', 'hover:bg-gray-800', 'text-white');
+                        button.textContent = 'Choose Team';
+                    }
+                }
+            });
+
+            // Update interview bundle availability based on subscription
+            const isFreePlan = !subscription.plan || subscription.plan === 'free';
+            document.querySelectorAll('.interview-bundle').forEach(bundle => {
+                const button = bundle.querySelector('button');
+                if (isFreePlan) {
+                    bundle.classList.add('opacity-50', 'cursor-not-allowed');
+                    bundle.style.pointerEvents = 'none';
+                    if (button) {
+                        button.disabled = true;
+                        button.textContent = 'Upgrade Required';
+                        button.classList.add('bg-gray-400', 'cursor-not-allowed');
+                        button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                    }
+                } else {
+                    bundle.classList.remove('opacity-50', 'cursor-not-allowed');
+                    bundle.style.pointerEvents = 'auto';
+                    if (button) {
+                        button.disabled = false;
+                        button.textContent = 'Purchase';
+                        button.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                        button.classList.add('bg-blue-500', 'hover:bg-blue-600');
+                    }
+                }
+            });
+
+            // Add or remove notice for free users
+            const bundleSection = document.querySelector('.interview-bundle')?.closest('.bg-gradient-to-r');
+            const existingNotice = bundleSection?.querySelector('.free-plan-notice');
+            
+            if (isFreePlan && bundleSection && !existingNotice) {
+                const notice = document.createElement('div');
+                notice.className = 'free-plan-notice bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4 text-center';
+                notice.innerHTML = '<strong>Note:</strong> Additional interviews are only available for paid plan subscribers. Please upgrade to Starter or Growth to purchase more interviews.';
+                bundleSection.insertBefore(notice, bundleSection.children[1]);
+            } else if (!isFreePlan && existingNotice) {
+                existingNotice.remove();
+            }
+        }
+
+        // Handle plan selection
+        async function selectPlan(planId) {
+            if (!currentUser) {
+                alert('Please sign in to select a plan');
+                return;
+            }
+
+            const loadingModal = document.getElementById('loadingModal');
+            loadingModal.classList.remove('hidden');
+
+            try {
+                const idToken = await currentUser.getIdToken();
+                const response = await fetch('/api/subscription/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${idToken}`
+                    },
+                    body: JSON.stringify({ planId })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // If in iframe, open in new tab
+                    if (window.self !== window.top) {
+                        window.open(data.checkoutUrl, '_blank');
+                        loadingModal.classList.add('hidden');
+                        alert('Stripe checkout opened in a new tab. Please complete your purchase there.');
+                    } else {
+                        window.location.href = data.checkoutUrl;
+                    }
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to create checkout session');
+                }
+            } catch (error) {
+                console.error('Error selecting plan:', error);
+                alert('Failed to process payment. Please try again.');
+                loadingModal.classList.add('hidden');
+            }
+        }
+
+        // Handle interview bundle purchases
+        document.querySelectorAll('.interview-bundle').forEach(bundle => {
+            bundle.addEventListener('click', async (e) => {
+                // Prevent event from bubbling if clicking the button
+                if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                    e.stopPropagation();
+                }
+                
+                const bundleType = bundle.dataset.bundle;
+                await purchaseInterviewBundle(bundleType);
+            });
+        });
+
+        async function purchaseInterviewBundle(bundleType) {
+            if (!currentUser) {
+                alert('Please sign in to purchase interviews');
+                window.location.href = '/auth.html';
+                return;
+            }
+
+            // Check if user has an active paid subscription
+            if (!subscriptionData || subscriptionData.subscription.plan === 'free') {
+                alert('Additional interviews are only available for paid plan subscribers. Please choose a plan first.');
+                return;
+            }
+
+            const loadingModal = document.getElementById('loadingModal');
+            loadingModal.classList.remove('hidden');
+
+            try {
+                const idToken = await currentUser.getIdToken();
+                const response = await fetch('/api/purchase/interviews', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${idToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ bundleType })
+                });
+
+                if (response.ok) {
+                    const { checkoutUrl } = await response.json();
+                    window.location.href = checkoutUrl;
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to create purchase session');
+                }
+            } catch (error) {
+                console.error('Error purchasing interviews:', error);
+                alert('Failed to process purchase. Please try again.');
+                loadingModal.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html> 

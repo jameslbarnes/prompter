@@ -1,0 +1,42 @@
+/* Custom Scrollbar Styles */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--bg-tertiary);
+    border-radius: 4px;
+    border: 2px solid var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-secondary);
+}
+
+/* Thread tabs scrollbar */
+#journalThreadTabs .scrollbar-thin {
+    scrollbar-width: thin;
+}
+
+#journalThreadTabs .scrollbar-thin::-webkit-scrollbar {
+    height: 6px;
+}
+
+#journalThreadTabs .scrollbar-thin::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+#journalThreadTabs .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+#journalThreadTabs .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+} 
