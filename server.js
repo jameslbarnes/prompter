@@ -7900,6 +7900,7 @@ app.post('/api/school-survey', express.json({ limit: '16kb' }), async (req, res)
         email:              cap(body.email, 200),
         phone:              cap(body.phone, 50),
         what_you_do:        cap(body.what_you_do, 500),
+        workspace_interest: cap(body.workspace_interest, 80),
         monthly_budget:     cap(body.monthly_budget || body.willing_300, 80),
         ninja_skill:        cap(body.ninja_skill, 4000),
         info_session:       cap(body.info_session, 80),
@@ -7940,6 +7941,7 @@ app.post('/api/school-survey', express.json({ limit: '16kb' }), async (req, res)
                 `What they do:`,
                 `  ${doc.what_you_do || '(skipped)'}`,
                 ``,
+                `Workspace interest:   ${doc.workspace_interest || '(skipped)'}`,
                 `Coworking budget/mo:  ${doc.monthly_budget || '(skipped)'}`,
                 `Info session May 28:   ${doc.info_session || '(skipped)'}`,
                 ``,
@@ -7954,7 +7956,7 @@ app.post('/api/school-survey', express.json({ limit: '16kb' }), async (req, res)
             await sgMail.send({
                 to: toEmail,
                 from: fromEmail,
-                subject: `[The School] Contributor survey: ${doc.name}`,
+                subject: `[The Old School] Interest form: ${doc.name}`,
                 text: lines,
             });
         }
