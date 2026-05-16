@@ -7900,7 +7900,7 @@ app.post('/api/school-survey', express.json({ limit: '16kb' }), async (req, res)
         email:              cap(body.email, 200),
         phone:              cap(body.phone, 50),
         what_you_do:        cap(body.what_you_do, 500),
-        willing_300:        cap(body.willing_300, 80),
+        monthly_budget:     cap(body.monthly_budget || body.willing_300, 80),
         ninja_skill:        cap(body.ninja_skill, 4000),
         info_session:       cap(body.info_session, 80),
         user_agent:         cap(req.headers['user-agent'], 500),
@@ -7931,7 +7931,7 @@ app.post('/api/school-survey', express.json({ limit: '16kb' }), async (req, res)
     try {
         if (sgMail && process.env.SENDGRID_API_KEY) {
             const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'contact@example.com';
-            const toEmail = process.env.SCHOOL_SURVEY_TO_EMAIL || 'recipient@example.com';
+            const toEmail = 'memberships@theoldschool.nyc';
             const lines = [
                 `Name:  ${doc.name}`,
                 `Email: ${doc.email}`,
@@ -7940,7 +7940,7 @@ app.post('/api/school-survey', express.json({ limit: '16kb' }), async (req, res)
                 `What they do:`,
                 `  ${doc.what_you_do || '(skipped)'}`,
                 ``,
-                `In at $300/mo:         ${doc.willing_300 || '(skipped)'}`,
+                `Coworking budget/mo:  ${doc.monthly_budget || '(skipped)'}`,
                 `Info session May 28:   ${doc.info_session || '(skipped)'}`,
                 ``,
                 `Ninja skill:`,
