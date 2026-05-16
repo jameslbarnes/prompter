@@ -2,6 +2,8 @@
 
 Prompter is a Node/Express application for running AI-assisted interview and prompt workflows. It includes a browser interview UI, an admin workspace for creating and managing interview templates, report generation, optional voice/video capture, gallery publishing, pricing hooks, and optional memory/search integrations.
 
+Prompter currently powers [sayinterviews.com](https://sayinterviews.com).
+
 This public tree is intentionally sanitized: it does not include the original Git history, local `.env` files, service account JSON, generated media, session backups, private planning docs, or one-off production cleanup scripts.
 
 ## Features
