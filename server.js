@@ -7901,7 +7901,7 @@ app.post('/api/school-survey', express.json({ limit: '16kb' }), async (req, res)
         phone:              cap(body.phone, 50),
         what_you_do:        cap(body.what_you_do, 500),
         workspace_interest: cap(body.workspace_interest, 80),
-        monthly_budget:     cap(body.monthly_budget || body.willing_300, 80),
+        monthly_budget:     cap(body.monthly_budget, 80),
         ninja_skill:        cap(body.ninja_skill, 4000),
         info_session:       cap(body.info_session, 80),
         user_agent:         cap(req.headers['user-agent'], 500),
