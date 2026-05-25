@@ -779,13 +779,16 @@ if (SENDGRID_API_KEY) {
     console.warn('SENDGRID_API_KEY not found. Email will use Gmail if configured per user.');
 }
 
-if (!CLAUDE_API_KEY || !OPENAI_API_KEY || !DEEPGRAM_API_KEY || DEEPGRAM_API_KEY === "YOUR_DEEPGRAM_API_KEY_HERE") {
-    console.error('Missing required API keys. Please set CLAUDE_API_KEY, OPENAI_API_KEY, and DEEPGRAM_API_KEY environment variables.');
+if (!CLAUDE_API_KEY || !OPENAI_API_KEY) {
+    console.error('Missing required API keys. Please set CLAUDE_API_KEY and OPENAI_API_KEY environment variables.');
     process.exit(1);
 }
+if (!DEEPGRAM_API_KEY || DEEPGRAM_API_KEY === "YOUR_DEEPGRAM_API_KEY_HERE") {
+    console.warn('DEEPGRAM_API_KEY not set - voice/speech features will be disabled.');
+}
 
-// Initialize Deepgram client
-const deepgramClient = createClient(DEEPGRAM_API_KEY); // Updated initialization
+// Initialize Deepgram client (optional - only if key is set)
+const deepgramClient = DEEPGRAM_API_KEY ? createClient(DEEPGRAM_API_KEY) : null;
 
 // Store interview data at server level for persistence across socket connections
 const sessionData = new Map(); // Using Map to store session-specific data
@@ -4227,7 +4230,7 @@ ${interview.content || 'No content available'}`
                     console.log('=== END GENERATE QUESTION DEBUG ===');
 
                     const requestBody = {
-                        model: "claude-sonnet-4-6", // Always use Opus 4.5 for best question quality
+                        model: sessionInfo.followupModel || "claude-sonnet-4-6", // Use template's followupModel; default to Sonnet for cost
                         max_tokens: 1500, // 1024 for thinking budget + buffer for question
                         messages: messages,
                         temperature: 1,

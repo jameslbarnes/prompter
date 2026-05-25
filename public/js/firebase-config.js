@@ -1,11 +1,12 @@
 // Firebase configuration and initialization
 const firebaseConfig = window.PROMPTER_FIREBASE_CONFIG || {
-    apiKey: "YOUR_FIREBASE_WEB_API_KEY",
-    authDomain: "YOUR_FIREBASE_PROJECT.firebaseapp.com",
-    projectId: "YOUR_FIREBASE_PROJECT_ID",
-    messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID",
-    appId: "YOUR_FIREBASE_APP_ID",
-    measurementId: "YOUR_FIREBASE_MEASUREMENT_ID"
+    apiKey: "AIzaSyApTqHf1EU2LEwbkM_a30jAdyU7DjE4LIY",
+    authDomain: "storyteller-ce8c2.firebaseapp.com",
+    projectId: "storyteller-ce8c2",
+    storageBucket: "storyteller-ce8c2.firebasestorage.app",
+    messagingSenderId: "111944438783",
+    appId: "1:111944438783:web:dfe4f5843e75fac0da4dca",
+    measurementId: "G-2E8J26KE5Z"
 };
 
 // Initialize Firebase
